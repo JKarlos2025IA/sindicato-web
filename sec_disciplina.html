@@ -1,119 +1,155 @@
 <!DOCTYPE html>
-<html lang="es">
+                    <html lang="es">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control y Disciplina - SIUTCASJNJ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .logo-circle {
-            border: 3px solid #1e3a8a;
-            outline: 2px solid white;
-            outline-offset: -5px;
-        }
-    </style>
-</head>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Control y Disciplina - SIUTCASJNJ</title>
+                        <script src="https://cdn.tailwindcss.com"></script>
+                        <style>
+                            .logo-circle {
+                                border: 3px solid #1e3a8a;
+                                outline: 2px solid white;
+                                outline-offset: -5px;
+                            }
+                        </style>
+                    </head>
 
-<body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center mb-4 md:mb-0">
-                <div
-                    class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
-                    SIUT</div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ</h1>
-                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de Trabajadores CAS -
-                        JNJ</p>
-                </div>
-            </div>
-            <nav>
-                <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
-                    <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
-                    <li><a href="index.html#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a>
-                    </li>
-                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a></li>
-                    <li><a href="index.html#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+                    <body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
+                        <!-- Header -->
+                        <header class="bg-white shadow-md sticky top-0 z-50">
+                            <div
+                                class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+                                <div class="flex items-center mb-4 md:mb-0">
+                                    <div
+                                        class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
+                                        SIUT</div>
+                                    <div>
+                                        <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ
+                                        </h1>
+                                        <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de
+                                            Trabajadores CAS -
+                                            JNJ</p>
+                                    </div>
+                                </div>
+                                <nav>
+                                    <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
+                                        <li><a href="index.html"
+                                                class="hover:text-blue-900 transition-colors">Inicio</a></li>
+                                        <li><a href="index.html#secretarias"
+                                                class="hover:text-blue-900 transition-colors">Secretarías</a>
+                                        </li>
+                                        <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a>
+                                        </li>
+                                        <li><a href="index.html#contacto"
+                                                class="hover:text-blue-900 transition-colors">Contacto</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-12">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-red-600 pb-2 inline-block">
-                Control y Disciplina</h2>
+                        <!-- Main Content -->
+                        <main class="flex-grow container mx-auto px-4 py-12">
+                            <div class="max-w-4xl mx-auto">
+                                <h2
+                                    class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-red-600 pb-2 inline-block">
+                                    Control y Disciplina</h2>
 
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Section A: Código de Ética -->
-                <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-red-600">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="bg-red-100 text-red-600 p-2 rounded-lg mr-3">⚖️</span>
-                        Código de Ética y Estatuto
-                    </h3>
-                    <p class="text-gray-600 mb-4">La conducta de nuestros afiliados se rige por los principios de
-                        honestidad, lealtad y solidaridad.</p>
-                    <div class="space-y-3">
-                        <a href="#" class="block p-3 bg-gray-50 rounded hover:bg-gray-100 transition flex items-center">
-                            <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                </path>
-                            </svg>
-                            <span class="text-sm font-semibold text-gray-700">Descargar Estatuto Vigente</span>
-                        </a>
-                        <a href="#" class="block p-3 bg-gray-50 rounded hover:bg-gray-100 transition flex items-center">
-                            <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
-                            <span class="text-sm font-semibold text-gray-700">Reglamento de Disciplina</span>
-                        </a>
-                    </div>
-                </section>
+                                <div class="grid md:grid-cols-2 gap-8">
+                                    <!-- Section A: Código de Ética -->
+                                    <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-red-600">
+                                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                            <span class="bg-red-100 text-red-600 p-2 rounded-lg mr-3">⚖️</span>
+                                            Código de Ética y Estatuto
+                                        </h3>
+                                        <p class="text-gray-600 mb-4">La conducta de nuestros afiliados se rige por los
+                                            principios de
+                                            honestidad, lealtad y solidaridad.</p>
+                                        <div class="space-y-3">
+                                            <a href="#"
+                                                class="block p-3 bg-gray-50 rounded hover:bg-gray-100 transition flex items-center">
+                                                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                                    </path>
+                                                </svg>
+                                                <span class="text-sm font-semibold text-gray-700">Descargar Estatuto
+                                                    Vigente</span>
+                                            </a>
+                                            <a href="#"
+                                                class="block p-3 bg-gray-50 rounded hover:bg-gray-100 transition flex items-center">
+                                                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                                    </path>
+                                                </svg>
+                                                <span class="text-sm font-semibold text-gray-700">Reglamento de
+                                                    Disciplina</span>
+                                            </a>
+                                        </div>
+                                    </section>
 
-                <!-- Section B: Canal de Denuncias -->
-                <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-red-500">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="bg-red-100 text-red-500 p-2 rounded-lg mr-3">📢</span>
-                        Canal de Denuncias
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-4">Reporte cualquier falta al estatuto o conducta antiética. Su
-                        denuncia será tratada con confidencialidad.</p>
-                    <form class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
-                            <input type="text"
-                                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 border p-2"
-                                placeholder="Breve descripción">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                            <textarea
-                                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 border p-2"
-                                rows="3" placeholder="Detalles del incidente"></textarea>
-                        </div>
-                        <button type="button"
-                            class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
-                            Enviar Reporte
-                        </button>
-                    </form>
-                </section>
-            </div>
-        </div>
-    </main>
+                                    <!-- Section B: Canal de Denuncias -->
+                                    <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-red-500">
+                                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                            <span class="bg-red-100 text-red-500 p-2 rounded-lg mr-3">📢</span>
+                                            Canal de Denuncias
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mb-4">Reporte cualquier falta al estatuto o
+                                            conducta antiética. Su
+                                            denuncia será tratada con confidencialidad.</p>
+                                        <form class="space-y-4">
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
+                                                <input type="text"
+                                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 border p-2"
+                                                    placeholder="Breve descripción">
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                                                <textarea
+                                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 border p-2"
+                                                    rows="3" placeholder="Detalles del incidente"></textarea>
+                                            </div>
+                                            <button type="button"
+                                                class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                                                Enviar Reporte
+                                            </button>
+                                        </form>
+                                    </section>
+                                </div>
+                            </div>
+                        </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12 mt-auto">
-        </div>
-        </div>
-    </footer>
-</body>
+                        <!-- Footer -->
+                        <footer class="bg-gray-900 text-white py-12 mt-auto">
+                            <div class="container mx-auto px-4">
+                                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                                    <div class="mb-6 md:mb-0 text-center md:text-left">
+                                        <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
+                                        <p class="text-gray-400">Unidad y compromiso por nuestros derechos.</p>
+                                    </div>
+                                    <div class="text-center md:text-right">
+                                        <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Av.
+                                            Paseo de la Republica N° 3285</p>
+                                        <p class="text-gray-400">San Isidro, Lima</p>
+                                        <p class="text-gray-400 mt-1">sindicatocasjnj@gmail.com</p>
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                                    <p class="mb-2">Gestión 2024-2026</p>
+                                    <p>Sitio web impulsado y desarrollado por la <span
+                                            class="text-gray-300 font-semibold">Secretaría de Cultura y Deporte</span>.
+                                    </p>
+                                </div>
+                            </div>
+                        </footer>
+                    </body>
 
-</html>
+                    </html>

@@ -1,122 +1,220 @@
 <!DOCTYPE html>
 <html lang="es">
-<div class="w-24 h-1 bg-blue-600 mx-auto rounded"></div>
-<p class="mt-4 text-gray-600 max-w-2xl mx-auto">Conoce a los responsables de velar por los intereses y el
-    bienestar de todos nuestros afiliados.</p>
-</div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    <!-- Card Template -->
-    <a href="sec_general.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-900">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Secretaría General</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Pavel Ordoñez Escarza</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Representación legal del sindicato y defensa
-                irrestricta de los derechos de los afiliados ante las autoridades.</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindicato Único de Trabajadores CAS - JNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circle {
+            border: 3px solid #1e3a8a;
+            outline: 2px solid white;
+            outline-offset: -5px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div
+                    class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
+                    SIUT
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de Trabajadores CAS -
+                        JNJ</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
+                    <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
+                    <li><a href="#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a></li>
+                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a></li>
+                    <li><a href="#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
+                </ul>
+            </nav>
         </div>
-    </a>
+    </header>
 
-    <a href="sec_subgeneral.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-700">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Sub-Secretaría General</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Katty Candy Jara Jancco</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Apoyo directo a la gestión general y reemplazo en
-                funciones ante la ausencia del Secretario General.</p>
+    <!-- Hero Section -->
+    <section class="relative h-[500px] flex items-center justify-center text-center text-white">
+        <div class="absolute inset-0 bg-cover bg-center z-0" style="background-image: url('miembros.jpg');"></div>
+        <div class="absolute inset-0 bg-[rgba(255,253,208,0.6)] z-10"></div> <!-- Vanilla Overlay -->
+        <div class="relative z-20 px-4 max-w-4xl mx-auto">
+            <h2 class="text-2xl md:text-4xl font-bold mb-4 drop-shadow-lg text-blue-900">
+                Unidad, Defensa y Progreso para todos los trabajadores CAS
+            </h2>
+            <p class="text-lg md:text-xl mb-8 font-light text-blue-800">Junta Nacional de Justicia</p>
+            <a href="#secretarias"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105 shadow-lg">
+                Conoce a tu Directiva
+            </a>
         </div>
-    </a>
+    </section>
 
-    <a href="sec_organizacion.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-600">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Organización</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Juan Alfredo Tisza Astete</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Mantenimiento del padrón de afiliados y
-                organización logística de asambleas y actividades sindicales.</p>
-        </div>
-    </a>
-
-    <a href="sec_defensa.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-500">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Defensa</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Richard Trejo Silva</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Asesoría legal permanente y vigilancia del
-                cumplimiento de las normas laborales vigentes.</p>
-        </div>
-    </a>
-
-    <a href="sec_economia.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-green-600">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Economía</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Ricardo Molleapaza Calderón</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Administración responsable de los fondos sindicales
-                y transparencia contable hacia los afiliados.</p>
-        </div>
-    </a>
-
-    <a href="sec_actas.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-gray-600">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Actas y Archivo</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Lucy Álvarez Herrera</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Gestión y custodia de los libros de actas y todo el
-                acervo documentario de la organización.</p>
-        </div>
-    </a>
-
-    <a href="sec_disciplina.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-red-600">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Control y Disciplina</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Antuaned María Montoya La Rosa</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Fiscalización ética de los miembros y cumplimiento
-                de los estatutos y normativas internas.</p>
-        </div>
-    </a>
-
-    <a href="sec_prensa.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-purple-600">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Prensa y Propaganda</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Jimmy Geraldo Chalco Bustinza</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Difusión de acuerdos, comunicados y actividades del
-                sindicato a través de los canales oficiales.</p>
-        </div>
-    </a>
-
-    <a href="sec_cultura_deporte.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-orange-500">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Cultura y Deporte</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Juan Carlos Montenegro Gonzáles</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Promoción y organización de eventos deportivos,
-                artísticos y recreativos para la integración.</p>
-        </div>
-    </a>
-
-    <a href="sec_bienestar.html"
-        class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-teal-500">
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-blue-900 mb-1">Bienestar Social</h3>
-            <p class="text-sm text-blue-600 font-semibold mb-4">Gissela Margarita Silva Macetas</p>
-            <p class="text-gray-600 text-sm leading-relaxed">Asistencia social a los miembros y gestión de
-                convenios de salud y beneficios.</p>
-        </div>
-    </a>
-</div>
-</section>
-
-<!-- Footer -->
-<footer id="contacto" class="bg-gray-900 text-white py-12">
+    <!-- Birthday Banner -->
+    <div id="birthday-banner"
+        class="hidden bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-4 text-center shadow-md relative z-20">
+        <p class="font-bold text-lg animate-pulse">
+            🎉 ¡Feliz cumpleaños a nuestros socios: <span id="birthday-names" class="underline decoration-wavy"></span>!
+            🎂
+        </p>
     </div>
-</footer>
 
-<!-- Scripts -->
-<script src="datos_socios.js"></script>
-<script src="script.js"></script>
+    <!-- Main Content -->
+    <main id="secretarias" class="flex-grow container mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-blue-900 mb-4">Junta Directiva 2024 - 2026</h2>
+            <div class="w-24 h-1 bg-blue-600 mx-auto rounded"></div>
+            <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Conoce a los responsables de velar por los intereses y el
+                bienestar de todos nuestros afiliados.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Card 1: General -->
+            <a href="sec_general.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-900">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Secretaría General</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Pavel Ordoñez Escarza</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Representación legal del sindicato y defensa
+                        irrestricta de los derechos de los afiliados ante las autoridades.</p>
+                </div>
+            </a>
+
+            <!-- Card 2: Sub-General -->
+            <a href="sec_subgeneral.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-700">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Sub-Secretaría General</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Katty Candy Jara Jancco</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Apoyo directo a la gestión general y reemplazo en
+                        funciones ante la ausencia del Secretario General.</p>
+                </div>
+            </a>
+
+            <!-- Card 3: Organización -->
+            <a href="sec_organizacion.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Organización</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Juan Alfredo Tisza Astete</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Mantenimiento del padrón de afiliados y
+                        organización logística de asambleas y actividades sindicales.</p>
+                </div>
+            </a>
+
+            <!-- Card 4: Defensa -->
+            <a href="sec_defensa.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-500">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Defensa</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Richard Trejo Silva</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Asesoría legal permanente y vigilancia del
+                        cumplimiento de las normas laborales vigentes.</p>
+                </div>
+            </a>
+
+            <!-- Card 5: Economía -->
+            <a href="sec_economia.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-green-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Economía</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Ricardo Molleapaza Calderón</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Administración responsable de los fondos sindicales
+                        y transparencia contable hacia los afiliados.</p>
+                </div>
+            </a>
+
+            <!-- Card 6: Actas -->
+            <a href="sec_actas.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-gray-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Actas y Archivo</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Lucy Álvarez Herrera</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Gestión y custodia de los libros de actas y todo el
+                        acervo documentario de la organización.</p>
+                </div>
+            </a>
+
+            <!-- Card 7: Disciplina -->
+            <a href="sec_disciplina.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-red-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Control y Disciplina</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Antuaned María Montoya La Rosa</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Fiscalización ética de los miembros y cumplimiento
+                        de los estatutos y normativas internas.</p>
+                </div>
+            </a>
+
+            <!-- Card 8: Prensa -->
+            <a href="sec_prensa.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-purple-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Prensa y Propaganda</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Jimmy Geraldo Chalco Bustinza</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Difusión de acuerdos, comunicados y actividades del
+                        sindicato a través de los canales oficiales.</p>
+                </div>
+            </a>
+
+            <!-- Card 9: Cultura -->
+            <a href="sec_cultura_deporte.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-orange-500">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Cultura y Deporte</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Juan Carlos Montenegro Gonzáles</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Promoción y organización de eventos deportivos,
+                        artísticos y recreativos para la integración.</p>
+                </div>
+            </a>
+
+            <!-- Card 10: Bienestar -->
+            <a href="sec_bienestar.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-teal-500">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Bienestar Social</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Gissela Margarita Silva Macetas</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Asistencia social a los miembros y gestión de
+                        convenios de salud y beneficios.</p>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contacto" class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
+                    <p class="text-gray-400">Unidad y compromiso por nuestros derechos.</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Av. Paseo de la Republica N°
+                        3285</p>
+                    <p class="text-gray-400">San Isidro, Lima</p>
+                    <p class="text-gray-400 mt-1">sindicatocasjnj@gmail.com</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p class="mb-2">Gestión 2024-2026</p>
+                <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de
+                        Cultura y Deporte</span>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="datos_socios.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>
