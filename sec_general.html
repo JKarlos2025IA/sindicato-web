@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secretaría General - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circle {
+            border: 3px solid #1e3a8a;
+            outline: 2px solid white;
+            outline-offset: -5px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div
+                    class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
+                    SIUT
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de Trabajadores CAS -
+                        JNJ</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
+                    <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
+                    <li><a href="index.html#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a>
+                    </li>
+                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a></li>
+                    <li><a href="index.html#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-blue-900 pb-2 inline-block">
+                Secretaría General</h2>
+
+            <!-- Section A: Comunicados -->
+            <section class="mb-12 bg-white rounded-xl shadow-md p-8 border-l-8 border-blue-900">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-100 text-blue-900 p-2 rounded-lg mr-3">📢</span>
+                    Comunicados Oficiales del Secretario
+                </h3>
+                <div class="space-y-6">
+                    <article class="border-b border-gray-200 pb-4">
+                        <h4 class="font-bold text-lg text-blue-800 mb-2">Mensaje de Bienvenida a la Gestión 2024-2026
+                        </h4>
+                        <p class="text-gray-600 mb-2">Estimados compañeros, iniciamos este periodo con el firme
+                            compromiso de...</p>
+                        <span class="text-xs text-gray-400">Publicado: 01 Enero 2024</span>
+                    </article>
+                    <article>
+                        <h4 class="font-bold text-lg text-blue-800 mb-2">Pronunciamiento N° 001-2024</h4>
+                        <p class="text-gray-600 mb-2">Sobre las recientes medidas adoptadas respecto al régimen CAS...
+                        </p>
+                        <span class="text-xs text-gray-400">Publicado: 15 Febrero 2024</span>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Section B: Representación Legal -->
+            <section class="mb-12 bg-white rounded-xl shadow-md p-8 border-l-8 border-blue-700">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-100 text-blue-900 p-2 rounded-lg mr-3">⚖️</span>
+                    Representación Legal
+                </h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    La Secretaría General mantiene una mesa de diálogo activa con la Junta Nacional de Justicia para
+                    velar por el cumplimiento de los acuerdos colectivos.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-2 ml-4">
+                    <li>Seguimiento a la Negociación Colectiva 2024.</li>
+                    <li>Participación en comités de Seguridad y Salud en el Trabajo.</li>
+                    <li>Representación ante instancias del Ministerio de Trabajo.</li>
+                </ul>
+            </section>
+
+            <!-- Sidebar/Extra: Downloads -->
+            <div class="bg-blue-50 rounded-xl p-6 border border-blue-100 text-center">
+                <h4 class="font-bold text-blue-900 mb-3">Documentos de Gestión</h4>
+                <button
+                    class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-full shadow transition-transform transform hover:scale-105 flex items-center justify-center mx-auto">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Descargar Resoluciones
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
+                    <p class="text-gray-400">Unidad y compromiso por nuestros derechos.</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Jirón Moquegua 157, Oficina
+                        315</p>
+                    <p class="text-gray-400">Cercado de Lima, Perú</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p class="mb-2">Gestión 2024-2026</p>
+                <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de
+                        Cultura y Deporte</span>.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

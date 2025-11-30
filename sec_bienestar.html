@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienestar Social - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circle {
+            border: 3px solid #1e3a8a;
+            outline: 2px solid white;
+            outline-offset: -5px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div
+                    class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
+                    SIUT</div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de Trabajadores CAS -
+                        JNJ</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
+                    <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
+                    <li><a href="index.html#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a>
+                    </li>
+                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a></li>
+                    <li><a href="index.html#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-teal-500 pb-2 inline-block">
+                Bienestar Social</h2>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Section A: Convenios Vigentes -->
+                <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-teal-500 md:col-span-2">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-teal-100 text-teal-500 p-2 rounded-lg mr-3">🤝</span>
+                        Convenios Vigentes
+                    </h3>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="border rounded-lg p-4 hover:shadow-md transition">
+                            <h4 class="font-bold text-teal-700">Clínica Dental "Sonrisas"</h4>
+                            <p class="text-sm text-gray-600 mt-2">20% de descuento en tratamientos integrales.</p>
+                        </div>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition">
+                            <h4 class="font-bold text-teal-700">Gimnasio "PowerFit"</h4>
+                            <p class="text-sm text-gray-600 mt-2">Matrícula gratis y plan corporativo.</p>
+                        </div>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition">
+                            <h4 class="font-bold text-teal-700">Óptica "Visión Total"</h4>
+                            <p class="text-sm text-gray-600 mt-2">Descuento por planilla en monturas.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section C: Cumpleañeros (Sidebar) -->
+                <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-pink-500">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-pink-100 text-pink-500 p-2 rounded-lg mr-3">🎂</span>
+                        Cumpleañeros
+                    </h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-center justify-between border-b pb-2">
+                            <span>Maria Rodriguez</span>
+                            <span class="font-bold text-pink-500">30 Nov</span>
+                        </li>
+                        <li class="flex items-center justify-between border-b pb-2">
+                            <span>Carlos Gomez</span>
+                            <span class="font-bold text-pink-500">25 Dic</span>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+            <!-- Section B: Asistencia Social -->
+            <section class="mt-8 bg-white rounded-xl shadow-md p-8 border-t-4 border-teal-600">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="bg-teal-100 text-teal-600 p-2 rounded-lg mr-3">❤️</span>
+                    Solicitud de Asistencia Social
+                </h3>
+                <p class="text-gray-600 mb-6">Si usted o un familiar directo atraviesa una situación de salud delicada o
+                    emergencia, contáctenos para activar el fondo de ayuda mutua.</p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="mailto:bienestar@siutcasjnj.pe"
+                        class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded text-center transition-colors">
+                        Enviar Correo
+                    </a>
+                    <a href="tel:+51999999999"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded text-center transition-colors border border-gray-300">
+                        Llamar a Emergencia
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
+                    <p class="text-gray-400">Unidad y compromiso por nuestros derechos.</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Jirón Moquegua 157, Oficina
+                        315</p>
+                    <p class="text-gray-400">Cercado de Lima, Perú</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p class="mb-2">Gestión 2024-2026</p>
+                <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de
+                        Cultura y Deporte</span>.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

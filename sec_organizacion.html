@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organización y Estadística - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circle {
+            border: 3px solid #1e3a8a;
+            outline: 2px solid white;
+            outline-offset: -5px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div
+                    class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
+                    SIUT</div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de Trabajadores CAS -
+                        JNJ</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
+                    <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
+                    <li><a href="index.html#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a>
+                    </li>
+                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a></li>
+                    <li><a href="index.html#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-blue-600 pb-2 inline-block">
+                Organización y Estadística</h2>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Section A: Afiliación -->
+                <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-blue-600">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">📝</span>
+                        Afiliación
+                    </h3>
+                    <p class="text-gray-600 mb-4">Únete a nuestra fuerza sindical. Requisitos:</p>
+                    <ul class="list-disc list-inside text-sm text-gray-600 mb-6 space-y-1">
+                        <li>Ser trabajador CAS de la JNJ.</li>
+                        <li>Copia de DNI.</li>
+                        <li>Última boleta de pago.</li>
+                    </ul>
+                    <button
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors flex justify-center items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Descargar Ficha de Afiliación
+                    </button>
+                </section>
+
+                <!-- Section B: Próximas Asambleas -->
+                <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-blue-800">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-blue-100 text-blue-800 p-2 rounded-lg mr-3">📅</span>
+                        Próximas Asambleas
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-800">
+                            <p class="font-bold text-blue-900">Asamblea General Ordinaria</p>
+                            <p class="text-sm text-gray-600">Fecha: 15 de Diciembre, 2024</p>
+                            <p class="text-sm text-gray-600">Hora: 5:00 PM</p>
+                            <p class="text-sm text-gray-600">Agenda: Balance Anual 2024</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Section C: Padrón Actualizado -->
+            <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-gray-500">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-gray-100 text-gray-600 p-2 rounded-lg mr-3">👥</span>
+                    Padrón de Afiliados
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full leading-normal">
+                        <thead>
+                            <tr>
+                                <th
+                                    class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Estado</th>
+                                <th
+                                    class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Total</th>
+                                <th
+                                    class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Actualización</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><span
+                                        class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight"><span
+                                            aria-hidden="true"
+                                            class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span><span
+                                            class="relative">Activos</span></span></td>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-900">145</td>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-500">Noviembre
+                                    2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
+                    <p class="text-gray-400">Unidad y compromiso por nuestros derechos.</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Jirón Moquegua 157, Oficina
+                        315</p>
+                    <p class="text-gray-400">Cercado de Lima, Perú</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p class="mb-2">Gestión 2024-2026</p>
+                <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de
+                        Cultura y Deporte</span>.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
