@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultura y Deporte - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circle {
+            border: 3px solid #1e3a8a;
+            outline: 2px solid white;
+            outline-offset: -5px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div
+                    class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
+                    SIUT</div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">
+                        SIUTCASJNJ</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato
+                        Único de Trabajadores CAS -
+                        JNJ</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
+                    <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
+                    <li><a href="index.html#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a>
+                    </li>
+                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a>
+                    </li>
+                    <li><a href="index.html#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <div class="max-w-5xl mx-auto">
+            <h2
+                class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-orange-500 pb-2 inline-block">
+                Cultura y Deporte</h2>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Section A: Próximos Eventos -->
+                <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-orange-500">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-orange-100 text-orange-500 p-2 rounded-lg mr-3">🏆</span>
+                        Próximos Eventos
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center bg-orange-50 p-4 rounded-lg">
+                            <div class="bg-white p-3 rounded-lg shadow text-center mr-4 min-w-[70px]">
+                                <span class="block text-xs text-gray-500 uppercase">Dic</span>
+                                <span class="block text-2xl font-bold text-orange-600">15</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Campeonato Relámpago de
+                                    Fulbito</h4>
+                                <p class="text-sm text-gray-600">Lugar: Complejo Deportivo
+                                    "El Golazo"</p>
+                                <p class="text-sm text-gray-600">Hora: 9:00 AM</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section C: Inscripciones -->
+                <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-orange-400">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-orange-100 text-orange-400 p-2 rounded-lg mr-3">✍️</span>
+                        Inscripciones
+                    </h3>
+                    <p class="text-gray-600 mb-4">Inscribe a tu equipo o participa
+                        individualmente en nuestros talleres.
+                    </p>
+                    <form class="space-y-4">
+                        <select
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 border p-2">
+                            <option>Seleccionar Evento</option>
+                            <option>Campeonato de Fulbito</option>
+                            <option>Taller de Danzas</option>
+                        </select>
+                        <button type="button"
+                            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition-colors">
+                            Inscribirme
+                        </button>
+                    </form>
+                </section>
+            </div>
+
+            <section class="mt-12">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-orange-100 text-orange-500 p-2 rounded-lg mr-3">📸</span>
+                    Galería de Actividades
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <img src="https://via.placeholder.com/300" alt="Actividad 1"
+                        class="rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer lightbox-trigger">
+                    <img src="https://via.placeholder.com/300" alt="Actividad 2"
+                        class="rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer lightbox-trigger">
+                    <img src="https://via.placeholder.com/300" alt="Actividad 3"
+                        class="rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer lightbox-trigger">
+                    <img src="https://via.placeholder.com/300" alt="Actividad 4"
+                        class="rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer lightbox-trigger">
+                </div>
+            </section>
+        </div>
+
+        <footer class="bg-gray-900 text-white py-12 mt-auto">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="mb-6 md:mb-0 text-center md:text-left">
+                        <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
+                        <p class="text-gray-400">Unidad y compromiso por nuestros
+                            derechos.</p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Av.
+                            Paseo de la Republica N° 3285</p>
+                        <p class="text-gray-400">San Isidro, Lima</p>
+                        <p class="text-gray-400 mt-1">sindicatocasjnj@gmail.com</p>
+                    </div>
+                </div>
+                <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                    <p class="mb-2">Gestión 2024-2026</p>
+                    <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de
+                            Cultura y
+                            Deporte</span>.</p>
+                </div>
+            </div>
+        </footer>
+</body>
+
+</html>
