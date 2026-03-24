@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - SIUTCASJNJ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+        // Las reglas del índice pueden pedir configurar Firestore para Ordenar por fecha. Por ahora limitamos los problemas.
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
+            authDomain: "sindicato-jnj.firebaseapp.com",
+            projectId: "sindicato-jnj",
+            storageBucket: "sindicato-jnj.firebasestorage.app",
+            messagingSenderId: "1036915309355",
+            appId: "1:1036915309355:web:fac53de65031a39597e36e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Referencias principales
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const loginForm = document.getElementById('login-form');
+        const btnLogout = document.getElementById('btn-logout');
+
+        // Referencias de Navegación
+        const navInicio = document.getElementById('nav-inicio');
+        const navCultura = document.getElementById('nav-cultura');
+        const navGaleria = document.getElementById('nav-galeria');
+        const navPortadas = document.getElementById('nav-portadas');
+        const viewInicio = document.getElementById('view-inicio');
+        const viewCultura = document.getElementById('view-cultura');
+        const viewGaleria = document.getElementById('view-galeria');
+        const viewPortadas = document.getElementById('view-portadas');
+        const viewTitle = document.getElementById('view-title');
+        const navItems = document.querySelectorAll('.nav-menu-item');
+
+        // Referencias Formulario
+        const formDoc = document.getElementById('form-doc');
+        const btnSubmitDoc = document.getElementById('btn-submit-doc');
+        const listaDocumentos = document.getElementById('lista-documentos');
+
+        // === AUTENTICACIÓN ===
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                document.getElementById('admin-email-display').textContent = user.email;
+                cargarDocumentos(); // Cargar tabla al iniciar
+            } else {
+                loginSection.classList.remove('hidden');
+                dashboardSection.classList.add('hidden');
+            }
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch((error) => alert('Error al iniciar sesión: ' + error.message));
+        });
+
+        btnLogout.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // === NAVEGACIÓN ===
+        function switchView(activeNav, activeView, title) {
+            navItems.forEach(item => {
+                item.classList.remove('bg-blue-900/50', 'text-blue-300', 'border-l-4', 'border-blue-500');
+                item.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+            });
+            activeNav.classList.add('bg-blue-900/50', 'text-blue-300', 'border-l-4', 'border-blue-500');
+            activeNav.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+
+            viewInicio.classList.add('hidden');
+            viewCultura.classList.add('hidden');
+            if (viewGaleria) viewGaleria.classList.add('hidden');
+            if (viewPortadas) viewPortadas.classList.add('hidden');
+            activeView.classList.remove('hidden');
+            viewTitle.textContent = title;
+        }
+
+        navInicio.addEventListener('click', (e) => { e.preventDefault(); switchView(navInicio, viewInicio, 'Vista General'); });
+        navCultura.addEventListener('click', (e) => { e.preventDefault(); switchView(navCultura, viewCultura, 'Gestión: Cultura y Deportes'); });
+        navGaleria.addEventListener('click', (e) => { e.preventDefault(); switchView(navGaleria, viewGaleria, 'Gestión: Galería de Fotos'); window.cargarGaleria(); });
+        if (navPortadas) navPortadas.addEventListener('click', (e) => { e.preventDefault(); switchView(navPortadas, viewPortadas, 'Gestión: Portadas del Carrusel'); window.cargarPortadas(); });
+        window.forceNavCultura = () => { navCultura.click(); } // Helper global para ir desde el home
+
+        // === LÓGICA DE DOCUMENTOS ===
+        formDoc.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById('doc-titulo').value;
+            const categoria = document.getElementById('doc-categoria').value;
+            const archivoFile = document.getElementById('doc-archivo').files[0];
+
+            if (!archivoFile) return;
+
+            btnSubmitDoc.disabled = true;
+            btnSubmitDoc.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
+
+            try {
+                // 1. Subir al almacenamiento
+                const stamp = Date.now();
+                const safeName = archivoFile.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
+                const storagePath = `cultura_deportes/${stamp}_${safeName}`;
+                const storageRef = ref(storage, storagePath);
+                await uploadBytes(storageRef, archivoFile);
+
+                // 2. Obtener la URL pública de descarga
+                const downloadURL = await getDownloadURL(storageRef);
+
+                // 3. Guardar el registro en la base de datos (Firestore)
+                await addDoc(collection(db, "documentos_cultura"), {
+                    titulo: titulo,
+                    categoria: categoria,
+                    url: downloadURL,
+                    storagePath: storagePath,
+                    fecha: serverTimestamp(),
+                    timestamp: Date.now()
+                });
+
+                alert('¡Documento subido y publicado exitosamente en la web!');
+                formDoc.reset();
+                cargarDocumentos(); // Refrescar la tabla
+            } catch (error) {
+                console.error("Error subiendo archivo:", error);
+                alert("Hubo un error al subir. Revisa tu consola o tu conexión.");
+            } finally {
+                btnSubmitDoc.disabled = false;
+                btnSubmitDoc.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir Archivo y Publicar en Web';
+            }
+        });
+
+        // Cargar lista desde Firebase
+        window.cargarDocumentos = async function () {
+            try {
+                listaDocumentos.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">Buscando documentos...</td></tr>';
+
+                // Pedimos todos, ordenamos localmente por timestamp (para evitar problemas de indexado puro en firebase test)
+                const querySnapshot = await getDocs(collection(db, "documentos_cultura"));
+                const docsData = [];
+                querySnapshot.forEach(docSnap => {
+                    docsData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                docsData.sort((a, b) => b.timestamp - a.timestamp); // Mas recientes primero
+
+                listaDocumentos.innerHTML = '';
+                if (docsData.length === 0) {
+                    listaDocumentos.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No hay documentos publicados aún.</td></tr>';
+                    return;
+                }
+
+                docsData.forEach((data) => {
+                    // Formatear Fecha
+                    let fechaTxt = 'Reciente';
+                    if (data.fecha) {
+                        try { fechaTxt = data.fecha.toDate().toLocaleDateString(); } catch (e) { }
+                    } else if (data.timestamp) {
+                        fechaTxt = new Date(data.timestamp).toLocaleDateString();
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-800">
+                            ${data.titulo} 
+                            <div class="text-xs text-blue-500 mt-1"><a href="${data.url}" target="_blank" class="hover:underline flex items-center"><ion-icon name="link-outline" class="mr-1"></ion-icon> Ver archivo</a></div>
+                        </td>
+                        <td class="px-6 py-4 capitalize text-gray-600">
+                            <span class="bg-gray-100 px-2 py-1 rounded-md text-xs font-bold border">${data.categoria}</span>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500">${fechaTxt}</td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="text-red-500 hover:text-red-700 bg-red-50 px-3 py-1 rounded transition btn-eliminar" data-id="${data.id}" data-path="${data.storagePath}">Eliminar</button>
+                        </td>
+                    `;
+                    listaDocumentos.appendChild(tr);
+                });
+
+                // Registrar eventos de Eliminar
+                document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.target.getAttribute('data-id');
+                        const path = e.target.getAttribute('data-path');
+                        if (confirm('¿Seguro que deseas eliminar este documento?\nDesaparecerá inmediatamente de la página pública.')) {
+                            e.target.innerText = "Borrando...";
+                            e.target.disabled = true;
+                            // Borrar db
+                            await deleteDoc(doc(db, "documentos_cultura", id));
+                            // Borrar storage (archivo fisico)
+                            if (path) await deleteObject(ref(storage, path)).catch(err => console.log("Archivo físico no encontrado"));
+                            await window.cargarDocumentos();
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error cargando tabla:", error);
+                listaDocumentos.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error cargando información de la nube.</td></tr>';
+            }
+        }
+
+        // === LÓGICA DE PORTADAS ===
+        const listaPortadas = document.getElementById('lista-portadas');
+
+        window.cargarPortadas = async function () {
+            if (!listaPortadas) return;
+            try {
+                listaPortadas.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">Cargando portadas...</td></tr>';
+                const qPortadas = await getDocs(query(collection(db, "portadas"), orderBy("orden", "asc")));
+                const portadas = [];
+                qPortadas.forEach(docSnap => portadas.push({ id: docSnap.id, ...docSnap.data() }));
+
+                if (portadas.length === 0) {
+                    listaPortadas.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No hay portadas configuradas. Se mostrarán las imágenes por defecto en la página de inicio.</td></tr>';
+                    return;
+                }
+
+                listaPortadas.innerHTML = '';
+                portadas.forEach((data) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-800">
+                            <div class="flex items-center">
+                                <img src="${data.url}" class="h-16 w-24 object-cover rounded shadow-sm mr-4 border border-gray-200">
+                                <div>
+                                    <span class="block font-bold">${data.titulo || 'Sin título'}</span>
+                                    <span class="text-xs text-gray-500 block max-w-xs truncate">${data.descripcion || '-'}</span>
+                                    <span class="text-xs text-blue-500 mt-1 block"><a href="${data.url}" target="_blank" class="hover:underline flex items-center"><ion-icon name="link-outline" class="mr-1"></ion-icon> Ver imagen</a></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <input type="number" class="w-20 p-2 border border-gray-300 rounded text-center input-orden focus:ring-2 focus:ring-blue-500 outline-none" data-id="${data.id}" value="${data.orden}">
+                        </td>
+                        <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                            <button class="text-blue-600 hover:text-white hover:bg-blue-600 bg-blue-50 px-3 py-1.5 rounded transition btn-guardar-orden font-semibold border border-blue-200 hover:border-blue-600" data-id="${data.id}">
+                                <ion-icon name="save-outline" class="mr-1 align-text-bottom"></ion-icon> Orden
+                            </button>
+                            <button class="text-red-600 hover:text-white hover:bg-red-600 bg-red-50 px-3 py-1.5 rounded transition btn-eliminar-portada font-semibold border border-red-200 hover:border-red-600" data-id="${data.id}" data-path="${data.storagePath}">
+                                <ion-icon name="trash-outline" class="mr-1 align-text-bottom"></ion-icon> Eliminar
+                            </button>
+                        </td>
+                    `;
+                    listaPortadas.appendChild(tr);
+                });
+
+                // Eventos Portadas
+                document.querySelectorAll('.btn-eliminar-portada').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const target = e.currentTarget;
+                        const id = target.getAttribute('data-id');
+                        const path = target.getAttribute('data-path');
+                        if (confirm('¿Seguro que deseas eliminar esta portada? Desaparecerá del carrusel público.')) {
+                            target.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon> Borrando...';
+                            target.disabled = true;
+                            await deleteDoc(doc(db, "portadas", id));
+                            if (path) await deleteObject(ref(storage, path)).catch(err => console.log("No storage file"));
+                            await window.cargarPortadas();
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-guardar-orden').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const target = e.currentTarget;
+                        const id = target.getAttribute('data-id');
+                        const input = document.querySelector(`.input-orden[data-id="${id}"]`);
+                        const nuevoOrden = parseInt(input.value) || 0;
+
+                        target.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon> ...';
+                        target.disabled = true;
+                        try {
+                            await updateDoc(doc(db, "portadas", id), { orden: nuevoOrden });
+                            target.innerHTML = '<ion-icon name="checkmark-outline"></ion-icon> OK';
+                            target.classList.replace('text-blue-600', 'text-green-600');
+                            target.classList.replace('bg-blue-50', 'bg-green-50');
+                            target.classList.replace('border-blue-200', 'border-green-200');
+                            setTimeout(() => {
+                                window.cargarPortadas();
+                            }, 1000);
+                        } catch (err) {
+                            alert('Error al guardar: ' + err.message);
+                            target.innerHTML = 'Error';
+                            target.disabled = false;
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error cargando portadas:", error);
+                listaPortadas.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error al cargar datos de portadas.</td></tr>';
+            }
+        };
+
+        window.cargarGaleria = async () => {
+            if (!contenedorGaleriaAdmin) return;
+            try {
+                contenedorGaleriaAdmin.innerHTML = '<p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando galería...</p>';
+
+                // Cargar Actividades
+                const qActs = await getDocs(collection(db, "actividades"));
+                const actividades = [];
+                qActs.forEach(doc => actividades.push({ id: doc.id, ...doc.data() }));
+                actividades.sort((a, b) => a.timestamp - b.timestamp); // Antiguas primero o cronologico
+
+                // Cargar Fotos
+                const qFotos = await getDocs(collection(db, "fotos"));
+                const fotos = [];
+                qFotos.forEach(doc => fotos.push({ id: doc.id, ...doc.data() }));
+
+                // Poblar select
+                let optionsHtml = '<option value="">Selecciona una actividad...</option>';
+                actividades.forEach(act => {
+                    optionsHtml += `<option value="${act.id}">${act.titulo}</option>`;
+                });
+                if (document.getElementById('foto-actividad-id')) document.getElementById('foto-actividad-id').innerHTML = optionsHtml;
+
+                // Renderizar
+                if (actividades.length === 0) {
+                    contenedorGaleriaAdmin.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay actividades registradas. Usa el formulario de arriba para crear una.</p>';
+                    return;
+                }
+
+                let htmlContent = '';
+                actividades.forEach((act, idx) => {
+                    htmlContent += `
+                        <div class="mb-8 border border-gray-200 rounded-lg p-5 relative bg-white shadow-sm">
+                            <button class="absolute top-4 right-4 text-red-500 hover:text-red-700 bg-red-50 text-xs font-bold px-3 py-1.5 rounded transition btn-eliminar-actividad border border-red-200" data-id="${act.id}" title="Eliminar Actividad">
+                                Eliminar Actividad
+                            </button>
+                            <h4 class="text-xl font-bold text-blue-800 mb-5 pb-2 border-b border-gray-100">Actividad ${idx + 1}: ${act.titulo}</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    `;
+
+                    const fotosAct = fotos.filter(f => f.actividadId === act.id);
+                    if (fotosAct.length === 0) {
+                        htmlContent += `<div class="col-span-full py-4 text-gray-400 text-sm italic text-center">No hay fotos subidas para esta actividad todavía.</div>`;
+                    } else {
+                        fotosAct.forEach(foto => {
+                            htmlContent += `
+                                <div class="relative group aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                                    <img src="${foto.url}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button class="bg-red-500 text-white p-2 md:p-3 rounded-full hover:bg-red-600 transition transform hover:scale-110 btn-eliminar-foto shadow-lg" data-id="${foto.id}" data-path="${foto.storagePath}" title="Eliminar Foto">
+                                            <ion-icon name="trash" class="text-xl block"></ion-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    htmlContent += `</div></div>`;
+                });
+
+                contenedorGaleriaAdmin.innerHTML = htmlContent;
+
+                // Binding Evento Borrar Foto
+                document.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const target = e.currentTarget;
+                        const id = target.getAttribute('data-id');
+                        const path = target.getAttribute('data-path');
+                        if (confirm('¿Seguro de que deseas eliminar permanentemente esta foto?')) {
+                            target.disabled = true;
+                            await deleteDoc(doc(db, "fotos", id));
+                            if (path) await deleteObject(ref(storage, path)).catch(err => console.log(err));
+                            await window.cargarGaleria();
+                        }
+                    });
+                });
+
+                // Binding Evento Borrar Actividad
+                document.querySelectorAll('.btn-eliminar-actividad').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const target = e.currentTarget;
+                        const id = target.getAttribute('data-id');
+                        if (confirm('¿ATENCIÓN: ELIMINAR ACTIVIDAD?\nEsto solo elimina el título de la actividad. Para no dejar archivos sueltos (basura en la nube), asegúrate de eliminar PRIMERO todas las fotos de esta actividad individualmente.\n¿Continuar de todos modos?')) {
+                            target.disabled = true;
+                            target.innerText = "Borrando...";
+                            await deleteDoc(doc(db, "actividades", id));
+                            await window.cargarGaleria();
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error cargando galería:", error);
+                contenedorGaleriaAdmin.innerHTML = '<p class="text-red-500 text-center py-4 font-bold border border-red-200 rounded-lg">Fallo al conectar con la base de datos (Galería).</p>';
+            }
+        };
+
+        // Delay events binding (se ejecuta al renderizar)
+        document.addEventListener('DOMContentLoaded', () => {
+            const fAct = document.getElementById('form-actividad');
+            if (fAct) {
+                fAct.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const titulo = document.getElementById('actividad-titulo').value;
+                    const btn = document.getElementById('btn-submit-actividad');
+                    btn.disabled = true; btn.innerHTML = 'Creando...';
+                    try {
+                        await addDoc(collection(db, "actividades"), { titulo: titulo, timestamp: Date.now() });
+                        fAct.reset();
+                        await window.cargarGaleria();
+                    } catch (err) { alert("Error creando actividad."); }
+                    finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="add" class="mr-1 text-xl"></ion-icon> Crear Actividad'; }
+                });
+            }
+
+            const fFoto = document.getElementById('form-foto');
+            if (fFoto) {
+                fFoto.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const actId = document.getElementById('foto-actividad-id').value;
+                    const file = document.getElementById('foto-archivo').files[0];
+                    const btn = document.getElementById('btn-submit-foto');
+                    if (!actId || !file) return;
+                    btn.disabled = true; btn.innerHTML = 'Subiendo...';
+                    try {
+                        const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
+                        const path = `galeria/${actId}/${Date.now()}_${safeName}`;
+                        const sRef = ref(storage, path);
+                        await uploadBytes(sRef, file);
+                        const url = await getDownloadURL(sRef);
+                        await addDoc(collection(db, "fotos"), { actividadId: actId, url: url, storagePath: path, timestamp: Date.now() });
+                        fFoto.reset();
+                        await window.cargarGaleria();
+                    } catch (err) { alert("Error subiendo fotografía."); console.log(err); }
+                    finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir Foto'; }
+                });
+            }
+
+            const fPortada = document.getElementById('form-portada');
+            if (fPortada) {
+                fPortada.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const titulo = document.getElementById('portada-titulo').value;
+                    const desc = document.getElementById('portada-desc').value;
+                    const orden = parseInt(document.getElementById('portada-orden').value) || 0;
+                    const file = document.getElementById('portada-archivo').files[0];
+                    const btn = document.getElementById('btn-submit-portada');
+
+                    if (!file) return;
+
+                    btn.disabled = true;
+                    btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
+
+                    try {
+                        const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
+                        const storagePath = `portadas/${Date.now()}_${safeName}`;
+                        const sRef = ref(storage, storagePath);
+                        await uploadBytes(sRef, file);
+                        const url = await getDownloadURL(sRef);
+
+                        await addDoc(collection(db, "portadas"), {
+                            titulo: titulo,
+                            descripcion: desc,
+                            orden: orden,
+                            url: url,
+                            storagePath: storagePath,
+                            timestamp: Date.now()
+                        });
+
+                        fPortada.reset();
+                        alert('¡Portada publicada en el inicio exitosamente!');
+                        await window.cargarPortadas();
+                    } catch (err) {
+                        alert("Error subiendo portada.");
+                        console.error(err);
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir y Publicar Portada';
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+
+<body class="bg-gray-100 min-h-screen text-gray-800 font-sans">
+
+    <!-- SECCIÓN 1: LOGIN PANTALLA -->
+    <div id="login-section"
+        class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-gray-900">
+        <div
+            class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full border-t-8 border-orange-500 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-100 rounded-full opacity-50"></div>
+            <div class="text-center mb-8 relative z-10">
+                <div
+                    class="w-20 h-20 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold text-4xl mx-auto mb-4 tracking-tighter shadow-lg ring-4 ring-blue-100">
+                    S
+                </div>
+                <h2 class="text-2xl font-black text-gray-800 uppercase tracking-wide">Panel Admin</h2>
+                <p class="text-xs font-semibold text-orange-500 uppercase tracking-widest mt-1">SIUTCAS - JNJ</p>
+            </div>
+            <form id="login-form" class="space-y-5 relative z-10">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Usuario (Correo)</label>
+                    <input type="email" id="email" required placeholder="tu-correo@jnj.gob.pe"
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-900 bg-gray-50 transition outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" id="password" required placeholder="••••••••"
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-900 bg-gray-50 transition outline-none">
+                </div>
+                <div class="pt-2">
+                    <button type="submit"
+                        class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                        Ingresar al Sistema
+                    </button>
+                </div>
+            </form>
+            <div class="mt-6 text-center border-t border-gray-100 pt-4 relative z-10">
+                <a href="index.html"
+                    class="flex items-center justify-center text-sm font-medium text-gray-500 hover:text-blue-600 transition">
+                    <ion-icon name="arrow-back" class="mr-1"></ion-icon> Regresar a la web pública
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 2: DASHBOARD -->
+    <div id="dashboard-section" class="hidden">
+        <div class="flex h-screen overflow-hidden">
+
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-900 text-white flex flex-col hidden md:flex shrink-0 relative z-30 shadow-2xl">
+                <div class="p-6 text-center border-b border-gray-800/80 bg-gray-900">
+                    <h2
+                        class="text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-300">
+                        ADMIN SIUTCAS</h2>
+                    <p class="text-[11px] font-mono text-gray-400 mt-2 bg-gray-800 rounded px-2 py-1 truncate"
+                        id="admin-email-display"></p>
+                </div>
+                <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+                    <a href="#" id="nav-inicio"
+                        class="flex items-center p-3 bg-blue-900/50 text-blue-300 rounded-lg border-l-4 border-blue-500 nav-menu-item font-medium transition-all">
+                        <ion-icon name="grid" class="mr-3 text-xl"></ion-icon>
+                        Vista General
+                    </a>
+                    <a href="#" id="nav-cultura"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="document-text" class="mr-3 text-xl"></ion-icon>
+                        Cultura y Deportes
+                    </a>
+                    <a href="#" id="nav-galeria"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="images" class="mr-3 text-xl"></ion-icon>
+                        Galería de Fotos
+                    </a>
+                    <a href="#" id="nav-portadas"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="image" class="mr-3 text-xl"></ion-icon>
+                        Portadas del Carrusel
+                    </a>
+
+                    <div class="mt-8 mb-2 px-3 text-xs font-bold text-gray-600 uppercase tracking-wider">Próximas
+                        Funciones</div>
+                    <a href="#"
+                        class="flex items-center p-3 text-gray-500 hover:bg-gray-800 rounded-lg transition-all nav-menu-item opacity-50 cursor-not-allowed">
+                        <ion-icon name="gift" class="mr-3 text-xl"></ion-icon>
+                        Cumpleaños
+                    </a>
+                </nav>
+                <div class="p-4 border-t border-gray-800 bg-gray-900">
+                    <button id="btn-logout"
+                        class="w-full flex items-center justify-center p-3 text-red-400 border border-red-900/50 hover:bg-red-500 hover:text-white rounded-lg transition-colors font-bold shadow">
+                        <ion-icon name="log-out-outline" class="mr-2 text-xl font-black"></ion-icon>
+                        Cerrar Sesión
+                    </button>
+                    <div class="mt-4 text-center">
+                        <a href="index.html" target="_blank"
+                            class="text-xs text-gray-500 hover:text-blue-400 font-semibold flex justify-center items-center">
+                            Ver web en vivo <ion-icon name="open-outline" class="ml-1"></ion-icon>
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 flex flex-col bg-gray-100 overflow-y-auto w-full relative">
+                <header
+                    class="bg-white px-8 py-5 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b border-gray-200">
+                    <h2 id="view-title" class="text-2xl font-bold text-gray-800 tracking-tight">Vista General</h2>
+                    <span
+                        class="bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold px-4 py-1.5 rounded-full text-xs flex items-center shadow-sm">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> Conectado a la
+                        Nube
+                    </span>
+                </header>
+
+                <div class="p-6 md:p-8 w-full max-w-6xl mx-auto space-y-8">
+
+                    <!-- =================================== -->
+                    <!-- VISTA: INICIO -->
+                    <!-- =================================== -->
+                    <div id="view-inicio" class="space-y-6">
+                        <div
+                            class="bg-gradient-to-r from-blue-900 to-blue-700 text-white rounded-2xl shadow-xl p-8 md:p-10 relative overflow-hidden border border-blue-600">
+                            <div class="relative z-10">
+                                <span
+                                    class="bg-orange-500 text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-md mb-4 inline-block">Sistema
+                                    Activo</span>
+                                <h3 class="text-3xl md:text-4xl font-black mb-4 tracking-tight leading-tight">Tu centro
+                                    de comando.</h3>
+                                <p class="text-blue-100 mb-8 text-lg max-w-2xl font-medium leading-relaxed opacity-90">
+                                    El motor de Firebase está 100% operativo. Desde aquí podrás subir archivos, cambiar
+                                    textos y manejar la información de tu página sin tocar una sola línea de código.
+                                </p>
+                                <button onclick="window.forceNavCultura()"
+                                    class="bg-white text-blue-900 font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-gray-50 hover:scale-105 transition-all flex items-center">
+                                    Empezar a subir documentos <ion-icon name="arrow-forward"
+                                        class="ml-2 text-xl"></ion-icon>
+                                </button>
+                            </div>
+                            <!-- Decoración de fondo -->
+                            <ion-icon name="layers"
+                                class="absolute -right-8 -bottom-8 text-[14rem] text-white opacity-10 z-0 rotate-12"></ion-icon>
+                        </div>
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: CULTURA Y DEPORTES -->
+                    <!-- =================================== -->
+                    <div id="view-cultura" class="hidden space-y-8">
+
+                        <!-- Caja de Formulario -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="cloud-upload" class="text-blue-600 mr-2 text-xl"></ion-icon>
+                                    Subir Nuevo Documento
+                                </h3>
+                            </div>
+
+                            <form id="form-doc" class="p-6 space-y-5">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Título del
+                                        Documento</label>
+                                    <input type="text" id="doc-titulo" required
+                                        placeholder="Ej: Ficha de Inscripción Fútbol 2026"
+                                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                    <p class="text-xs text-gray-400 mt-1">Este nombre se mostrará en la página web
+                                        pública.</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Categoría
+                                            (Columna)</label>
+                                        <select id="doc-categoria"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none cursor-pointer">
+                                            <option value="bases">Bases Deportivas</option>
+                                            <option value="fichas">Fichas de Inscripción</option>
+                                            <option value="resultados">Resultados y Comunicados</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Archivo (PDF o
+                                            Word)</label>
+                                        <input type="file" id="doc-archivo" required accept=".pdf,.doc,.docx"
+                                            class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100">
+                                    <button type="submit" id="btn-submit-doc"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto min-w-[250px]">
+                                        <ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon>
+                                        Subir y Publicar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Caja de Tabla -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div
+                                class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="list" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Documentos Publicados
+                                </h3>
+                                <button onclick="window.cargarDocumentos()"
+                                    class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
+                                    <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar Tabla
+                                </button>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left text-sm text-gray-600">
+                                    <thead
+                                        class="bg-white text-gray-400 text-xs uppercase font-extrabold border-b border-gray-100">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-4">Documento</th>
+                                            <th scope="col" class="px-6 py-4">Categoría</th>
+                                            <th scope="col" class="px-6 py-4">Subido el</th>
+                                            <th scope="col" class="px-6 py-4 text-right">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lista-documentos" class="divide-y divide-gray-100">
+                                        <!-- Documentos dinámicos renderizados por JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: GALERÍA DE FOTOS -->
+                    <!-- =================================== -->
+                    <div id="view-galeria" class="hidden space-y-8">
+
+                        <!-- Caja de Crear Actividad -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="add-circle" class="text-orange-500 mr-2 text-xl"></ion-icon>
+                                    1. Crear Nueva Actividad
+                                </h3>
+                            </div>
+                            <form id="form-actividad" class="p-6">
+                                <div class="flex flex-col md:flex-row gap-4">
+                                    <div class="flex-grow">
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Nombre de la
+                                            Actividad</label>
+                                        <input type="text" id="actividad-titulo" required
+                                            placeholder="Ej: Campeonato Relámpago de Fulbito"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div class="flex items-end">
+                                        <button type="submit" id="btn-submit-actividad"
+                                            class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto h-[52px]">
+                                            <ion-icon name="add" class="mr-1 text-xl"></ion-icon>
+                                            Crear Actividad
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Caja de Subir Foto -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="image" class="text-blue-600 mr-2 text-xl"></ion-icon>
+                                    2. Subir Fotos a Actividad
+                                </h3>
+                            </div>
+                            <form id="form-foto" class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Seleccionar
+                                            Actividad</label>
+                                        <select id="foto-actividad-id" required
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none cursor-pointer">
+                                            <option value="">Cargando actividades...</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Fotografía</label>
+                                        <input type="file" id="foto-archivo" required accept="image/*"
+                                            class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100">
+                                    <button type="submit" id="btn-submit-foto"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto min-w-[250px]">
+                                        <ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon>
+                                        Subir Foto
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Visor de Galería -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div
+                                class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="images-outline" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Gestión de Galería Activa
+                                </h3>
+                                <button onclick="window.cargarGaleria()"
+                                    class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
+                                    <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                </button>
+                            </div>
+                            <div id="contenedor-galeria-admin" class="p-6 space-y-8">
+                                <!-- Contenido dinamico de galeria -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: PORTADAS DEL CARRUSEL -->
+                    <!-- =================================== -->
+                    <div id="view-portadas" class="hidden space-y-8">
+
+                        <!-- Caja de Subir Portada -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="cloud-upload" class="text-blue-600 mr-2 text-xl"></ion-icon>
+                                    Subir Nueva Portada al Inicio
+                                </h3>
+                            </div>
+
+                            <form id="form-portada" class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Título
+                                                (Opcional)</label>
+                                            <input type="text" id="portada-titulo" placeholder="Títular principal"
+                                                maxlength="40"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Descripción
+                                                breve (Opcional)</label>
+                                            <input type="text" id="portada-desc" placeholder="Texto de subtítulo"
+                                                maxlength="80"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Orden de
+                                                aparición</label>
+                                            <input type="number" id="portada-orden" required value="1" min="1" max="99"
+                                                class="w-full md:w-1/3 border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                            <p class="text-xs text-gray-400 mt-1">El orden más bajo aparece primero (1,
+                                                2, 3...)</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Imagen de
+                                                Portada (Ideal horizontal 16:9)</label>
+                                            <input type="file" id="portada-archivo" required accept="image/*"
+                                                class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100">
+                                    <button type="submit" id="btn-submit-portada"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto min-w-[300px]">
+                                        <ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon>
+                                        Subir y Publicar Portada
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Lista de Portadas -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div
+                                class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="images" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Portadas Activas (Ordenadas)
+                                </h3>
+                                <button onclick="window.cargarPortadas()"
+                                    class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
+                                    <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar Todo
+                                </button>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left text-sm text-gray-600">
+                                    <thead
+                                        class="bg-white text-gray-400 text-xs uppercase font-extrabold border-b border-gray-100">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-4">Imagen y Título</th>
+                                            <th scope="col" class="px-6 py-4 text-center">Orden</th>
+                                            <th scope="col" class="px-6 py-4 text-right">Acciones Rápidas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lista-portadas" class="divide-y divide-gray-100">
+                                        <!-- Render JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>

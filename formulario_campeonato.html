@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sindicato Unitario de Trabajadores CAS - JNJ | Inscripción</title>
+    <!-- Tailwind CSS (via CDN for simplicity, consider building it for production) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <!-- Header/Nav -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- Logo area -->
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center space-x-3 group">
+                    <div
+                        class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl group-hover:bg-orange-600 transition-colors">
+                        S
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight text-gray-800">SIUTCASJNJ</h1>
+                        <p class="text-xs text-gray-500 font-medium tracking-wide">Junta Nacional de Justicia</p>
+                    </div>
+                </a>
+            </div>
+
+            <a href="sec_cultura_deporte.html"
+                class="text-gray-600 hover:text-orange-500 transition-colors flex items-center font-medium">
+                <ion-icon name="arrow-back-outline" class="mr-2 text-xl"></ion-icon>
+                Volver a Deporte
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-12 flex items-center justify-center">
+        <!-- Formulario Inscripcion -->
+        <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-orange-400 w-full max-w-3xl">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center justify-center">
+                <span class="bg-orange-100 text-orange-400 p-2 rounded-lg mr-3">⚽</span>
+                Inscripción: Campeonato de Fulbito
+            </h3>
+            <p class="text-gray-600 mb-6 text-center">
+                Completa el formulario para registrar a tu equipo en el Campeonato Relámpago de Fulbito (17.Abr.2026).
+            </p>
+            <form class="space-y-6" id="form-campeonato" onsubmit="enviarWhatsApp(event)">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-orange-50 p-4 rounded-lg border border-orange-100">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Nombre del Equipo *</label>
+                        <input type="text" id="nombre-equipo" placeholder="Ej. Los Halcones" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 border p-3">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Teléfono o Celular (Representante)
+                            *</label>
+                        <input type="tel" id="telefono-lider" placeholder="999 999 999" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 border p-3">
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-gray-200">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">Registro de Jugadores</h4>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Por favor ingresa el <b>Nombre Completo</b> y el <b>Área</b> a la que pertenece cada jugador. Se
+                        requiere un mínimo de 6 jugadores (1 titular/capitán y 5 jugadores de campo).
+                    </p>
+
+                    <div id="jugadores-container" class="space-y-4">
+                        <!-- Generado por JavaScript -->
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit"
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all transform hover:-translate-y-1 text-lg flex items-center justify-center">
+                        <ion-icon name="logo-whatsapp" class="mr-2 text-2xl"></ion-icon>
+                        Enviar Inscripción por WhatsApp
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-8 mt-auto">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+            <p class="mb-2">Gestión 2026-2028</p>
+            <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de Cultura
+                    y Deporte</span>.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('jugadores-container');
+            const totalJugadores = 10;
+            const minJugadores = 6;
+
+            for (let i = 1; i <= totalJugadores; i++) {
+                const isRequired = i <= minJugadores ? 'required' : '';
+                const ast = i <= minJugadores ? '<span class="text-red-500">*</span>' : '<span class="text-gray-400 text-xs font-normal">(Opcional)</span>';
+                let labelExtra = i === 1 ? ' (Representante / Líder)' : '';
+                let bgClass = i <= minJugadores ? 'bg-white border-blue-100 shadow-sm' : 'bg-gray-50 border-gray-100 opacity-90';
+
+                container.innerHTML += `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg border hover:shadow-md transition-shadow ${bgClass} jugador-row">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Jugador ${i}${labelExtra} ${ast}</label>
+                            <input type="text" placeholder="Nombre completo" ${isRequired} class="jugador-nombre w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 border p-2 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Área / Dependencia ${ast}</label>
+                            <input type="text" placeholder="Ej. OAF, Informática, Logística" ${isRequired} class="jugador-area w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 border p-2 text-sm bg-white">
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        function enviarWhatsApp(event) {
+            event.preventDefault(); // Evitar que el formulario recargue la página
+
+            const nombreEquipo = document.getElementById('nombre-equipo').value;
+            const telefonoLider = document.getElementById('telefono-lider').value;
+
+            // Recolectar datos de jugadores
+            let textoJugadores = "";
+            const filasJugadores = document.querySelectorAll('.jugador-row');
+
+            filasJugadores.forEach((fila, index) => {
+                const nombre = fila.querySelector('.jugador-nombre').value.trim();
+                const area = fila.querySelector('.jugador-area').value.trim();
+
+                if (nombre !== "") {
+                    textoJugadores += `${index + 1}. *${nombre}* - ${area || 'Sin área especificada'}\n`;
+                }
+            });
+
+            // Construir el mensaje final
+            const mensajeOriginal = `🏆 *NUEVA INSCRIPCIÓN AL CAMPEONATO* 🏆\n\n` +
+                `*Equipo:* ${nombreEquipo}\n` +
+                `*Teléfono de Contacto:* ${telefonoLider}\n\n` +
+                `*LISTA DE JUGADORES:*\n` +
+                `${textoJugadores}\n` +
+                `_Formulario enviado desde la web del Sindicato._`;
+
+            // Codificar el texto para la URL
+            const mensajeCodificado = encodeURIComponent(mensajeOriginal);
+
+            // Número proporcionado por el usuario (Perú)
+            const numeroWhatsApp = "51993782711";
+
+            // Abrir WhatsApp Web / App
+            const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
+            window.open(urlWhatsApp, '_blank');
+
+            // Redirigir de vuelta
+            setTimeout(() => {
+                window.location.href = 'sec_cultura_deporte.html';
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

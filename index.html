@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindicato Único de Trabajadores CAS - JNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circle {
+            border: 3px solid #1e3a8a;
+            outline: 2px solid white;
+            outline-offset: -5px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <img src="docs/img/logo_new.png" alt="Logo SIUT"
+                    class="w-16 h-16 rounded-full mr-4 shadow-lg object-cover">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de Trabajadores CAS -
+                        JNJ</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
+                    <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
+                    <li><a href="#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a></li>
+                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a></li>
+                    <li><a href="#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section Carousel -->
+    <section class="relative w-full h-[500px] overflow-hidden group">
+        <!-- Carousel Wrapper -->
+        <div id="hero-carousel-wrapper" class="flex transition-transform duration-500 ease-out h-full">
+            <!-- Skeleton/Loading Portadas -->
+            <div class="w-full flex-shrink-0 relative bg-gray-200 flex items-center justify-center">
+                <div class="text-center text-gray-500">
+                    <svg class="animate-spin h-10 w-10 text-orange-500 object-center mx-auto mb-4"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <p class="font-semibold">Cargando portadas...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <button id="hero-prev-slide"
+            class="absolute top-1/2 left-4 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white p-3 rounded-full shadow-lg transition-colors opacity-0 group-hover:opacity-100 z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+        </button>
+        <button id="hero-next-slide"
+            class="absolute top-1/2 right-4 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white p-3 rounded-full shadow-lg transition-colors opacity-0 group-hover:opacity-100 z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+        </button>
+
+        <!-- Indicators -->
+        <div id="hero-indicators-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+            <!-- Se generarán dinámicamente -->
+        </div>
+    </section>
+
+
+
+
+    <!-- Birthday Banner -->
+    <div id="birthday-banner"
+        class="hidden flex-col md:flex-row bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-4 justify-center items-center gap-4 text-center shadow-md relative z-20">
+        <p class="font-bold text-lg animate-pulse">
+            🎉 ¡Feliz cumpleaños a <span id="birthday-names" class="underline decoration-wavy"></span>! 🎂
+        </p>
+        <div id="birthday-actions" class="flex flex-wrap gap-2 justify-center">
+            <!-- Botones de WhatsApp se insertan aquí vía JS -->
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="secretarias" class="flex-grow container mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-blue-900 mb-4">Junta Directiva 2026 - 2028</h2>
+            <div class="w-24 h-1 bg-blue-600 mx-auto rounded"></div>
+            <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Conoce a los responsables de velar por los intereses y el
+                bienestar de todos nuestros afiliados.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Card 1: General -->
+            <a href="sec_general.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-900">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Secretaría General</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Pavel Ordoñez Escarza</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Representación legal del sindicato y defensa
+                        irrestricta de los derechos de los afiliados ante las autoridades.</p>
+                </div>
+            </a>
+
+            <!-- Card 2: Sub-General -->
+            <a href="sec_subgeneral.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-700">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Sub-Secretaría General</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Katty Candy Jara Jancco</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Apoyo directo a la gestión general y reemplazo en
+                        funciones ante la ausencia del Secretario General.</p>
+                </div>
+            </a>
+
+            <!-- Card 3: Organización -->
+            <a href="sec_organizacion.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Organización</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Juan Alfredo Tisza Astete</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Mantenimiento del padrón de afiliados y
+                        organización logística de asambleas y actividades sindicales.</p>
+                </div>
+            </a>
+
+            <!-- Card 4: Defensa -->
+            <a href="sec_defensa.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-500">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Defensa</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Richard Trejo Silva</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Asesoría legal permanente y vigilancia del
+                        cumplimiento de las normas laborales vigentes.</p>
+                </div>
+            </a>
+
+            <!-- Card 5: Economía -->
+            <a href="sec_economia.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-green-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Economía</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Ricardo Molleapaza Calderón</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Administración responsable de los fondos sindicales
+                        y transparencia contable hacia los afiliados.</p>
+                </div>
+            </a>
+
+            <!-- Card 6: Actas -->
+            <a href="sec_actas.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-gray-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Actas y Archivo</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Lucy Álvarez Herrera</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Gestión y custodia de los libros de actas y todo el
+                        acervo documentario de la organización.</p>
+                </div>
+            </a>
+
+            <!-- Card 7: Disciplina -->
+            <a href="sec_disciplina.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-red-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Control y Disciplina</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Antuaned María Montoya La Rosa</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Fiscalización ética de los miembros y cumplimiento
+                        de los estatutos y normativas internas.</p>
+                </div>
+            </a>
+
+            <!-- Card 8: Prensa -->
+            <a href="sec_prensa.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-purple-600">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Prensa y Propaganda</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Jimmy Geraldo Chalco Bustinza</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Difusión de acuerdos, comunicados y actividades del
+                        sindicato a través de los canales oficiales.</p>
+                </div>
+            </a>
+
+            <!-- Card 9: Cultura -->
+            <a href="sec_cultura_deporte.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-orange-500">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Cultura y Deporte</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Juan Carlos Montenegro Gonzáles</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Promoción y organización de eventos deportivos,
+                        artísticos y recreativos para la integración.</p>
+                </div>
+            </a>
+
+            <!-- Card 10: Bienestar -->
+            <a href="sec_bienestar.html"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-teal-500">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-1">Bienestar Social</h3>
+                    <p class="text-sm text-blue-600 font-semibold mb-4">Gissela Margarita Silva Macetas</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">Asistencia social a los miembros y gestión de
+                        convenios de salud y beneficios.</p>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contacto" class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
+                    <p class="text-gray-400">Unidad y compromiso por nuestros derechos.</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Av. Paseo de la Republica N°
+                        3285</p>
+                    <p class="text-gray-400">San Isidro, Lima</p>
+                    <p class="text-gray-400 mt-1">sindicatocasjnj@gmail.com</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p class="mb-2">Gestión 2026-2028</p>
+                <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de
+                        Cultura y Deporte</span>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="datos_socios.js"></script>
+    <script src="script.js"></script>
+
+    <!-- Firebase SDK (Lectura de Portadas para el Carrusel) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
+            authDomain: "sindicato-jnj.firebaseapp.com",
+            projectId: "sindicato-jnj",
+            storageBucket: "sindicato-jnj.firebasestorage.app",
+            messagingSenderId: "1036915309355",
+            appId: "1:1036915309355:web:fac53de65031a39597e36e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function cargarPortadas() {
+            const wrapper = document.getElementById('hero-carousel-wrapper');
+            const indicatorsContainer = document.getElementById('hero-indicators-container');
+
+            if (!wrapper || !indicatorsContainer) return;
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "portadas"));
+                const portadas = [];
+                querySnapshot.forEach(docSnap => {
+                    portadas.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                portadas.sort((a, b) => a.orden - b.orden);
+
+                // Fallback si la colección está vacía (por ej, recién habilitado)
+                if (portadas.length === 0) {
+                    portadas.push({ url: 'ANUNCIO_PORTADA_02.png', objectFit: 'cover' });
+                    portadas.push({ url: 'docs/img/portada/portada2.jpg', objectFit: 'cover' });
+                    portadas.push({ url: 'docs/img/portada/portada3.jpg', objectFit: 'cover' });
+                    portadas.push({ url: 'docs/img/portada/portada4.png', objectFit: 'contain' });
+                    portadas.push({ url: 'img/CAMPEONTAO_04.png', objectFit: 'contain' });
+                }
+
+                wrapper.innerHTML = '';
+                indicatorsContainer.innerHTML = '';
+
+                portadas.forEach((portada, index) => {
+                    // Slide HTML
+                    const div = document.createElement('div');
+                    // Usar fondo negro si es contain
+                    div.className = "w-full flex-shrink-0 relative " + (portada.objectFit === 'contain' ? 'bg-black' : '');
+                    div.innerHTML = `<img src="${portada.url}" alt="Portada ${index + 1}" class="w-full h-full object-${portada.objectFit || 'cover'}" onerror="this.src='https://via.placeholder.com/1200x500?text=Imagen+no+encontrada';">`;
+                    wrapper.appendChild(div);
+
+                    // Indicador Html
+                    const btn = document.createElement('button');
+                    btn.className = `w-3 h-3 rounded-full hero-indicator ${index === 0 ? 'bg-white active' : 'bg-white/50'}`;
+                    btn.dataset.slide = index;
+                    indicatorsContainer.appendChild(btn);
+                });
+
+                // Iniciar lógicas nativas del carrusel después de renderizar HTML
+                initCarousel();
+
+            } catch (error) {
+                console.error("Error cargando portadas:", error);
+                wrapper.innerHTML = '<div class="w-full flex items-center justify-center bg-gray-200 text-red-500 font-bold h-full">Error cargando carrusel fotográfico. Verifica tu conexión.</div>';
+            }
+        }
+
+        function initCarousel() {
+            const carouselWrapper = document.getElementById('hero-carousel-wrapper');
+            const prevSlideBtn = document.getElementById('hero-prev-slide');
+            const nextSlideBtn = document.getElementById('hero-next-slide');
+            const indicators = document.querySelectorAll('.hero-indicator');
+
+            if (carouselWrapper && prevSlideBtn && nextSlideBtn && indicators.length > 0) {
+                let currentSlide = 0;
+                const totalSlides = carouselWrapper.children.length;
+
+                function updateCarousel() {
+                    const offset = -currentSlide * 100;
+                    carouselWrapper.style.transform = `translateX(${offset}%)`;
+
+                    indicators.forEach((ind, index) => {
+                        if (index === currentSlide) {
+                            ind.classList.add('active', 'bg-white');
+                            ind.classList.remove('bg-white/50');
+                        } else {
+                            ind.classList.remove('active', 'bg-white');
+                            ind.classList.add('bg-white/50');
+                        }
+                    });
+                }
+
+                function nextSlide() {
+                    currentSlide = (currentSlide + 1) % totalSlides;
+                    updateCarousel();
+                }
+
+                function prevSlide() {
+                    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                    updateCarousel();
+                }
+
+                nextSlideBtn.addEventListener('click', nextSlide);
+                prevSlideBtn.addEventListener('click', prevSlide);
+
+                let slideInterval = setInterval(nextSlide, 5000);
+
+                const carouselContainer = carouselWrapper.parentElement;
+                carouselContainer.addEventListener('mouseenter', () => clearInterval(slideInterval));
+                carouselContainer.addEventListener('mouseleave', () => slideInterval = setInterval(nextSlide, 5000));
+
+                indicators.forEach((ind, index) => {
+                    ind.addEventListener('click', () => {
+                        currentSlide = index;
+                        updateCarousel();
+                    });
+                });
+            }
+        }
+
+        // Ejecutar carga de imágenes
+        cargarPortadas();
+    </script>
+
+</html>
