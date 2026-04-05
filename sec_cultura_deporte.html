@@ -12,6 +12,126 @@
             outline: 2px solid white;
             outline-offset: -5px;
         }
+
+        /* ── Campeonato Banner ── */
+        .campeonato-hero {
+            background: linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #1976D2 100%);
+            border-radius: 1.25rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .campeonato-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 250px; height: 250px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            pointer-events: none;
+        }
+        .campeonato-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; left: -40px;
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background: rgba(56,182,255,0.08);
+            pointer-events: none;
+        }
+
+        /* ── Countdown ── */
+        .cd-box {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 0.75rem;
+            padding: 12px 16px;
+            min-width: 72px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+        .cd-num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+        .cd-lbl {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.65);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* ── Diagonal speed lines ── */
+        .speed-lines {
+            position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+        }
+        .speed-lines::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 30px,
+                rgba(255,255,255,0.02) 30px,
+                rgba(255,255,255,0.02) 32px
+            );
+        }
+
+        /* ── Info pill ── */
+        .info-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            padding: 5px 14px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.9);
+            font-weight: 600;
+        }
+
+        /* ── Stat card ── */
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 0.75rem;
+            padding: 14px 10px;
+            text-align: center;
+        }
+        .stat-val { font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1; }
+        .stat-lbl { font-size: 9px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+
+        /* ── Ver más btn ── */
+        .btn-celeste {
+            background: #38B6FF;
+            color: #0D47A1;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 13px;
+            transition: all .2s;
+            display: inline-flex; align-items: center; gap: 6px;
+            text-decoration: none;
+        }
+        .btn-celeste:hover { background: #81D4FA; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(56,182,255,0.4); }
+
+        .btn-outline-white {
+            background: transparent;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-size: 13px;
+            border: 1.5px solid rgba(255,255,255,0.4);
+            transition: all .2s;
+            display: inline-flex; align-items: center; gap: 6px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.7); }
     </style>
 </head>
 
@@ -20,24 +140,17 @@
     <header class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center mb-4 md:mb-0">
-                <div
-                    class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">
-                    SIUT</div>
+                <div class="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold text-xl logo-circle mr-4 shadow-lg">SIUT</div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">
-                        SIUTCASJNJ</h1>
-                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato
-                        Único de Trabajadores CAS -
-                        JNJ</p>
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-900 leading-tight">SIUTCASJNJ</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wider">Sindicato Único de Trabajadores CAS - JNJ</p>
                 </div>
             </div>
             <nav>
                 <ul class="flex space-x-6 text-sm font-semibold text-gray-600">
                     <li><a href="index.html" class="hover:text-blue-900 transition-colors">Inicio</a></li>
-                    <li><a href="index.html#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a>
-                    </li>
-                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a>
-                    </li>
+                    <li><a href="index.html#secretarias" class="hover:text-blue-900 transition-colors">Secretarías</a></li>
+                    <li><a href="#" class="hover:text-blue-900 transition-colors">Calendario</a></li>
                     <li><a href="index.html#contacto" class="hover:text-blue-900 transition-colors">Contacto</a></li>
                 </ul>
             </nav>
@@ -47,9 +160,74 @@
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-12">
         <div class="max-w-5xl mx-auto">
-            <h2
-                class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-orange-500 pb-2 inline-block">
-                Cultura y Deporte</h2>
+
+            <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-orange-500 pb-2 inline-block">
+                Cultura y Deporte
+            </h2>
+
+            <!-- ══════════════════════════════════════════════════════════════
+                 NUEVO: BANNER CAMPEONATO RELÁMPAGO 2026
+            ══════════════════════════════════════════════════════════════ -->
+            <div class="campeonato-hero p-6 md:p-10 mb-10 shadow-2xl">
+                <div class="speed-lines"></div>
+                <div class="relative z-10">
+
+                    <!-- Badge + Título -->
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                        <div>
+                            <span class="inline-block bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                                ⚡ Próximo Evento
+                            </span>
+                            <h3 class="text-2xl md:text-4xl font-extrabold text-white leading-tight">
+                                CAMPEONATO RELÁMPAGO<br>
+                                <span class="text-blue-300">COPA SIUTCASJNJ</span>
+                                <span class="text-yellow-300"> 2026</span>
+                            </h3>
+                        </div>
+                        <div class="text-5xl md:text-6xl">⚽</div>
+                    </div>
+
+                    <!-- Info Pills -->
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="info-pill">📅 17 y 24 de Abril 2026</span>
+                        <span class="info-pill">⏰ 18:00 hrs.</span>
+                        <span class="info-pill">📍 Sport School San Isidro</span>
+                        <span class="info-pill">⚽ Fútbol 7 · Masculino</span>
+                    </div>
+
+                    <!-- Countdown -->
+                    <div class="mb-6">
+                        <p class="text-xs text-blue-200 uppercase tracking-widest mb-3 font-semibold">⏳ Cuenta regresiva — Jornada 1 · 17 de Abril</p>
+                        <div class="flex gap-3 flex-wrap">
+                            <div class="cd-box"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">Días</div></div>
+                            <div class="cd-box"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">Horas</div></div>
+                            <div class="cd-box"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">Min</div></div>
+                            <div class="cd-box"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">Seg</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-7">
+                        <div class="stat-card"><div class="stat-val">6</div><div class="stat-lbl">Equipos</div></div>
+                        <div class="stat-card"><div class="stat-val">7</div><div class="stat-lbl">Jug. min.</div></div>
+                        <div class="stat-card"><div class="stat-val">S/150</div><div class="stat-lbl">Inscripción</div></div>
+                        <div class="stat-card"><div class="stat-val">2</div><div class="stat-lbl">Jornadas</div></div>
+                        <div class="stat-card"><div class="stat-val">🏆</div><div class="stat-lbl">Copa</div></div>
+                        <div class="stat-card"><div class="stat-val">🍽️</div><div class="stat-lbl">Cena</div></div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex flex-wrap gap-3">
+                        <a href="campeonato_2026.html" class="btn-celeste">
+                            📊 Ver Plan Completo e Itinerario
+                        </a>
+                        <a href="formulario_campeonato.html" class="btn-outline-white">
+                            ✍️ Inscribir mi Equipo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- ══ FIN BANNER ══ -->
 
             <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-12">
                 <!-- Section A: Próximos Eventos -->
@@ -59,17 +237,28 @@
                         Próximos Eventos
                     </h3>
                     <div class="space-y-4">
-                        <div class="flex items-center bg-orange-50 p-4 rounded-lg">
+                        <!-- Evento 1 -->
+                        <div class="flex items-center bg-blue-50 p-4 rounded-lg border border-blue-100">
                             <div class="bg-white p-3 rounded-lg shadow text-center mr-4 min-w-[70px]">
                                 <span class="block text-xs text-gray-500 uppercase">Abr</span>
-                                <span class="block text-2xl font-bold text-orange-600">17</span>
+                                <span class="block text-2xl font-bold text-blue-700">17</span>
                             </div>
                             <div>
-                                <h4 class="font-bold text-gray-800">Campeonato Relámpago de
-                                    Fulbito</h4>
-                                <p class="text-sm text-gray-600">Lugar: Complejo Deportivo
-                                    "El Golazo"</p>
-                                <p class="text-sm text-gray-600">Hora: 18:00 horas</p>
+                                <h4 class="font-bold text-gray-800">Campeonato Relámpago — Jornada 1</h4>
+                                <p class="text-sm text-gray-600">📍 Sport School San Isidro</p>
+                                <p class="text-sm text-gray-600">⏰ 18:00 hrs. · Fase de Grupos</p>
+                            </div>
+                        </div>
+                        <!-- Evento 2 -->
+                        <div class="flex items-center bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                            <div class="bg-white p-3 rounded-lg shadow text-center mr-4 min-w-[70px]">
+                                <span class="block text-xs text-gray-500 uppercase">Abr</span>
+                                <span class="block text-2xl font-bold text-yellow-600">24</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Campeonato Relámpago — Jornada 2</h4>
+                                <p class="text-sm text-gray-600">📍 Sport School San Isidro</p>
+                                <p class="text-sm text-gray-600">⏰ 18:00 hrs. · Semifinales + Gran Final 🏆</p>
                             </div>
                         </div>
                     </div>
@@ -81,14 +270,11 @@
                         <span class="bg-orange-100 text-orange-400 p-2 rounded-lg mr-3">✍️</span>
                         Inscripciones
                     </h3>
-                    <p class="text-gray-600 mb-4">Inscribe a tu equipo o participa
-                        individualmente en nuestros talleres.
-                    </p>
+                    <p class="text-gray-600 mb-4">Inscribe a tu equipo o participa individualmente en nuestros talleres.</p>
                     <form class="space-y-4">
-                        <select id="evento-select"
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 border p-2 mb-2">
+                        <select id="evento-select" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 border p-2 mb-2">
                             <option value="">Seleccionar Evento</option>
-                            <option value="fulbito" selected>Campeonato de Fulbito</option>
+                            <option value="fulbito" selected>Campeonato Relámpago 2026</option>
                             <option value="danzas">Taller de Danzas</option>
                         </select>
                         <button type="button" onclick="irAlFormulario()"
@@ -116,12 +302,9 @@
                         <span class="bg-blue-100 text-blue-500 p-2 rounded-lg mr-3">📄</span>
                         Documentación Oficial
                     </h3>
-                    <p class="text-gray-600 mb-5 text-sm">Descarga las bases, fichas de inscripción y comunicados
-                        emitidos por la secretaría.</p>
+                    <p class="text-gray-600 mb-5 text-sm">Descarga las bases, fichas de inscripción y comunicados emitidos por la secretaría.</p>
                     <div class="space-y-4" id="lista-documentacion-publica">
-                        <!-- Loading State -->
-                        <div
-                            class="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                        <div class="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
                             <ion-icon name="sync-outline" class="animate-spin text-4xl mb-3 text-blue-400"></ion-icon>
                             <p class="text-sm font-semibold tracking-wide">Sincronizando con la nube...</p>
                         </div>
@@ -134,10 +317,7 @@
                     <span class="bg-orange-100 text-orange-500 p-2 rounded-lg mr-3">📸</span>
                     Galería de Actividades
                 </h3>
-
-                <!-- Skeleton Loading -->
-                <div
-                    class="text-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                <div class="text-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
                     <ion-icon name="sync-outline" class="animate-spin text-5xl mb-3 text-orange-400"></ion-icon>
                     <p class="text-lg font-semibold tracking-wide text-gray-500">Descargando fotografías...</p>
                 </div>
@@ -149,33 +329,51 @@
                 <div class="flex flex-col md:flex-row justify-between items-center mb-8">
                     <div class="mb-6 md:mb-0 text-center md:text-left">
                         <h4 class="text-2xl font-bold mb-2">SIUTCASJNJ</h4>
-                        <p class="text-gray-400">Unidad y compromiso por nuestros
-                            derechos.</p>
+                        <p class="text-gray-400">Unidad y compromiso por nuestros derechos.</p>
                     </div>
                     <div class="text-center md:text-right">
-                        <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Av.
-                            Paseo de la Republica N° 3285</p>
+                        <p class="mb-1"><span class="font-bold text-gray-300">Dirección:</span> Av. Paseo de la Republica N° 3285</p>
                         <p class="text-gray-400">San Isidro, Lima</p>
                         <p class="text-gray-400 mt-1">sindicatocasjnj@gmail.com</p>
                     </div>
                 </div>
                 <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
                     <p class="mb-2">Gestión 2026-2028</p>
-                    <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de
-                            Cultura y
-                            Deporte</span>.</p>
+                    <p>Sitio web impulsado y desarrollado por la <span class="text-gray-300 font-semibold">Secretaría de Cultura y Deporte</span>.</p>
                 </div>
             </div>
         </footer>
 
         <!-- Scripts -->
         <script src="script.js"></script>
-
-        <!-- Ionicons (Para iconos de documentos) -->
         <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
         <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
-        <!-- Firebase SDK (Lectura para la web pública) -->
+        <!-- Countdown Script -->
+        <script>
+            function updateCountdown() {
+                const target = new Date('2026-04-17T18:00:00-05:00');
+                const now    = new Date();
+                const diff   = target - now;
+                if (diff <= 0) {
+                    document.querySelectorAll('.cd-box').forEach(b => b.style.display='none');
+                    return;
+                }
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000)  / 60000);
+                const s = Math.floor((diff % 60000)    / 1000);
+                const pad = n => String(n).padStart(2,'0');
+                document.getElementById('cd-d').textContent = pad(d);
+                document.getElementById('cd-h').textContent = pad(h);
+                document.getElementById('cd-m').textContent = pad(m);
+                document.getElementById('cd-s').textContent = pad(s);
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        </script>
+
+        <!-- Firebase SDK -->
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
             import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -195,41 +393,23 @@
             async function cargarDocumentosPublicos() {
                 const contenedor = document.getElementById('lista-documentacion-publica');
                 if (!contenedor) return;
-
                 try {
                     const querySnapshot = await getDocs(collection(db, "documentos_cultura"));
                     const docsData = [];
-                    querySnapshot.forEach(docSnap => {
-                        docsData.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-
-                    docsData.sort((a, b) => b.timestamp - a.timestamp); // Más recientes primero
-
-                    contenedor.innerHTML = ''; // Limpiar estado de carga
-
+                    querySnapshot.forEach(docSnap => { docsData.push({ id: docSnap.id, ...docSnap.data() }); });
+                    docsData.sort((a, b) => b.timestamp - a.timestamp);
+                    contenedor.innerHTML = '';
                     if (docsData.length === 0) {
                         contenedor.innerHTML = '<div class="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg"><p class="text-gray-500 text-sm font-medium">No hay documentos publicados actualmente.</p></div>';
                         return;
                     }
-
                     docsData.forEach((data) => {
-                        let iconColor = 'text-blue-500';
-                        let bgHover = 'hover:bg-blue-50';
-                        let tagColor = 'bg-gray-100 text-gray-600';
-
-                        if (data.categoria === 'bases') {
-                            iconColor = 'text-red-500'; bgHover = 'hover:bg-red-50';
-                            tagColor = 'bg-red-100 text-red-700';
-                        } else if (data.categoria === 'fichas') {
-                            iconColor = 'text-green-500'; bgHover = 'hover:bg-green-50';
-                            tagColor = 'bg-green-100 text-green-700';
-                        }
-
+                        let iconColor = 'text-blue-500', bgHover = 'hover:bg-blue-50', tagColor = 'bg-gray-100 text-gray-600';
+                        if (data.categoria === 'bases') { iconColor = 'text-red-500'; bgHover = 'hover:bg-red-50'; tagColor = 'bg-red-100 text-red-700'; }
+                        else if (data.categoria === 'fichas') { iconColor = 'text-green-500'; bgHover = 'hover:bg-green-50'; tagColor = 'bg-green-100 text-green-700'; }
                         const a = document.createElement('a');
-                        a.href = data.url;
-                        a.target = '_blank';
+                        a.href = data.url; a.target = '_blank';
                         a.className = `flex items-center p-4 bg-white shadow-sm border border-gray-200 rounded-xl transition-all hover:-translate-y-1 hover:shadow-md ${bgHover} group cursor-pointer`;
-
                         a.innerHTML = `
                             <div class="bg-gray-50 p-3 rounded-lg mr-4 border border-gray-100">
                                 <ion-icon name="document-text" class="text-3xl ${iconColor}"></ion-icon>
@@ -240,13 +420,10 @@
                             </div>
                             <div class="flex flex-col items-end justify-center px-2">
                                 <ion-icon name="download" class="text-2xl text-gray-300 group-hover:${iconColor} transition-colors"></ion-icon>
-                            </div>
-                        `;
+                            </div>`;
                         contenedor.appendChild(a);
                     });
-
                 } catch (error) {
-                    console.error("Error cargando documentos en la web pública:", error);
                     contenedor.innerHTML = '<p class="text-red-500 text-sm text-center font-bold">Error sincronizando con la nube.</p>';
                 }
             }
@@ -254,75 +431,40 @@
             async function cargarGaleriaPublica() {
                 const contenedor = document.getElementById('contenedor-galeria-publico');
                 if (!contenedor) return;
-
                 try {
-                    // Cargar Actividades
                     const qActs = await getDocs(collection(db, "actividades"));
                     const actividades = [];
                     qActs.forEach(doc => actividades.push({ id: doc.id, ...doc.data() }));
-                    actividades.sort((a, b) => a.timestamp - b.timestamp); // Cronológico 1, 2, 3
-
-                    // Cargar Fotos
+                    actividades.sort((a, b) => a.timestamp - b.timestamp);
                     const qFotos = await getDocs(collection(db, "fotos"));
                     const fotos = [];
                     qFotos.forEach(doc => fotos.push({ id: doc.id, ...doc.data() }));
-
                     if (actividades.length === 0) {
-                        contenedor.innerHTML = `
-                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                                <span class="bg-orange-100 text-orange-500 p-2 rounded-lg mr-3">📸</span>
-                                Galería de Actividades
-                            </h3>
-                            <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
-                                <p class="text-gray-500 font-medium">Aún no hay actividades publicadas.</p>
-                            </div>
-                        `;
+                        contenedor.innerHTML = `<h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center"><span class="bg-orange-100 text-orange-500 p-2 rounded-lg mr-3">📸</span>Galería de Actividades</h3><div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg"><p class="text-gray-500 font-medium">Aún no hay actividades publicadas.</p></div>`;
                         return;
                     }
-
-                    let htmlContent = `
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="bg-orange-100 text-orange-500 p-2 rounded-lg mr-3">📸</span>
-                            Galería de Actividades
-                        </h3>
-                    `;
-
+                    let htmlContent = `<h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center"><span class="bg-orange-100 text-orange-500 p-2 rounded-lg mr-3">📸</span>Galería de Actividades</h3>`;
                     actividades.forEach((act, idx) => {
                         htmlContent += `<h4 class="text-xl font-bold text-blue-800 mb-4 mt-8">Actividad ${idx + 1}: ${act.titulo}</h4>`;
-
                         const fotosAct = fotos.filter(f => f.actividadId === act.id);
                         if (fotosAct.length === 0) {
                             htmlContent += `<div class="text-gray-400 italic text-sm mb-8">Esta actividad aún no tiene fotos...</div>`;
                         } else {
                             htmlContent += `<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">`;
                             fotosAct.forEach(foto => {
-                                htmlContent += `
-                                    <div class="aspect-video relative overflow-hidden rounded-lg shadow-sm border border-gray-200 group">
-                                        <img src="${foto.url}" alt="Foto ${act.titulo}"
-                                            class="object-cover w-full h-full cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                                            onclick="window.open('${foto.url}', '_blank')">
-                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2 md:p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                            <ion-icon name="expand-outline" class="text-white text-xl float-right drop-shadow-md"></ion-icon>
-                                        </div>
-                                    </div>
-                                `;
+                                htmlContent += `<div class="aspect-video relative overflow-hidden rounded-lg shadow-sm border border-gray-200 group"><img src="${foto.url}" alt="Foto ${act.titulo}" class="object-cover w-full h-full cursor-pointer transition-transform duration-300 group-hover:scale-105" onclick="window.open('${foto.url}', '_blank')"><div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2 md:p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"><ion-icon name="expand-outline" class="text-white text-xl float-right drop-shadow-md"></ion-icon></div></div>`;
                             });
                             htmlContent += `</div>`;
                         }
                     });
-
                     contenedor.innerHTML = htmlContent;
-
                 } catch (error) {
-                    console.error("Error cargando galería pública:", error);
                     contenedor.innerHTML = '<p class="text-red-500 text-center font-bold">Error sincronizando galería fotográfica.</p>';
                 }
             }
 
-            // Ejecutamos las cargas simultáneamente
             cargarDocumentosPublicos();
             cargarGaleriaPublica();
         </script>
 </body>
-
 </html>
