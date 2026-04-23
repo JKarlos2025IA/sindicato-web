@@ -177,17 +177,89 @@
 
   /* ── MATCH CARD ───────────────────────────────────────────────────────── */
   .match-vs {
-    display: flex; align-items: center; gap: 12px; margin-top: 10px;
+    display: flex; align-items: stretch; gap: 0; margin-top: 12px;
+    border-radius: 12px; overflow: hidden; border: 1px solid rgba(56,182,255,.25);
   }
-  .team-pill {
-    flex: 1; background: rgba(56,182,255,.1); border: 1px solid rgba(56,182,255,.3);
-    border-radius: 8px; padding: 8px 12px; text-align: center;
-    font-weight: 700; font-size: 13px; color: var(--white);
+  .team-block {
+    flex: 1; padding: 14px 10px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; background: rgba(56,182,255,.07); position: relative;
+  }
+  .team-block.winner {
+    background: linear-gradient(135deg, rgba(0,188,212,.18) 0%, rgba(13,71,161,.22) 100%);
+  }
+  .team-block .team-name {
+    font-weight: 800; font-size: 12px; color: var(--white); line-height: 1.3;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .team-block .team-goals {
+    font-family: 'Oswald', sans-serif; font-size: 42px; font-weight: 700; line-height: 1;
+  }
+  .team-block.winner .team-goals { color: var(--celeste); }
+  .team-block.loser  .team-goals { color: rgba(123,158,196,.4); }
+  .winner-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: linear-gradient(90deg, #00BCD4, #0097A7);
+    color: #fff; font-size: 9px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    border-radius: 20px; padding: 3px 9px;
+    box-shadow: 0 2px 8px rgba(0,188,212,.5);
+  }
+  .score-divider {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--azul-m); min-width: 44px;
+    font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 700;
+    color: rgba(255,255,255,.4); letter-spacing: 1px; flex-direction: column; gap: 1px;
   }
   .vs-badge {
     background: var(--azul); border-radius: 8px; padding: 6px 10px;
     font-size: 11px; font-weight: 800; color: var(--celeste); letter-spacing: 1px;
   }
+  /* keep .team-pill for Jornada 2 and bracket panels */
+  .team-pill {
+    flex: 1; background: rgba(56,182,255,.1); border: 1px solid rgba(56,182,255,.3);
+    border-radius: 8px; padding: 8px 12px; text-align: center;
+    font-weight: 700; font-size: 13px; color: var(--white);
+  }
+
+  /* ── STANDINGS TABLE ──────────────────────────────────────────────────── */
+  .standings-wrap {
+    background: var(--card); border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(56,182,255,.2); margin-top: 28px;
+  }
+  .standings-header {
+    background: linear-gradient(90deg, var(--azul) 0%, var(--azul-l) 100%);
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--celeste);
+    border-bottom: 2px solid rgba(56,182,255,.3);
+  }
+  .standings-table { width: 100%; border-collapse: collapse; }
+  .standings-table th {
+    background: rgba(21,101,192,.4); color: var(--cel-l); padding: 10px 14px;
+    text-align: center; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .standings-table th:first-child { text-align: left; padding-left: 20px; }
+  .standings-table td {
+    padding: 11px 14px; font-size: 14px;
+    border-bottom: 1px solid rgba(56,182,255,.08); text-align: center;
+  }
+  .standings-table td:first-child { text-align: left; padding-left: 20px; }
+  .standings-table tr:last-child td { border-bottom: none; }
+  .standings-table tr:hover td { background: rgba(56,182,255,.06); }
+  .st-rank {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 700; margin-right: 8px;
+  }
+  .st-rank.gold   { background: var(--gold); color: var(--dark); }
+  .st-rank.silver { background: #90A4AE; color: var(--dark); }
+  .st-rank.bronze { background: #A1887F; color: #fff; }
+  .st-rank.last   { background: rgba(123,158,196,.2); color: var(--slate); }
+  .st-pts { font-family: 'Oswald', sans-serif; font-size: 20px; font-weight: 700; color: var(--celeste); }
+  .st-diff { font-weight: 700; }
+  .st-diff.pos { color: #4CAF50; } .st-diff.neg { color: #EF5350; } .st-diff.zero { color: var(--slate); }
 
   /* ── BRACKET ──────────────────────────────────────────────────────────── */
   .bracket { overflow-x: auto; padding-bottom: 8px; }
@@ -271,6 +343,44 @@
     .cards-row { grid-template-columns: 1fr 1fr; }
   }
 
+  /* ── TEAM PHOTO CARDS ────────────────────────────────────────────────── */
+  .team-photo-card {
+    background: var(--card); border: 1px solid rgba(56,182,255,.2);
+    border-radius: 14px; overflow: hidden; text-align: center;
+    transition: transform .2s, border-color .2s;
+  }
+  .team-photo-card:hover { transform: translateY(-4px); border-color: var(--celeste); }
+  .tp-img-wrap {
+    width: 100%; aspect-ratio: 4/3; overflow: hidden;
+    background: var(--card2); display: flex; align-items: center; justify-content: center;
+  }
+  .tp-img-wrap img {
+    width: 100%; height: 100%; object-fit: cover; object-position: top;
+    display: block;
+  }
+  .tp-fallback {
+    font-family: 'Oswald', sans-serif; font-size: 32px; font-weight: 700;
+    color: var(--celeste); opacity: .4;
+  }
+  .tp-name {
+    font-family: 'Oswald', sans-serif; font-size: 15px; font-weight: 700;
+    color: var(--white); padding: 10px 10px 4px; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .tp-badge {
+    font-size: 11px; font-weight: 700; padding: 4px 10px 12px;
+    letter-spacing: .5px;
+  }
+  .tp-badge.gold-badge   { color: var(--gold); }
+  .tp-badge.silver-badge { color: #90A4AE; }
+  .tp-badge.bronze-badge { color: #A1887F; }
+  .tp-badge.last-badge   { color: var(--slate); }
+
+  /* foto pequeña dentro del match-vs */
+  .mv-photo {
+    width: 64px; height: 64px; border-radius: 50%; object-fit: cover; object-position: top;
+    border: 2px solid rgba(56,182,255,.4); margin-bottom: 6px;
+  }
+
   /* ── GLOW PULSE ───────────────────────────────────────────────────────── */
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(56,182,255,.3)} 50%{box-shadow:0 0 0 8px rgba(56,182,255,0)} }
   .cd-box { animation: pulse 3s ease-in-out infinite; }
@@ -312,7 +422,7 @@
 
   <!-- ── COUNTDOWN ──────────────────────────────────────────────────────── -->
   <div class="countdown-section">
-    <div class="countdown-label">⏳ Cuenta regresiva — Jornada 1 · 17 de Abril 2026</div>
+    <div class="countdown-label">⏳ Cuenta regresiva — Jornada 2 · 24 de Abril 2026</div>
     <div class="countdown-grid">
       <div class="cd-box"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">Días</div></div>
       <div class="cd-box"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">Horas</div></div>
@@ -321,11 +431,11 @@
     </div>
   </div>
 
-  <!-- ── HOY GRAN EVENTO ────────────────────────────────────────────────── -->
-  <div style="padding:20px 24px;background:linear-gradient(135deg,var(--azul) 0%,var(--azul-l) 100%);border-radius:14px;border:2px solid var(--gold);margin-bottom:24px;text-align:center;box-shadow:0 4px 30px rgba(249,168,37,.35);animation:pulse 2s ease-in-out infinite;">
-    <div style="font-size:12px;color:var(--cel-l);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">⚽ Viernes 17 de Abril 2026</div>
-    <div style="font-family:'Oswald',sans-serif;font-size:34px;font-weight:700;color:var(--gold);line-height:1.1;">🔥 HOY · GRAN EVENTO DEPORTIVO 🔥</div>
-    <div style="font-size:13px;color:var(--offwhite);margin-top:8px;letter-spacing:1px;">Inauguración 18:00 hrs · Sport School San Isidro</div>
+  <!-- ── RESULTADOS 17.04.2026 ────────────────────────────────────────────────── -->
+  <div style="padding:20px 24px;background:linear-gradient(135deg,var(--azul) 0%,var(--azul-l) 100%);border-radius:14px;border:2px solid var(--gold);margin-bottom:24px;text-align:center;box-shadow:0 4px 30px rgba(249,168,37,.35);">
+    <div style="font-size:12px;color:var(--cel-l);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">✅ RESULTADOS JORNADA 1</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:34px;font-weight:700;color:var(--gold);line-height:1.1;">📊 RESULTADOS 17.04.2026 ✅</div>
+    <div style="font-size:13px;color:var(--offwhite);margin-top:8px;letter-spacing:1px;">Jornada 1 finalizada · Sport School San Isidro</div>
   </div>
 
   <!-- ── DATOS CLAVE ────────────────────────────────────────────────────── -->
@@ -373,11 +483,17 @@
         <div class="tl-dot match"></div>
         <div class="tl-card match-card">
           <div class="tl-time">⚽ PARTIDO 1 · 18:00 – 18:20 · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title">Partido 1</div>
           <div class="match-vs">
-            <div class="team-pill">OAF + PROCU (A)</div>
-            <div class="vs-badge">VS</div>
-            <div class="team-pill">SPORT JUSTICIA (B)</div>
+            <div class="team-block loser">
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div class="team-goals">1</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block winner">
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div class="team-goals">3</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
           </div>
         </div>
       </div>
@@ -385,11 +501,17 @@
         <div class="tl-dot match"></div>
         <div class="tl-card match-card">
           <div class="tl-time">⚽ PARTIDO 2 · 18:20 – 18:40 · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title">Partido 2</div>
           <div class="match-vs">
-            <div class="team-pill">DPD (C)</div>
-            <div class="vs-badge">VS</div>
-            <div class="team-pill">RATI (D)</div>
+            <div class="team-block winner">
+              <div class="team-name">DPD (C)</div>
+              <div class="team-goals">1</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">RATI (D)</div>
+              <div class="team-goals">0</div>
+            </div>
           </div>
         </div>
       </div>
@@ -397,11 +519,17 @@
         <div class="tl-dot match"></div>
         <div class="tl-card match-card">
           <div class="tl-time">⚽ PARTIDO 3 · 18:40 – 19:00 · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title">Partido 3</div>
           <div class="match-vs">
-            <div class="team-pill">OAF + PROCU (A)</div>
-            <div class="vs-badge">VS</div>
-            <div class="team-pill">DPD (C)</div>
+            <div class="team-block loser">
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div class="team-goals">0</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block winner">
+              <div class="team-name">DPD (C)</div>
+              <div class="team-goals">3</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
           </div>
         </div>
       </div>
@@ -409,11 +537,17 @@
         <div class="tl-dot match"></div>
         <div class="tl-card match-card">
           <div class="tl-time">⚽ PARTIDO 4 · 19:00 – 19:20 · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title">Partido 4</div>
           <div class="match-vs">
-            <div class="team-pill">SPORT JUSTICIA (B)</div>
-            <div class="vs-badge">VS</div>
-            <div class="team-pill">RATI (D)</div>
+            <div class="team-block winner">
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div class="team-goals">4</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">RATI (D)</div>
+              <div class="team-goals">0</div>
+            </div>
           </div>
         </div>
       </div>
@@ -421,11 +555,17 @@
         <div class="tl-dot match"></div>
         <div class="tl-card match-card">
           <div class="tl-time">⚽ PARTIDO 5 · 19:20 – 19:40 · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title">Partido 5</div>
           <div class="match-vs">
-            <div class="team-pill">OAF + PROCU (A)</div>
-            <div class="vs-badge">VS</div>
-            <div class="team-pill">RATI (D)</div>
+            <div class="team-block winner">
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div class="team-goals">2</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">RATI (D)</div>
+              <div class="team-goals">1</div>
+            </div>
           </div>
         </div>
       </div>
@@ -433,20 +573,73 @@
         <div class="tl-dot match"></div>
         <div class="tl-card match-card">
           <div class="tl-time">⚽ PARTIDO 6 · 19:40 – 20:00 · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title">Partido 6</div>
           <div class="match-vs">
-            <div class="team-pill">SPORT JUSTICIA (B)</div>
-            <div class="vs-badge">VS</div>
-            <div class="team-pill">DPD (C)</div>
+            <div class="team-block winner">
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div class="team-goals">3</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">DPD (C)</div>
+              <div class="team-goals">1</div>
+            </div>
           </div>
         </div>
       </div>
       <div class="tl-item">
         <div class="tl-dot special"></div>
         <div class="tl-card special-card">
-          <div class="tl-time">📋 AL FINALIZAR LA FASE REGULAR</div>
-          <div class="tl-title">Tabla de Posiciones</div>
-          <div class="tl-sub">Se ordena a los 4 equipos por puntos. Criterios de desempate: (1) diferencia de goles, (2) goles a favor, (3) resultado directo entre los empatados.</div>
+          <div class="tl-time">📋 TABLA DE POSICIONES — JORNADA 1 FINALIZADA</div>
+          <div class="standings-wrap" style="margin-top:12px;">
+            <div class="standings-header">📊 Posiciones Finales · Jornada 1</div>
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Equipo</th>
+                  <th>PJ</th>
+                  <th>G</th>
+                  <th>P</th>
+                  <th>GF</th>
+                  <th>GC</th>
+                  <th>+/-</th>
+                  <th>Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background:rgba(249,168,37,.07);">
+                  <td><span class="st-rank gold">1</span></td>
+                  <td><strong>SPORT JUSTICIA (B)</strong></td>
+                  <td>3</td><td>3</td><td>0</td><td>10</td><td>2</td>
+                  <td><span class="st-diff pos">+8</span></td>
+                  <td><span class="st-pts">9</span></td>
+                </tr>
+                <tr>
+                  <td><span class="st-rank silver">2</span></td>
+                  <td><strong>DPD (C)</strong></td>
+                  <td>3</td><td>2</td><td>1</td><td>6</td><td>1</td>
+                  <td><span class="st-diff pos">+5</span></td>
+                  <td><span class="st-pts">6</span></td>
+                </tr>
+                <tr>
+                  <td><span class="st-rank bronze">3</span></td>
+                  <td><strong>OAF + PROCU (A)</strong></td>
+                  <td>3</td><td>1</td><td>2</td><td>3</td><td>6</td>
+                  <td><span class="st-diff neg">-3</span></td>
+                  <td><span class="st-pts">3</span></td>
+                </tr>
+                <tr>
+                  <td><span class="st-rank last">4</span></td>
+                  <td><strong>RATI (D)</strong></td>
+                  <td>3</td><td>0</td><td>3</td><td>1</td><td>11</td>
+                  <td><span class="st-diff neg">-10</span></td>
+                  <td><span class="st-pts" style="color:var(--slate);">0</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tl-sub" style="margin-top:10px;">Desempate: (1) diferencia de goles · (2) goles a favor · (3) resultado directo</div>
         </div>
       </div>
       <div class="tl-item">
@@ -464,13 +657,51 @@
   <div id="jornada2" class="panel">
     <div class="jornada-header">
       <div class="jh-left">
-        <div class="jh-num">Jornada 2 · Finales por Posición</div>
-        <div class="jh-title">🏆 Definición del Campeón</div>
+        <div class="jh-num">Jornada 2 · Definición del Campeón</div>
+        <div class="jh-title">🏆 Gran Final</div>
       </div>
       <div class="jh-right">
         <div class="jh-date">24 de Abril 2026</div>
         <div class="jh-sub">Sport School San Isidro · 18:00 hrs.</div>
       </div>
+    </div>
+
+    <!-- Fotos de equipos -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px;">
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/SPORT JUSTICIA.png" alt="Sport Justicia" onerror="this.parentElement.innerHTML='<div class=tp-fallback>SJ</div>'"/>
+        </div>
+        <div class="tp-name">SPORT JUSTICIA</div>
+        <div class="tp-badge gold-badge">🥇 1.° Tabla · 9 pts</div>
+      </div>
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/DPD.png" alt="DPD" onerror="this.parentElement.innerHTML='<div class=tp-fallback>DPD</div>'"/>
+        </div>
+        <div class="tp-name">DPD</div>
+        <div class="tp-badge silver-badge">🥈 2.° Tabla · 6 pts</div>
+      </div>
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/OAF.png" alt="OAF + PROCU" onerror="this.parentElement.innerHTML='<div class=tp-fallback>OAF</div>'"/>
+        </div>
+        <div class="tp-name">OAF + PROCU</div>
+        <div class="tp-badge bronze-badge">🥉 3.° Tabla · 3 pts</div>
+      </div>
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/RATIFIACION.png" alt="RATI" onerror="this.parentElement.innerHTML='<div class=tp-fallback>RATI</div>'"/>
+        </div>
+        <div class="tp-name">RATI</div>
+        <div class="tp-badge last-badge">4.° Tabla · 0 pts</div>
+      </div>
+    </div>
+
+    <!-- Formato de la jornada -->
+    <div style="padding:14px 18px;background:var(--card);border-radius:12px;border-left:4px solid var(--celeste);font-size:13px;color:var(--offwhite);margin-bottom:24px;line-height:1.8;">
+      <strong style="color:var(--celeste);">📋 Formato Jornada 2:</strong>
+      Partido 1 y Partido 2 simultáneos o consecutivos · <strong>Cada tiempo: 15 minutos</strong> · Receso de 10 min antes de la Gran Final · El Campeón sale de los ganadores de P1 y P2.
     </div>
 
     <div class="timeline">
@@ -479,48 +710,93 @@
         <div class="tl-card special-card">
           <div class="tl-time">🕕 18:00 HRS.</div>
           <div class="tl-title">Concentración y Calentamiento</div>
-          <div class="tl-sub">Presentación de los 4 equipos según la tabla de posiciones de la Jornada 1</div>
+          <div class="tl-sub">Presentación de los 4 equipos · Cada tiempo dura 15 minutos</div>
         </div>
       </div>
+
+      <!-- PARTIDO 1 -->
       <div class="tl-item">
         <div class="tl-dot match"></div>
         <div class="tl-card match-card">
-          <div class="tl-time">⚽ PARTIDO POR EL 3.er PUESTO · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title">Tercer Puesto</div>
+          <div class="tl-time">⚽ PARTIDO 1 · 18:00 – 18:30 · 1.er T 15' + 2.do T 15'</div>
           <div class="match-vs">
-            <div class="team-pill">3.° en la Tabla</div>
-            <div class="vs-badge">VS</div>
-            <div class="team-pill">4.° en la Tabla</div>
+            <div class="team-block" style="background:rgba(249,168,37,.1);">
+              <img src="img/SPORT JUSTICIA.png" class="mv-photo" alt="Sport Justicia" onerror="this.style.display='none'"/>
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div style="font-size:10px;color:var(--gold);">1.° Tabla J1</div>
+            </div>
+            <div class="score-divider" style="font-size:18px;color:var(--celeste);">VS</div>
+            <div class="team-block">
+              <img src="img/RATIFIACION.png" class="mv-photo" alt="RATI" onerror="this.style.display='none'"/>
+              <div class="team-name">RATI (D)</div>
+              <div style="font-size:10px;color:var(--slate);">4.° Tabla J1</div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- PARTIDO 2 -->
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 2 · 18:30 – 19:00 · 1.er T 15' + 2.do T 15'</div>
+          <div class="match-vs">
+            <div class="team-block" style="background:rgba(56,182,255,.1);">
+              <img src="img/DPD.png" class="mv-photo" alt="DPD" onerror="this.style.display='none'"/>
+              <div class="team-name">DPD (C)</div>
+              <div style="font-size:10px;color:var(--cel-l);">2.° Tabla J1</div>
+            </div>
+            <div class="score-divider" style="font-size:18px;color:var(--celeste);">VS</div>
+            <div class="team-block">
+              <img src="img/OAF.png" class="mv-photo" alt="OAF + PROCU" onerror="this.style.display='none'"/>
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div style="font-size:10px;color:var(--slate);">3.° Tabla J1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECESO -->
       <div class="tl-item">
         <div class="tl-dot special"></div>
         <div class="tl-card special-card">
-          <div class="tl-time">⏸️ INTERMEDIO</div>
-          <div class="tl-title">Descanso antes de la Gran Final</div>
-          <div class="tl-sub">Hidratación · Preparación para la Final</div>
+          <div class="tl-time">⏸️ RECESO · 19:00 – 19:10</div>
+          <div class="tl-title">10 minutos de descanso</div>
+          <div class="tl-sub">Hidratación · Los ganadores de P1 y P2 se preparan para la Gran Final</div>
         </div>
       </div>
+
+      <!-- GRAN FINAL -->
       <div class="tl-item">
         <div class="tl-dot match"></div>
         <div class="tl-card match-card" style="border-left-color:var(--gold);">
-          <div class="tl-time" style="color:var(--gold);">🏆 GRAN FINAL · 1.er T 10' + 2.do T 8'</div>
-          <div class="tl-title" style="font-size:18px;color:var(--gold);">FINAL DEL CAMPEONATO</div>
-          <div class="match-vs">
-            <div class="team-pill" style="border-color:var(--gold);background:rgba(249,168,37,.1);">1.° en la Tabla</div>
-            <div class="vs-badge" style="background:var(--gold);color:var(--dark);">VS</div>
-            <div class="team-pill" style="border-color:var(--gold);background:rgba(249,168,37,.1);">2.° en la Tabla</div>
+          <div class="tl-time" style="color:var(--gold);">🏆 GRAN FINAL · 19:10 – 19:40 · 1.er T 15' + 2.do T 15'</div>
+          <div class="tl-title" style="font-size:18px;color:var(--gold);margin-bottom:4px;">CAMPEÓN DEL TORNEO</div>
+          <div style="font-size:12px;color:var(--offwhite);margin-bottom:10px;">Ganador P1 vs Ganador P2</div>
+          <div class="match-vs" style="border-color:var(--gold);">
+            <div class="team-block" style="background:rgba(249,168,37,.08);">
+              <div style="font-size:28px;margin-bottom:6px;">🏆</div>
+              <div class="team-name" style="color:var(--gold);">Ganador P1</div>
+              <div style="font-size:10px;color:var(--offwhite);">Sport Justicia o RATI</div>
+            </div>
+            <div class="score-divider" style="background:var(--gold);color:var(--dark);font-size:16px;font-weight:900;">VS</div>
+            <div class="team-block" style="background:rgba(249,168,37,.08);">
+              <div style="font-size:28px;margin-bottom:6px;">🏆</div>
+              <div class="team-name" style="color:var(--gold);">Ganador P2</div>
+              <div style="font-size:10px;color:var(--offwhite);">DPD o OAF+PROCU</div>
+            </div>
           </div>
-          <div class="tl-sub" style="margin-top:8px;color:var(--offwhite);">En caso de empate → Penales (3 × equipo; si persiste: 1 penal c/u hasta definir)</div>
+          <div class="tl-sub" style="margin-top:10px;color:var(--offwhite);">En caso de empate → Penales (3 × equipo; si persiste: 1 penal c/u hasta definir)</div>
         </div>
       </div>
+
+      <!-- PREMIACIÓN -->
       <div class="tl-item">
         <div class="tl-dot special"></div>
         <div class="tl-card special-card" style="border-left-color:var(--gold);">
-          <div class="tl-time" style="color:var(--gold);">🎊 PREMIACIÓN</div>
+          <div class="tl-time" style="color:var(--gold);">🎊 PREMIACIÓN · ~19:45 HRS.</div>
           <div class="tl-title">Entrega de Copa de Campeones</div>
-          <div class="tl-sub">Ceremonia de premiación al equipo campeón y reconocimiento al 2.°, 3.° y 4.° lugar</div>
+          <div class="tl-sub">Ceremonia de premiación · 🥇 Campeón · 🥈 Subcampeón · Reconocimiento a todos los participantes</div>
         </div>
       </div>
     </div>
@@ -558,8 +834,8 @@
             <th style="width:40px;">#</th>
             <th style="width:140px;">Hora</th>
             <th>Enfrentamiento</th>
-            <th style="width:120px;">Resultado</th>
-            <th style="width:140px;">Puntos</th>
+            <th style="width:100px;">Resultado</th>
+            <th style="width:160px;">Ganador</th>
           </tr>
         </thead>
         <tbody>
@@ -567,43 +843,43 @@
             <td><strong>1</strong></td>
             <td>18:00 – 18:20</td>
             <td><strong>OAF + PROCU</strong> (A) <span style="color:var(--slate);">vs</span> <strong>SPORT JUSTICIA</strong> (B)</td>
-            <td class="amount" style="color:var(--slate);">— : —</td>
-            <td style="color:var(--slate);font-size:12px;">A:__ B:__</td>
+            <td class="amount"><strong>1 : 3</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 SPORT JUSTICIA (B)</td>
           </tr>
           <tr>
             <td><strong>2</strong></td>
             <td>18:20 – 18:40</td>
             <td><strong>DPD</strong> (C) <span style="color:var(--slate);">vs</span> <strong>RATI</strong> (D)</td>
-            <td class="amount" style="color:var(--slate);">— : —</td>
-            <td style="color:var(--slate);font-size:12px;">C:__ D:__</td>
+            <td class="amount"><strong>1 : 0</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 DPD (C)</td>
           </tr>
           <tr>
             <td><strong>3</strong></td>
             <td>18:40 – 19:00</td>
             <td><strong>OAF + PROCU</strong> (A) <span style="color:var(--slate);">vs</span> <strong>DPD</strong> (C)</td>
-            <td class="amount" style="color:var(--slate);">— : —</td>
-            <td style="color:var(--slate);font-size:12px;">A:__ C:__</td>
+            <td class="amount"><strong>0 : 3</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 DPD (C)</td>
           </tr>
           <tr>
             <td><strong>4</strong></td>
             <td>19:00 – 19:20</td>
             <td><strong>SPORT JUSTICIA</strong> (B) <span style="color:var(--slate);">vs</span> <strong>RATI</strong> (D)</td>
-            <td class="amount" style="color:var(--slate);">— : —</td>
-            <td style="color:var(--slate);font-size:12px;">B:__ D:__</td>
+            <td class="amount"><strong>4 : 0</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 SPORT JUSTICIA (B)</td>
           </tr>
           <tr>
             <td><strong>5</strong></td>
             <td>19:20 – 19:40</td>
             <td><strong>OAF + PROCU</strong> (A) <span style="color:var(--slate);">vs</span> <strong>RATI</strong> (D)</td>
-            <td class="amount" style="color:var(--slate);">— : —</td>
-            <td style="color:var(--slate);font-size:12px;">A:__ D:__</td>
+            <td class="amount"><strong>2 : 1</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 OAF + PROCU (A)</td>
           </tr>
           <tr>
             <td><strong>6</strong></td>
             <td>19:40 – 20:00</td>
             <td><strong>SPORT JUSTICIA</strong> (B) <span style="color:var(--slate);">vs</span> <strong>DPD</strong> (C)</td>
-            <td class="amount" style="color:var(--slate);">— : —</td>
-            <td style="color:var(--slate);font-size:12px;">B:__ C:__</td>
+            <td class="amount"><strong>3 : 1</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 SPORT JUSTICIA (B)</td>
           </tr>
         </tbody>
       </table>
@@ -616,24 +892,31 @@
         <div class="bracket-col">
           <div style="text-align:center;font-size:11px;color:var(--slate);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;">Tabla J1 · 17 Abr</div>
           <div class="bracket-match">
-            <div class="bm-header">Posiciones</div>
-            <div class="bm-team">1.° en la Tabla</div>
-            <div class="bm-team">2.° en la Tabla</div>
-            <div class="bm-team">3.° en la Tabla</div>
-            <div class="bm-team">4.° en la Tabla</div>
+            <div class="bm-header">Tabla J1 · Resultados</div>
+            <div class="bm-team" style="color:var(--gold);">🥇 SPORT JUSTICIA (B) · 9 pts</div>
+            <div class="bm-team" style="color:var(--cel-l);">🥈 DPD (C) · 6 pts</div>
+            <div class="bm-team" style="color:var(--offwhite);">🥉 OAF + PROCU (A) · 3 pts</div>
+            <div class="bm-team" style="color:var(--slate);">4.° RATI (D) · 0 pts</div>
           </div>
         </div>
         <div class="bracket-arrow">→</div>
         <div class="bracket-col">
           <div style="text-align:center;font-size:11px;color:var(--slate);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;">Finales · 24 Abr</div>
           <div class="bracket-match">
-            <div class="bm-header">3.er Puesto</div>
-            <div class="bm-team">3.° vs 4.°</div>
+            <div class="bm-header">Partido 1</div>
+            <div class="bm-team" style="color:var(--gold);">SPORT JUSTICIA (B)</div>
+            <div class="bm-team" style="color:var(--slate);">RATI (D)</div>
+          </div>
+          <div style="height:16px;"></div>
+          <div class="bracket-match">
+            <div class="bm-header">Partido 2</div>
+            <div class="bm-team" style="color:var(--cel-l);">DPD (C)</div>
+            <div class="bm-team">OAF + PROCU (A)</div>
           </div>
           <div style="height:16px;"></div>
           <div class="bracket-match" style="border-color:var(--gold);">
             <div class="bm-header" style="background:rgba(249,168,37,.2);color:var(--gold);">Gran Final</div>
-            <div class="bm-team">1.° vs 2.°</div>
+            <div class="bm-team" style="color:var(--gold);">Ganador P1 vs Ganador P2</div>
           </div>
         </div>
         <div class="bracket-arrow">→</div>
@@ -712,12 +995,12 @@
 <script>
   // ── COUNTDOWN ──────────────────────────────────────────────────────────────
   function updateCountdown() {
-    const target = new Date('2026-04-17T18:00:00-05:00');
+    const target = new Date('2026-04-24T18:00:00-05:00');
     const now    = new Date();
     const diff   = target - now;
     if (diff <= 0) {
       document.querySelector('.countdown-section').innerHTML =
-        '<div style="text-align:center;font-size:20px;color:var(--gold);font-weight:700;padding:20px;">⚽ ¡El evento ya comenzó! ¡Mucho éxito!</div>';
+        '<div style="text-align:center;font-size:20px;color:var(--gold);font-weight:700;padding:20px;">🏆 ¡Gran Final en curso! ¡Mucho éxito a todos!</div>';
       return;
     }
     const d = Math.floor(diff / 86400000);
