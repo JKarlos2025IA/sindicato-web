@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Campeonato Relámpago Copa SIUTCASJNJ 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Oswald:wght@400;500;600;700&display=swap');
+
+  :root {
+    --azul:    #0D47A1;
+    --azul-m:  #1565C0;
+    --azul-l:  #1976D2;
+    --celeste: #38B6FF;
+    --cel-l:   #81D4FA;
+    --gold:    #F9A825;
+    --dark:    #0A1628;
+    --card:    #0E1F3D;
+    --card2:   #132444;
+    --white:   #FFFFFF;
+    --offwhite:#D6E4F7;
+    --slate:   #7B9EC4;
+    --green:   #00BCD4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED BACKGROUND ──────────────────────────────────────────────── */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(56,182,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,182,255,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .bg-blob {
+    position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none;
+  }
+  .bg-blob.b1 { width:500px;height:500px; top:-100px;left:-100px; background:rgba(13,71,161,.35); z-index:0; }
+  .bg-blob.b2 { width:400px;height:400px; bottom:-80px;right:-80px; background:rgba(56,182,255,.18); z-index:0; }
+  .bg-blob.b3 { width:300px;height:300px; top:40%;left:60%; background:rgba(21,101,192,.2); z-index:0; }
+
+  /* ── LAYOUT ───────────────────────────────────────────────────────────── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* ── HEADER ───────────────────────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-l) 60%, rgba(56,182,255,.3) 100%);
+    border-bottom: 3px solid var(--celeste);
+    padding: 32px 0 24px;
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content:''; position:absolute; top:-60px; right:-60px;
+    width:300px; height:300px; border-radius:50%;
+    background: rgba(255,255,255,.05);
+  }
+  .header-inner {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  }
+  .header-org { font-size: 12px; letter-spacing: 2px; color: var(--cel-l); font-weight: 500; text-transform: uppercase; }
+  .header-title { font-family: 'Oswald', sans-serif; font-size: clamp(28px, 4vw, 46px); font-weight: 700; line-height: 1.1; }
+  .header-title span { color: var(--celeste); }
+  .header-title .year { color: var(--gold); }
+  .header-badge {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 12px; padding: 10px 18px; text-align: center; backdrop-filter: blur(8px);
+  }
+  .header-badge .badge-top { font-size: 11px; color: var(--cel-l); letter-spacing: 1px; text-transform: uppercase; }
+  .header-badge .badge-loc { font-size: 15px; font-weight: 700; color: white; margin-top: 4px; }
+  .header-badge .badge-sub { font-size: 11px; color: var(--offwhite); }
+
+  /* ── COUNTDOWN ────────────────────────────────────────────────────────── */
+  .countdown-section { padding: 32px 0 24px; }
+  .countdown-label { text-align: center; font-size: 12px; letter-spacing: 3px; color: var(--slate); text-transform: uppercase; margin-bottom: 16px; }
+  .countdown-grid { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .cd-box {
+    background: var(--card); border: 1px solid rgba(56,182,255,.25);
+    border-radius: 16px; padding: 20px 24px; min-width: 90px; text-align: center;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,.4);
+    transition: transform .2s;
+  }
+  .cd-box:hover { transform: translateY(-4px); }
+  .cd-box::before {
+    content:''; position:absolute; top:0;left:0;right:0; height:3px;
+    background: linear-gradient(90deg, var(--celeste), var(--azul));
+  }
+  .cd-num { font-family:'Oswald',sans-serif; font-size: 46px; font-weight: 700; color: var(--celeste); line-height: 1; }
+  .cd-lbl { font-size: 10px; letter-spacing: 2px; color: var(--slate); text-transform: uppercase; margin-top: 6px; }
+
+  /* ── SECTION TITLE ────────────────────────────────────────────────────── */
+  .section-title {
+    font-family:'Oswald',sans-serif; font-size: 22px; font-weight: 600; color: var(--celeste);
+    letter-spacing: 2px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  }
+  .section-title::after {
+    content:''; flex:1; height:2px;
+    background: linear-gradient(90deg, rgba(56,182,255,.4), transparent);
+  }
+  .section-title .icon { font-size: 18px; }
+
+  /* ── INFO CARDS ROW ───────────────────────────────────────────────────── */
+  .cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 32px; }
+  .info-card {
+    background: var(--card); border: 1px solid rgba(56,182,255,.2);
+    border-radius: 14px; padding: 18px 14px; text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3); transition: border-color .2s, transform .2s;
+  }
+  .info-card:hover { border-color: var(--celeste); transform: translateY(-3px); }
+  .info-card .ic-icon { font-size: 26px; margin-bottom: 8px; }
+  .info-card .ic-val { font-family:'Oswald',sans-serif; font-size: 28px; font-weight: 700; color: var(--celeste); }
+  .info-card .ic-lbl { font-size: 11px; color: var(--slate); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+  /* ── TABS ─────────────────────────────────────────────────────────────── */
+  .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tab {
+    padding: 10px 22px; border-radius: 50px; border: 1.5px solid rgba(56,182,255,.3);
+    background: transparent; color: var(--slate); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; letter-spacing: .5px;
+  }
+  .tab:hover { border-color: var(--celeste); color: var(--celeste); }
+  .tab.active { background: var(--celeste); border-color: var(--celeste); color: var(--dark); }
+
+  /* ── TAB PANELS ───────────────────────────────────────────────────────── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── JORNADA HEADER ───────────────────────────────────────────────────── */
+  .jornada-header {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-l) 100%);
+    border-radius: 16px; padding: 20px 24px; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    border: 1px solid rgba(56,182,255,.3);
+  }
+  .jornada-header .jh-left .jh-num { font-size: 11px; letter-spacing: 2px; color: var(--cel-l); text-transform: uppercase; }
+  .jornada-header .jh-left .jh-title { font-family:'Oswald',sans-serif; font-size: 24px; font-weight: 700; }
+  .jornada-header .jh-right { text-align: right; }
+  .jornada-header .jh-right .jh-date { font-family:'Oswald',sans-serif; font-size: 22px; color: var(--gold); font-weight: 700; }
+  .jornada-header .jh-right .jh-sub { font-size: 12px; color: var(--offwhite); margin-top: 2px; }
+
+  /* ── TIMELINE ─────────────────────────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before {
+    content:''; position:absolute; left:10px; top:0; bottom:0; width:2px;
+    background: linear-gradient(to bottom, var(--celeste), rgba(56,182,255,.1));
+  }
+  .tl-item { position: relative; margin-bottom: 16px; }
+  .tl-dot {
+    position: absolute; left: -26px; top: 14px; width: 14px; height: 14px;
+    border-radius: 50%; border: 2px solid var(--celeste); background: var(--dark);
+    z-index: 1;
+  }
+  .tl-dot.match { background: var(--celeste); }
+  .tl-dot.special { background: var(--gold); border-color: var(--gold); }
+  .tl-card {
+    background: var(--card); border: 1px solid rgba(56,182,255,.18);
+    border-radius: 12px; padding: 14px 18px;
+    transition: border-color .2s, transform .2s;
+  }
+  .tl-card:hover { border-color: rgba(56,182,255,.5); transform: translateX(4px); }
+  .tl-card.match-card { border-left: 3px solid var(--celeste); }
+  .tl-card.special-card { border-left: 3px solid var(--gold); }
+  .tl-time { font-size: 11px; color: var(--slate); letter-spacing: 1px; margin-bottom: 6px; font-weight: 600; }
+  .tl-title { font-weight: 700; font-size: 15px; color: var(--white); }
+  .tl-sub { font-size: 13px; color: var(--offwhite); margin-top: 3px; }
+
+  /* ── MATCH CARD ───────────────────────────────────────────────────────── */
+  .match-vs {
+    display: flex; align-items: stretch; gap: 0; margin-top: 12px;
+    border-radius: 12px; overflow: hidden; border: 1px solid rgba(56,182,255,.25);
+  }
+  .team-block {
+    flex: 1; padding: 14px 10px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; background: rgba(56,182,255,.07); position: relative;
+  }
+  .team-block.winner {
+    background: linear-gradient(135deg, rgba(0,188,212,.18) 0%, rgba(13,71,161,.22) 100%);
+  }
+  .team-block .team-name {
+    font-weight: 800; font-size: 12px; color: var(--white); line-height: 1.3;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .team-block .team-goals {
+    font-family: 'Oswald', sans-serif; font-size: 42px; font-weight: 700; line-height: 1;
+  }
+  .team-block.winner .team-goals { color: var(--celeste); }
+  .team-block.loser  .team-goals { color: rgba(123,158,196,.4); }
+  .winner-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: linear-gradient(90deg, #00BCD4, #0097A7);
+    color: #fff; font-size: 9px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    border-radius: 20px; padding: 3px 9px;
+    box-shadow: 0 2px 8px rgba(0,188,212,.5);
+  }
+  .score-divider {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--azul-m); min-width: 44px;
+    font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 700;
+    color: rgba(255,255,255,.4); letter-spacing: 1px; flex-direction: column; gap: 1px;
+  }
+  .vs-badge {
+    background: var(--azul); border-radius: 8px; padding: 6px 10px;
+    font-size: 11px; font-weight: 800; color: var(--celeste); letter-spacing: 1px;
+  }
+  /* keep .team-pill for Jornada 2 and bracket panels */
+  .team-pill {
+    flex: 1; background: rgba(56,182,255,.1); border: 1px solid rgba(56,182,255,.3);
+    border-radius: 8px; padding: 8px 12px; text-align: center;
+    font-weight: 700; font-size: 13px; color: var(--white);
+  }
+
+  /* ── STANDINGS TABLE ──────────────────────────────────────────────────── */
+  .standings-wrap {
+    background: var(--card); border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(56,182,255,.2); margin-top: 28px;
+  }
+  .standings-header {
+    background: linear-gradient(90deg, var(--azul) 0%, var(--azul-l) 100%);
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--celeste);
+    border-bottom: 2px solid rgba(56,182,255,.3);
+  }
+  .standings-table { width: 100%; border-collapse: collapse; }
+  .standings-table th {
+    background: rgba(21,101,192,.4); color: var(--cel-l); padding: 10px 14px;
+    text-align: center; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .standings-table th:first-child { text-align: left; padding-left: 20px; }
+  .standings-table td {
+    padding: 11px 14px; font-size: 14px;
+    border-bottom: 1px solid rgba(56,182,255,.08); text-align: center;
+  }
+  .standings-table td:first-child { text-align: left; padding-left: 20px; }
+  .standings-table tr:last-child td { border-bottom: none; }
+  .standings-table tr:hover td { background: rgba(56,182,255,.06); }
+  .st-rank {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 700; margin-right: 8px;
+  }
+  .st-rank.gold   { background: var(--gold); color: var(--dark); }
+  .st-rank.silver { background: #90A4AE; color: var(--dark); }
+  .st-rank.bronze { background: #A1887F; color: #fff; }
+  .st-rank.last   { background: rgba(123,158,196,.2); color: var(--slate); }
+  .st-pts { font-family: 'Oswald', sans-serif; font-size: 20px; font-weight: 700; color: var(--celeste); }
+  .st-diff { font-weight: 700; }
+  .st-diff.pos { color: #4CAF50; } .st-diff.neg { color: #EF5350; } .st-diff.zero { color: var(--slate); }
+
+  /* ── BRACKET ──────────────────────────────────────────────────────────── */
+  .bracket { overflow-x: auto; padding-bottom: 8px; }
+  .bracket-grid {
+    display: grid; grid-template-columns: 1fr 80px 1fr 80px 1fr;
+    gap: 0; min-width: 600px; align-items: center;
+  }
+  .bracket-col { display: flex; flex-direction: column; gap: 16px; }
+  .bracket-match {
+    background: var(--card); border: 1px solid rgba(56,182,255,.25);
+    border-radius: 10px; overflow: hidden;
+  }
+  .bracket-match .bm-header {
+    background: rgba(21,101,192,.4); padding: 5px 10px;
+    font-size: 10px; letter-spacing: 1px; color: var(--cel-l); font-weight: 600; text-transform: uppercase;
+  }
+  .bracket-match .bm-team {
+    padding: 8px 10px; font-size: 13px; font-weight: 600; border-bottom: 1px solid rgba(56,182,255,.1);
+  }
+  .bracket-match .bm-team:last-child { border-bottom: none; }
+  .bracket-arrow { display:flex; align-items:center; justify-content:center; color:var(--slate); font-size:20px; }
+  .bracket-final {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-l) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 12px; padding: 16px; text-align: center;
+    box-shadow: 0 0 20px rgba(249,168,37,.2);
+  }
+  .bracket-final .bf-label { font-size: 11px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .bracket-final .bf-title { font-family:'Oswald',sans-serif; font-size: 20px; font-weight: 700; color: white; }
+  .bracket-final .bf-date { font-size: 12px; color: var(--cel-l); margin-top: 6px; }
+
+  /* ── PRESUPUESTO TABLE ────────────────────────────────────────────────── */
+  .budget-table { width: 100%; border-collapse: collapse; }
+  .budget-table th {
+    background: var(--azul-m); color: white; padding: 12px 16px; text-align: left;
+    font-size: 12px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+  }
+  .budget-table td {
+    padding: 11px 16px; font-size: 14px; border-bottom: 1px solid rgba(56,182,255,.1);
+  }
+  .budget-table tr:nth-child(even) td { background: rgba(56,182,255,.04); }
+  .budget-table tr:hover td { background: rgba(56,182,255,.08); }
+  .budget-table .total-row td {
+    background: rgba(56,182,255,.12) !important; font-weight: 700; color: var(--celeste);
+    border-top: 2px solid rgba(56,182,255,.4);
+  }
+  .budget-table .income-row td { color: #4CAF50; }
+  .amount { text-align: right; font-family: 'Oswald', sans-serif; font-size: 16px; }
+  .table-wrap {
+    background: var(--card); border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(56,182,255,.18);
+  }
+
+  /* ── ACCOUNT BOX ──────────────────────────────────────────────────────── */
+  .account-box {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-l) 100%);
+    border-radius: 14px; padding: 20px 24px; margin-top: 16px;
+    border: 1px solid var(--celeste);
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .account-box .ab-icon { font-size: 32px; }
+  .account-box .ab-label { font-size: 11px; color: var(--cel-l); letter-spacing: 1px; text-transform: uppercase; }
+  .account-box .ab-val { font-family:'Oswald',sans-serif; font-size: 20px; font-weight: 700; color: white; margin-top: 2px; }
+  .account-box .ab-cci { font-size: 13px; color: var(--offwhite); margin-top: 2px; }
+
+  /* ── FOOTER ───────────────────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid rgba(56,182,255,.15); margin-top: 48px; padding: 24px 0;
+    text-align: center; color: var(--slate); font-size: 13px;
+    position: relative; z-index: 1;
+  }
+  footer strong { color: var(--celeste); }
+
+  /* ── SECTION PADDING ──────────────────────────────────────────────────── */
+  .section { padding: 24px 0; }
+
+  /* ── RESPONSIVE ───────────────────────────────────────────────────────── */
+  @media(max-width:600px) {
+    .header-inner { flex-direction: column; }
+    .bracket-grid { grid-template-columns: 1fr 40px 1fr 40px 1fr; }
+    .cards-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── GOLEADORES ──────────────────────────────────────────────────────── */
+  .goleadores-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;
+  }
+  .gol-team-card {
+    background: var(--card); border: 1px solid rgba(56,182,255,.2);
+    border-radius: 14px; overflow: hidden;
+  }
+  .gol-team-header {
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .gol-team-photo {
+    width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top;
+    border: 2px solid rgba(255,255,255,.3); flex-shrink: 0;
+  }
+  .gol-team-name {
+    font-family: 'Oswald', sans-serif; font-size: 15px; font-weight: 700;
+    color: #fff; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .gol-team-total { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px; }
+  .gol-list { padding: 8px 0; }
+  .gol-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px; border-bottom: 1px solid rgba(56,182,255,.07);
+    transition: background .15s;
+  }
+  .gol-row:last-child { border-bottom: none; }
+  .gol-row:hover { background: rgba(56,182,255,.06); }
+  .gol-row.top-scorer { background: rgba(249,168,37,.06); }
+  .gol-row.top-scorer .gol-name { color: var(--gold); }
+  .gol-name { flex: 1; font-weight: 700; font-size: 13px; color: var(--white); }
+  .gol-balls { font-size: 12px; letter-spacing: 1px; }
+  .gol-num {
+    font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700;
+    color: var(--celeste); min-width: 28px; text-align: right;
+  }
+  .gol-row.top-scorer .gol-num { color: var(--gold); }
+
+  /* ── TEAM PHOTO CARDS ────────────────────────────────────────────────── */
+  .team-photo-card {
+    background: var(--card); border: 1px solid rgba(56,182,255,.2);
+    border-radius: 14px; overflow: hidden; text-align: center;
+    transition: transform .2s, border-color .2s;
+  }
+  .team-photo-card:hover { transform: translateY(-4px); border-color: var(--celeste); }
+  .tp-img-wrap {
+    width: 100%; aspect-ratio: 4/3; overflow: hidden;
+    background: var(--card2); display: flex; align-items: center; justify-content: center;
+  }
+  .tp-img-wrap img {
+    width: 100%; height: 100%; object-fit: cover; object-position: top;
+    display: block;
+  }
+  .tp-fallback {
+    font-family: 'Oswald', sans-serif; font-size: 32px; font-weight: 700;
+    color: var(--celeste); opacity: .4;
+  }
+  .tp-name {
+    font-family: 'Oswald', sans-serif; font-size: 15px; font-weight: 700;
+    color: var(--white); padding: 10px 10px 4px; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .tp-badge {
+    font-size: 11px; font-weight: 700; padding: 4px 10px 12px;
+    letter-spacing: .5px;
+  }
+  .tp-badge.gold-badge   { color: var(--gold); }
+  .tp-badge.silver-badge { color: #90A4AE; }
+  .tp-badge.bronze-badge { color: #A1887F; }
+  .tp-badge.last-badge   { color: var(--slate); }
+
+  /* foto pequeña dentro del match-vs */
+  .mv-photo {
+    width: 64px; height: 64px; border-radius: 50%; object-fit: cover; object-position: top;
+    border: 2px solid rgba(56,182,255,.4); margin-bottom: 6px;
+  }
+
+  /* ── GLOW PULSE ───────────────────────────────────────────────────────── */
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(56,182,255,.3)} 50%{box-shadow:0 0 0 8px rgba(56,182,255,0)} }
+  .cd-box { animation: pulse 3s ease-in-out infinite; }
+  .cd-box:nth-child(2) { animation-delay:.5s; }
+  .cd-box:nth-child(3) { animation-delay:1s; }
+  .cd-box:nth-child(4) { animation-delay:1.5s; }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-blob b1"></div>
+<div class="bg-blob b2"></div>
+<div class="bg-blob b3"></div>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div>
+        <div class="header-org">Sindicato Único de Trabajadores · Junta Nacional de Justicia</div>
+        <div class="header-title" style="margin-top:8px;">
+          CAMPEONATO<br>
+          <span>RELÁMPAGO</span> COPA<br>
+          SIUTCASJNJ <span class="year">2026</span>
+        </div>
+      </div>
+      <div class="header-badge">
+        <div class="badge-top">📍 Sede</div>
+        <div class="badge-loc">Sport School San Isidro</div>
+        <div class="badge-sub">Chacarilla 590 · San Isidro · Lima</div>
+        <div style="margin-top:10px;font-size:13px;color:var(--gold);font-weight:700;">⚽ Fútbol 7 · Masculino</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── COUNTDOWN ──────────────────────────────────────────────────────── -->
+  <div class="countdown-section">
+    <div class="countdown-label">⏳ Cuenta regresiva — Jornada 2 · 24 de Abril 2026</div>
+    <div class="countdown-grid">
+      <div class="cd-box"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">Días</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">Horas</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">Minutos</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">Segundos</div></div>
+    </div>
+  </div>
+
+  <!-- ── RESULTADOS 17.04.2026 ────────────────────────────────────────────────── -->
+  <div style="padding:20px 24px;background:linear-gradient(135deg,var(--azul) 0%,var(--azul-l) 100%);border-radius:14px;border:2px solid var(--gold);margin-bottom:24px;text-align:center;box-shadow:0 4px 30px rgba(249,168,37,.35);">
+    <div style="font-size:12px;color:var(--cel-l);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">✅ RESULTADOS JORNADA 1</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:34px;font-weight:700;color:var(--gold);line-height:1.1;">📊 RESULTADOS 17.04.2026 ✅</div>
+    <div style="font-size:13px;color:var(--offwhite);margin-top:8px;letter-spacing:1px;">Jornada 1 finalizada · Sport School San Isidro</div>
+  </div>
+
+  <!-- ── DATOS CLAVE ────────────────────────────────────────────────────── -->
+  <div class="cards-row">
+    <div class="info-card"><div class="ic-icon">🏟️</div><div class="ic-val">2</div><div class="ic-lbl">Jornadas</div></div>
+    <div class="info-card"><div class="ic-icon">🏆</div><div class="ic-val">4</div><div class="ic-lbl">Equipos</div></div>
+    <div class="info-card"><div class="ic-icon">🔁</div><div class="ic-val">6</div><div class="ic-lbl">Partidos J1</div></div>
+    <div class="info-card"><div class="ic-icon">⏱️</div><div class="ic-val">18'</div><div class="ic-lbl">1.er T 10' · 2.do T 8'</div></div>
+    <div class="info-card"><div class="ic-icon">⏰</div><div class="ic-val">18:00</div><div class="ic-lbl">Hora inicio</div></div>
+    <div class="info-card"><div class="ic-icon">🎖️</div><div class="ic-val">Copa</div><div class="ic-lbl">Premiación</div></div>
+  </div>
+
+  <!-- ── TABS ───────────────────────────────────────────────────────────── -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('jornada1',this)">📅 Jornada 1 — 17 Abr</button>
+    <button class="tab" onclick="showTab('jornada2',this)">🏆 Jornada 2 — 24 Abr</button>
+    <button class="tab" onclick="showTab('bracket',this)">🗂️ Fixture</button>
+    <!-- Botón de Presupuesto eliminado -->
+    <button class="tab" onclick="showTab('inscripciones',this)">📝 Inscripciones</button>
+  </div>
+
+  <!-- ── PANEL JORNADA 1 ────────────────────────────────────────────────── -->
+  <div id="jornada1" class="panel active">
+    <div class="jornada-header">
+      <div class="jh-left">
+        <div class="jh-num">Jornada 1 · Fase Regular</div>
+        <div class="jh-title">⚽ Todos contra Todos</div>
+      </div>
+      <div class="jh-right">
+        <div class="jh-date">17 de Abril 2026</div>
+        <div class="jh-sub">Sport School San Isidro · 18:00 hrs.</div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot special"></div>
+        <div class="tl-card special-card">
+          <div class="tl-time">🕕 18:00 HRS.</div>
+          <div class="tl-title">Inauguración del Campeonato</div>
+          <div class="tl-sub">Presentación de equipos y delegados · Cada equipo juega 3 partidos</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 1 · 18:00 – 18:20 · 1.er T 10' + 2.do T 8'</div>
+          <div class="match-vs">
+            <div class="team-block loser">
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div class="team-goals">1</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block winner">
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div class="team-goals">3</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 2 · 18:20 – 18:40 · 1.er T 10' + 2.do T 8'</div>
+          <div class="match-vs">
+            <div class="team-block winner">
+              <div class="team-name">DPD (C)</div>
+              <div class="team-goals">1</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">RATI (D)</div>
+              <div class="team-goals">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 3 · 18:40 – 19:00 · 1.er T 10' + 2.do T 8'</div>
+          <div class="match-vs">
+            <div class="team-block loser">
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div class="team-goals">0</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block winner">
+              <div class="team-name">DPD (C)</div>
+              <div class="team-goals">3</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 4 · 19:00 – 19:20 · 1.er T 10' + 2.do T 8'</div>
+          <div class="match-vs">
+            <div class="team-block winner">
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div class="team-goals">4</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">RATI (D)</div>
+              <div class="team-goals">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 5 · 19:20 – 19:40 · 1.er T 10' + 2.do T 8'</div>
+          <div class="match-vs">
+            <div class="team-block winner">
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div class="team-goals">2</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">RATI (D)</div>
+              <div class="team-goals">1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 6 · 19:40 – 20:00 · 1.er T 10' + 2.do T 8'</div>
+          <div class="match-vs">
+            <div class="team-block winner">
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div class="team-goals">3</div>
+              <div class="winner-badge">🏆 Ganador</div>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="team-block loser">
+              <div class="team-name">DPD (C)</div>
+              <div class="team-goals">1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot special"></div>
+        <div class="tl-card special-card">
+          <div class="tl-time">📋 TABLA DE POSICIONES — JORNADA 1 FINALIZADA</div>
+          <div class="standings-wrap" style="margin-top:12px;">
+            <div class="standings-header">📊 Posiciones Finales · Jornada 1</div>
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Equipo</th>
+                  <th>PJ</th>
+                  <th>G</th>
+                  <th>P</th>
+                  <th>GF</th>
+                  <th>GC</th>
+                  <th>+/-</th>
+                  <th>Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background:rgba(249,168,37,.07);">
+                  <td><span class="st-rank gold">1</span></td>
+                  <td><strong>SPORT JUSTICIA (B)</strong></td>
+                  <td>3</td><td>3</td><td>0</td><td>10</td><td>2</td>
+                  <td><span class="st-diff pos">+8</span></td>
+                  <td><span class="st-pts">9</span></td>
+                </tr>
+                <tr>
+                  <td><span class="st-rank silver">2</span></td>
+                  <td><strong>DPD (C)</strong></td>
+                  <td>3</td><td>2</td><td>1</td><td>6</td><td>1</td>
+                  <td><span class="st-diff pos">+5</span></td>
+                  <td><span class="st-pts">6</span></td>
+                </tr>
+                <tr>
+                  <td><span class="st-rank bronze">3</span></td>
+                  <td><strong>OAF + PROCU (A)</strong></td>
+                  <td>3</td><td>1</td><td>2</td><td>3</td><td>6</td>
+                  <td><span class="st-diff neg">-3</span></td>
+                  <td><span class="st-pts">3</span></td>
+                </tr>
+                <tr>
+                  <td><span class="st-rank last">4</span></td>
+                  <td><strong>RATI (D)</strong></td>
+                  <td>3</td><td>0</td><td>3</td><td>1</td><td>11</td>
+                  <td><span class="st-diff neg">-10</span></td>
+                  <td><span class="st-pts" style="color:var(--slate);">0</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tl-sub" style="margin-top:10px;">Desempate: (1) diferencia de goles · (2) goles a favor · (3) resultado directo</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot special"></div>
+        <div class="tl-card special-card">
+          <div class="tl-time">🎉 CIERRE JORNADA 1</div>
+          <div class="tl-title">Publicación de Posiciones</div>
+          <div class="tl-sub">La Comisión Organizadora publica los emparejamientos para las finales por posición del 24 de Abril.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL JORNADA 2 ────────────────────────────────────────────────── -->
+  <div id="jornada2" class="panel">
+    <div class="jornada-header">
+      <div class="jh-left">
+        <div class="jh-num">Jornada 2 · Definición del Campeón</div>
+        <div class="jh-title">🏆 Gran Final</div>
+      </div>
+      <div class="jh-right">
+        <div class="jh-date">24 de Abril 2026</div>
+        <div class="jh-sub">Sport School San Isidro · 18:00 hrs.</div>
+      </div>
+    </div>
+
+    <!-- Fotos de equipos -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px;">
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/SPORT JUSTICIA.png" alt="Sport Justicia" onerror="this.parentElement.innerHTML='<div class=tp-fallback>SJ</div>'"/>
+        </div>
+        <div class="tp-name">SPORT JUSTICIA</div>
+        <div class="tp-badge gold-badge">🥇 1.° Tabla · 9 pts</div>
+      </div>
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/DPD.png" alt="DPD" onerror="this.parentElement.innerHTML='<div class=tp-fallback>DPD</div>'"/>
+        </div>
+        <div class="tp-name">DPD</div>
+        <div class="tp-badge silver-badge">🥈 2.° Tabla · 6 pts</div>
+      </div>
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/OAF.png" alt="OAF + PROCU" onerror="this.parentElement.innerHTML='<div class=tp-fallback>OAF</div>'"/>
+        </div>
+        <div class="tp-name">OAF + PROCU</div>
+        <div class="tp-badge bronze-badge">🥉 3.° Tabla · 3 pts</div>
+      </div>
+      <div class="team-photo-card">
+        <div class="tp-img-wrap">
+          <img src="img/RATIFIACION.png" alt="RATI" onerror="this.parentElement.innerHTML='<div class=tp-fallback>RATI</div>'"/>
+        </div>
+        <div class="tp-name">RATI</div>
+        <div class="tp-badge last-badge">4.° Tabla · 0 pts</div>
+      </div>
+    </div>
+
+    <!-- Formato de la jornada -->
+    <div style="padding:14px 18px;background:var(--card);border-radius:12px;border-left:4px solid var(--celeste);font-size:13px;color:var(--offwhite);margin-bottom:24px;line-height:1.8;">
+      <strong style="color:var(--celeste);">📋 Formato Jornada 2:</strong>
+      Partido 1 y Partido 2 simultáneos o consecutivos · <strong>Cada tiempo: 15 minutos</strong> · Receso de 10 min antes de la Gran Final · El Campeón sale de los ganadores de P1 y P2.
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot special"></div>
+        <div class="tl-card special-card">
+          <div class="tl-time">🕕 18:00 HRS.</div>
+          <div class="tl-title">Concentración y Calentamiento</div>
+          <div class="tl-sub">Presentación de los 4 equipos · Cada tiempo dura 15 minutos</div>
+        </div>
+      </div>
+
+      <!-- PARTIDO 1 -->
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 1 · 18:00 – 18:30 · 1.er T 15' + 2.do T 15'</div>
+          <div class="match-vs">
+            <div class="team-block" style="background:rgba(249,168,37,.1);">
+              <img src="img/SPORT JUSTICIA.png" class="mv-photo" alt="Sport Justicia" onerror="this.style.display='none'"/>
+              <div class="team-name">SPORT JUSTICIA (B)</div>
+              <div style="font-size:10px;color:var(--gold);">1.° Tabla J1</div>
+            </div>
+            <div class="score-divider" style="font-size:18px;color:var(--celeste);">VS</div>
+            <div class="team-block">
+              <img src="img/RATIFIACION.png" class="mv-photo" alt="RATI" onerror="this.style.display='none'"/>
+              <div class="team-name">RATI (D)</div>
+              <div style="font-size:10px;color:var(--slate);">4.° Tabla J1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARTIDO 2 -->
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card">
+          <div class="tl-time">⚽ PARTIDO 2 · 18:30 – 19:00 · 1.er T 15' + 2.do T 15'</div>
+          <div class="match-vs">
+            <div class="team-block" style="background:rgba(56,182,255,.1);">
+              <img src="img/DPD.png" class="mv-photo" alt="DPD" onerror="this.style.display='none'"/>
+              <div class="team-name">DPD (C)</div>
+              <div style="font-size:10px;color:var(--cel-l);">2.° Tabla J1</div>
+            </div>
+            <div class="score-divider" style="font-size:18px;color:var(--celeste);">VS</div>
+            <div class="team-block">
+              <img src="img/OAF.png" class="mv-photo" alt="OAF + PROCU" onerror="this.style.display='none'"/>
+              <div class="team-name">OAF + PROCU (A)</div>
+              <div style="font-size:10px;color:var(--slate);">3.° Tabla J1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECESO -->
+      <div class="tl-item">
+        <div class="tl-dot special"></div>
+        <div class="tl-card special-card">
+          <div class="tl-time">⏸️ RECESO · 19:00 – 19:10</div>
+          <div class="tl-title">10 minutos de descanso</div>
+          <div class="tl-sub">Hidratación · Los ganadores de P1 y P2 se preparan para la Gran Final</div>
+        </div>
+      </div>
+
+      <!-- GRAN FINAL -->
+      <div class="tl-item">
+        <div class="tl-dot match"></div>
+        <div class="tl-card match-card" style="border-left-color:var(--gold);">
+          <div class="tl-time" style="color:var(--gold);">🏆 GRAN FINAL · 19:10 – 19:16 · 1.er T 3' + 2.do T 3'</div>
+          <div class="tl-title" style="font-size:18px;color:var(--gold);margin-bottom:4px;">CAMPEÓN DEL TORNEO</div>
+          <div style="font-size:12px;color:var(--offwhite);margin-bottom:10px;">Ganador P1 vs Ganador P2</div>
+          <div class="match-vs" style="border-color:var(--gold);">
+            <div class="team-block" style="background:rgba(249,168,37,.08);">
+              <div style="font-size:28px;margin-bottom:6px;">🏆</div>
+              <div class="team-name" style="color:var(--gold);">Ganador P1</div>
+              <div style="font-size:10px;color:var(--offwhite);">Sport Justicia o RATI</div>
+            </div>
+            <div class="score-divider" style="background:var(--gold);color:var(--dark);font-size:16px;font-weight:900;">VS</div>
+            <div class="team-block" style="background:rgba(249,168,37,.08);">
+              <div style="font-size:28px;margin-bottom:6px;">🏆</div>
+              <div class="team-name" style="color:var(--gold);">Ganador P2</div>
+              <div style="font-size:10px;color:var(--offwhite);">DPD o OAF+PROCU</div>
+            </div>
+          </div>
+          <div class="tl-sub" style="margin-top:10px;color:var(--offwhite);">En caso de empate → Penales (3 × equipo; si persiste: 1 penal c/u hasta definir)</div>
+        </div>
+      </div>
+
+      <!-- PREMIACIÓN -->
+      <div class="tl-item">
+        <div class="tl-dot special"></div>
+        <div class="tl-card special-card" style="border-left-color:var(--gold);">
+          <div class="tl-time" style="color:var(--gold);">🎊 PREMIACIÓN · ~19:45 HRS.</div>
+          <div class="tl-title">Entrega de Copa de Campeones</div>
+          <div class="tl-sub">Ceremonia de premiación · 🥇 Campeón · 🥈 Subcampeón · Reconocimiento a todos los participantes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TABLA DE GOLEADORES ──────────────────────────────────────────── -->
+    <div style="margin-top:32px;">
+      <div class="section-title"><span class="icon">⚽</span> Tabla de Goleadores · Jornada 1</div>
+
+      <div class="goleadores-grid">
+
+        <!-- SPORT JUSTICIA -->
+        <div class="gol-team-card">
+          <div class="gol-team-header" style="background:linear-gradient(135deg,var(--azul) 0%,var(--azul-l) 100%);">
+            <img src="img/SPORT JUSTICIA.png" class="gol-team-photo" alt="Sport Justicia" onerror="this.style.display='none'"/>
+            <div>
+              <div class="gol-team-name">SPORT JUSTICIA</div>
+              <div class="gol-team-total">10 goles en el torneo</div>
+            </div>
+          </div>
+          <div class="gol-list">
+            <div class="gol-row top-scorer">
+              <div class="gol-name">Adrián Núñez</div>
+              <div class="gol-balls">⚽⚽⚽⚽⚽</div>
+              <div class="gol-num">5</div>
+            </div>
+            <div class="gol-row">
+              <div class="gol-name">Christopher Barzola</div>
+              <div class="gol-balls">⚽⚽⚽</div>
+              <div class="gol-num">3</div>
+            </div>
+            <div class="gol-row">
+              <div class="gol-name">Enrique Rojas</div>
+              <div class="gol-balls">⚽⚽</div>
+              <div class="gol-num">2</div>
+            </div>
+            <div class="gol-row">
+              <div class="gol-name">MARIO VALLEJO</div>
+              <div class="gol-balls">⚽</div>
+              <div class="gol-num">1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DPD -->
+        <div class="gol-team-card">
+          <div class="gol-team-header" style="background:linear-gradient(135deg,#1B5E20 0%,#2E7D32 100%);">
+            <img src="img/DPD.png" class="gol-team-photo" alt="DPD" onerror="this.style.display='none'"/>
+            <div>
+              <div class="gol-team-name">DPD</div>
+              <div class="gol-team-total">6 goles en el torneo</div>
+            </div>
+          </div>
+          <div class="gol-list">
+            <div class="gol-row top-scorer">
+              <div class="gol-name">Jose de Souza</div>
+              <div class="gol-balls">⚽⚽⚽⚽</div>
+              <div class="gol-num">4</div>
+            </div>
+            <div class="gol-row">
+              <div class="gol-name">Jorge Luis Jiménez</div>
+              <div class="gol-balls">⚽⚽</div>
+              <div class="gol-num">2</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OAF + PROCU -->
+        <div class="gol-team-card">
+          <div class="gol-team-header" style="background:linear-gradient(135deg,#4A148C 0%,#6A1B9A 100%);">
+            <img src="img/OAF.png" class="gol-team-photo" alt="OAF + PROCU" onerror="this.style.display='none'"/>
+            <div>
+              <div class="gol-team-name">OAF + PROCU</div>
+              <div class="gol-team-total">3 goles en el torneo</div>
+            </div>
+          </div>
+          <div class="gol-list">
+            <div class="gol-row top-scorer">
+              <div class="gol-name">Li Alejandro Valencia</div>
+              <div class="gol-balls">⚽⚽</div>
+              <div class="gol-num">2</div>
+            </div>
+            <div class="gol-row">
+              <div class="gol-name">Sergio Carbajal</div>
+              <div class="gol-balls">⚽</div>
+              <div class="gol-num">1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RATI -->
+        <div class="gol-team-card">
+          <div class="gol-team-header" style="background:linear-gradient(135deg,#B71C1C 0%,#C62828 100%);">
+            <img src="img/RATIFIACION.png" class="gol-team-photo" alt="RATI" onerror="this.style.display='none'"/>
+            <div>
+              <div class="gol-team-name">RATI</div>
+              <div class="gol-team-total">1 gol en el torneo</div>
+            </div>
+          </div>
+          <div class="gol-list">
+            <div class="gol-row top-scorer">
+              <div class="gol-name">Celso Gamarra</div>
+              <div class="gol-balls">⚽</div>
+              <div class="gol-num">1</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Máximo goleador del torneo -->
+      <div style="margin-top:20px;padding:18px 20px;background:linear-gradient(135deg,var(--azul) 0%,var(--azul-l) 100%);border-radius:14px;border:2px solid var(--gold);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="font-size:36px;">👑</div>
+        <div>
+          <div style="font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Máximo Goleador del Torneo</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:var(--white);">Adrián Núñez <span style="color:var(--gold);">· 5 goles</span></div>
+          <div style="font-size:12px;color:var(--cel-l);margin-top:2px;">Sport Justicia (B)</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── PANEL FIXTURE ──────────────────────────────────────────────────── -->
+  <div id="bracket" class="panel">
+    <div class="section-title"><span class="icon">🗂️</span> Fixture · Todos contra Todos</div>
+
+    <!-- Equipos participantes -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px;">
+      <div class="bracket-match">
+        <div class="bm-header">Equipo A</div>
+        <div class="bm-team" style="font-size:15px;color:var(--celeste);">OAF + PROCU</div>
+      </div>
+      <div class="bracket-match">
+        <div class="bm-header">Equipo B</div>
+        <div class="bm-team" style="font-size:15px;color:var(--celeste);">SPORT JUSTICIA</div>
+      </div>
+      <div class="bracket-match">
+        <div class="bm-header">Equipo C</div>
+        <div class="bm-team" style="font-size:15px;color:var(--celeste);">DPD</div>
+      </div>
+      <div class="bracket-match">
+        <div class="bm-header">Equipo D</div>
+        <div class="bm-team" style="font-size:15px;color:var(--celeste);">RATI</div>
+      </div>
+    </div>
+
+    <!-- Tabla de fixture -->
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <table class="budget-table">
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th style="width:140px;">Hora</th>
+            <th>Enfrentamiento</th>
+            <th style="width:100px;">Resultado</th>
+            <th style="width:160px;">Ganador</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>18:00 – 18:20</td>
+            <td><strong>OAF + PROCU</strong> (A) <span style="color:var(--slate);">vs</span> <strong>SPORT JUSTICIA</strong> (B)</td>
+            <td class="amount"><strong>1 : 3</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 SPORT JUSTICIA (B)</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>18:20 – 18:40</td>
+            <td><strong>DPD</strong> (C) <span style="color:var(--slate);">vs</span> <strong>RATI</strong> (D)</td>
+            <td class="amount"><strong>1 : 0</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 DPD (C)</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>18:40 – 19:00</td>
+            <td><strong>OAF + PROCU</strong> (A) <span style="color:var(--slate);">vs</span> <strong>DPD</strong> (C)</td>
+            <td class="amount"><strong>0 : 3</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 DPD (C)</td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>19:00 – 19:20</td>
+            <td><strong>SPORT JUSTICIA</strong> (B) <span style="color:var(--slate);">vs</span> <strong>RATI</strong> (D)</td>
+            <td class="amount"><strong>4 : 0</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 SPORT JUSTICIA (B)</td>
+          </tr>
+          <tr>
+            <td><strong>5</strong></td>
+            <td>19:20 – 19:40</td>
+            <td><strong>OAF + PROCU</strong> (A) <span style="color:var(--slate);">vs</span> <strong>RATI</strong> (D)</td>
+            <td class="amount"><strong>2 : 1</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 OAF + PROCU (A)</td>
+          </tr>
+          <tr>
+            <td><strong>6</strong></td>
+            <td>19:40 – 20:00</td>
+            <td><strong>SPORT JUSTICIA</strong> (B) <span style="color:var(--slate);">vs</span> <strong>DPD</strong> (C)</td>
+            <td class="amount"><strong>3 : 1</strong></td>
+            <td style="color:var(--celeste);font-weight:700;">🏆 SPORT JUSTICIA (B)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Llave J2 -->
+    <div class="section-title" style="margin-top:24px;"><span class="icon">🏆</span> Jornada 2 · Finales por Posición</div>
+    <div class="bracket">
+      <div class="bracket-grid">
+        <div class="bracket-col">
+          <div style="text-align:center;font-size:11px;color:var(--slate);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;">Tabla J1 · 17 Abr</div>
+          <div class="bracket-match">
+            <div class="bm-header">Tabla J1 · Resultados</div>
+            <div class="bm-team" style="color:var(--gold);">🥇 SPORT JUSTICIA (B) · 9 pts</div>
+            <div class="bm-team" style="color:var(--cel-l);">🥈 DPD (C) · 6 pts</div>
+            <div class="bm-team" style="color:var(--offwhite);">🥉 OAF + PROCU (A) · 3 pts</div>
+            <div class="bm-team" style="color:var(--slate);">4.° RATI (D) · 0 pts</div>
+          </div>
+        </div>
+        <div class="bracket-arrow">→</div>
+        <div class="bracket-col">
+          <div style="text-align:center;font-size:11px;color:var(--slate);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;">Finales · 24 Abr</div>
+          <div class="bracket-match">
+            <div class="bm-header">Partido 1</div>
+            <div class="bm-team" style="color:var(--gold);">SPORT JUSTICIA (B)</div>
+            <div class="bm-team" style="color:var(--slate);">RATI (D)</div>
+          </div>
+          <div style="height:16px;"></div>
+          <div class="bracket-match">
+            <div class="bm-header">Partido 2</div>
+            <div class="bm-team" style="color:var(--cel-l);">DPD (C)</div>
+            <div class="bm-team">OAF + PROCU (A)</div>
+          </div>
+          <div style="height:16px;"></div>
+          <div class="bracket-match" style="border-color:var(--gold);">
+            <div class="bm-header" style="background:rgba(249,168,37,.2);color:var(--gold);">Gran Final</div>
+            <div class="bm-team" style="color:var(--gold);">Ganador P1 vs Ganador P2</div>
+          </div>
+        </div>
+        <div class="bracket-arrow">→</div>
+        <div class="bracket-col" style="justify-content:center;align-items:center;display:flex;">
+          <div class="bracket-final">
+            <div class="bf-label">🏆 Campeón</div>
+            <div class="bf-title">CAMPEÓN</div>
+            <div style="font-size:28px;margin:8px 0;">🥇</div>
+            <div class="bf-date">24 de Abril 2026</div>
+            <div style="margin-top:8px;font-size:11px;color:var(--cel-l);">Copa de Campeones</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:14px 18px;background:var(--card);border-radius:12px;border:1px solid rgba(56,182,255,.15);font-size:13px;color:var(--offwhite);">
+      <strong style="color:var(--celeste);">📌 Criterios de Desempate (Tabla J1):</strong> (1) Mayor diferencia de goles, (2) Mayor cantidad de goles a favor, (3) Resultado directo entre los equipos empatados. Decide la Mesa de Control.
+    </div>
+  </div>
+
+  <!-- ── PANEL INSCRIPCIONES ────────────────────────────────────────────── -->
+  <div id="inscripciones" class="panel">
+    <div class="section-title"><span class="icon">📝</span> Cómo Inscribirse</div>
+    <div style="padding: 16px 20px; background: var(--card); border-radius: 12px; border-left: 4px solid var(--gold); margin-bottom: 20px; font-size: 14px; color: var(--white);">
+      <strong style="color: var(--gold);">✅ Inscripciones cerradas</strong> — Hoy se disputa la <strong>Jornada 1</strong> del campeonato.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="info-card" style="text-align:left;padding:20px;">
+        <div style="font-size:11px;color:var(--slate);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">✅ Requisitos</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--offwhite);">
+          <li>⚽ Mín. 7 jugadores inscritos</li>
+          <li>📋 Ficha de inscripción firmada por cada jugador</li>
+          <li>💳 Voucher de pago de S/ 150.00</li>
+          <li>👤 Designar un delegado del equipo</li>
+          <li>🏢 Ser servidor/vinculado a la JNJ</li>
+        </ul>
+      </div>
+      <div class="info-card" style="text-align:left;padding:20px;">
+        <div style="font-size:11px;color:var(--slate);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">📍 Dónde Entregar</div>
+        <div style="font-size:13px;color:var(--offwhite);line-height:1.8;">
+          🏢 Local SIUTCASJNJ<br>
+          Piso 6 de la institución<br>
+          (Junta Nacional de Justicia)<br><br>
+          📅 Desde la publicación de bases<br>
+          hasta la fecha límite indicada<br>
+          por la Comisión Organizadora
+        </div>
+      </div>
+    </div>
+
+    <div class="account-box">
+      <div class="ab-icon">🏦</div>
+      <div>
+        <div class="ab-label">Cuenta para depósito de inscripción — BCP</div>
+        <div class="ab-val">Cuenta de Ahorros N.° 193-92633452-0-41</div>
+        <div class="ab-cci">CCI N.° 002-193-192633452041-13</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:16px 20px;background:var(--card);border-radius:12px;border-left:4px solid var(--celeste);font-size:13px;color:var(--offwhite);line-height:1.7;">
+      <strong style="color:var(--celeste);">⚠️ Importante:</strong> Ningún jugador puede estar inscrito en más de un equipo.
+      De detectarse, ambos equipos quedan eliminados. El sorteo del fixture se realizará con los delegados
+      en el Piso 6, en la fecha que comunique la Comisión Organizadora.
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    <strong>SIUTCASJNJ</strong> — Campeonato Relámpago Copa SIUTCASJNJ 2026<br>
+    <span style="font-size:11px;margin-top:4px;display:block;">Comisión de Cultura y Deporte · Sindicato Único de Trabajadores de la Junta Nacional de Justicia</span>
+  </div>
+</footer>
+
+<script>
+  // ── COUNTDOWN ──────────────────────────────────────────────────────────────
+  function updateCountdown() {
+    const target = new Date('2026-04-24T18:00:00-05:00');
+    const now    = new Date();
+    const diff   = target - now;
+    if (diff <= 0) {
+      document.querySelector('.countdown-section').innerHTML =
+        '<div style="text-align:center;font-size:20px;color:var(--gold);font-weight:700;padding:20px;">🏆 ¡Gran Final en curso! ¡Mucho éxito a todos!</div>';
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000)  / 60000);
+    const s = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ── TABS ───────────────────────────────────────────────────────────────────
+  function showTab(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── RESPONSIVE budget grid ─────────────────────────────────────────────────
+  if (window.innerWidth < 600) {
+    document.querySelector('.budget-grids').style.gridTemplateColumns = '1fr';
+  }
+</script>
+</body>
+</html>
