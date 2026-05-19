@@ -44,10 +44,16 @@
         const navCultura = document.getElementById('nav-cultura');
         const navGaleria = document.getElementById('nav-galeria');
         const navPortadas = document.getElementById('nav-portadas');
+        const navSecretarias = document.getElementById('nav-secretarias');
+        const navSocios = document.getElementById('nav-socios');
+        const navConfig = document.getElementById('nav-config');
         const viewInicio = document.getElementById('view-inicio');
         const viewCultura = document.getElementById('view-cultura');
         const viewGaleria = document.getElementById('view-galeria');
         const viewPortadas = document.getElementById('view-portadas');
+        const viewSecretarias = document.getElementById('view-secretarias');
+        const viewSocios = document.getElementById('view-socios');
+        const viewConfig = document.getElementById('view-config');
         const viewTitle = document.getElementById('view-title');
         const navItems = document.querySelectorAll('.nav-menu-item');
 
@@ -62,12 +68,82 @@
                 loginSection.classList.add('hidden');
                 dashboardSection.classList.remove('hidden');
                 document.getElementById('admin-email-display').textContent = user.email;
-                cargarDocumentos(); // Cargar tabla al iniciar
+                cargarDocumentos();
+                seedInicialSiEsNecesario();
             } else {
                 loginSection.classList.remove('hidden');
                 dashboardSection.classList.add('hidden');
             }
         });
+
+        // === SEED INICIAL: Carga datos por defecto si las colecciones están vacías ===
+        async function seedInicialSiEsNecesario() {
+            try {
+                const qSec = await getDocs(collection(db, "secretarias"));
+                if (qSec.empty) {
+                    const secretariasDefault = [
+                        { nombre: "Secretaría General", titular: "Pavel Ordoñez Escarza", descripcion: "Representación legal del sindicato y defensa irrestricta de los derechos de los afiliados ante las autoridades.", archivo_html: "sec_general.html", color: "#1e3a8a", orden: 1 },
+                        { nombre: "Sub-Secretaría General", titular: "Katty Candy Jara Jancco", descripcion: "Apoyo directo a la gestión general y reemplazo en funciones ante la ausencia del Secretario General.", archivo_html: "sec_subgeneral.html", color: "#1d4ed8", orden: 2 },
+                        { nombre: "Organización", titular: "Juan Alfredo Tisza Astete", descripcion: "Mantenimiento del padrón de afiliados y organización logística de asambleas y actividades sindicales.", archivo_html: "sec_organizacion.html", color: "#2563eb", orden: 3 },
+                        { nombre: "Defensa", titular: "Richard Trejo Silva", descripcion: "Asesoría legal permanente y vigilancia del cumplimiento de las normas laborales vigentes.", archivo_html: "sec_defensa.html", color: "#3b82f6", orden: 4 },
+                        { nombre: "Economía", titular: "Ricardo Molleapaza Calderón", descripcion: "Administración responsable de los fondos sindicales y transparencia contable hacia los afiliados.", archivo_html: "sec_economia.html", color: "#16a34a", orden: 5 },
+                        { nombre: "Actas y Archivo", titular: "Lucy Álvarez Herrera", descripcion: "Gestión y custodia de los libros de actas y todo el acervo documentario de la organización.", archivo_html: "sec_actas.html", color: "#4b5563", orden: 6 },
+                        { nombre: "Control y Disciplina", titular: "Antuaned María Montoya La Rosa", descripcion: "Fiscalización ética de los miembros y cumplimiento de los estatutos y normativas internas.", archivo_html: "sec_disciplina.html", color: "#dc2626", orden: 7 },
+                        { nombre: "Prensa y Propaganda", titular: "Jimmy Geraldo Chalco Bustinza", descripcion: "Difusión de acuerdos, comunicados y actividades del sindicato a través de los canales oficiales.", archivo_html: "sec_prensa.html", color: "#9333ea", orden: 8 },
+                        { nombre: "Cultura y Deporte", titular: "Juan Carlos Montenegro Gonzáles", descripcion: "Promoción y organización de eventos deportivos, artísticos y recreativos para la integración.", archivo_html: "sec_cultura_deporte.html", color: "#f97316", orden: 9 },
+                        { nombre: "Bienestar Social", titular: "Gissela Margarita Silva Macetas", descripcion: "Asistencia social a los miembros y gestión de convenios de salud y beneficios.", archivo_html: "sec_bienestar.html", color: "#14b8a6", orden: 10 },
+                    ];
+                    for (const sec of secretariasDefault) {
+                        await addDoc(collection(db, "secretarias"), { ...sec, timestamp: Date.now() });
+                    }
+                    console.log("Secretarías por defecto cargadas en Firebase.");
+                }
+
+                const qSocios = await getDocs(collection(db, "socios"));
+                if (qSocios.empty) {
+                    const sociosDefault = [
+                        { nombre: "JARA JANCCO KATTY CANDY", fecha: "03-01", email: "", telefono: "" },
+                        { nombre: "ALVAREZ HERRERA LUCY", fecha: "03-02", email: "", telefono: "" },
+                        { nombre: "FAIRLIE CHAVEZ MARJORIE MARCELA IVONNE", fecha: "03-06", email: "", telefono: "" },
+                        { nombre: "MEJIA VARGAS MACHUCA ANGELA PATRICIA", fecha: "03-06", email: "", telefono: "" },
+                        { nombre: "CONDE BEDON JOSSY JACQUELINE", fecha: "03-09", email: "", telefono: "" },
+                        { nombre: "FERNANDEZ CORNEJO JACKELINE LIZBETH", fecha: "03-13", email: "", telefono: "" },
+                        { nombre: "BRUNO SANCHEZ HENRY JIMMY", fecha: "03-16", email: "", telefono: "" },
+                        { nombre: "LUNA LIZA MARIO HAMLET", fecha: "03-17", email: "", telefono: "" },
+                        { nombre: "GUERRERO SAAVEDRA CARLOS AUGUSTO", fecha: "03-20", email: "", telefono: "" },
+                        { nombre: "NUÑEZ GUTIERREZ ADRIAN", fecha: "03-20", email: "", telefono: "" },
+                        { nombre: "CASAFRANCA GARCIA ROGER REYNALDO", fecha: "03-22", email: "", telefono: "" },
+                        { nombre: "DELGADO VASQUEZ SILVIA NOHEMY", fecha: "03-22", email: "", telefono: "" },
+                        { nombre: "GUTARRA NINAHUANCA GIANELLA ANDREA", fecha: "03-22", email: "", telefono: "" },
+                        { nombre: "CORREA ROJAS MARIA DOLORES", fecha: "03-23", email: "", telefono: "" },
+                        { nombre: "ROJO ROJAS MARCO ANTONIO", fecha: "03-29", email: "", telefono: "" },
+                        { nombre: "CHANDUVI CORNEJO VICTOR HUGO", fecha: "03-31", email: "", telefono: "" },
+                        { nombre: "LUJAN MORENO JOSE ANTONIO", fecha: "03-31", email: "", telefono: "" },
+                    ];
+                    for (const socio of sociosDefault) {
+                        await addDoc(collection(db, "socios"), { ...socio, timestamp: Date.now() });
+                    }
+                    console.log("Socios por defecto cargados en Firebase.");
+                }
+
+                const qConfig = await getDocs(collection(db, "config_site"));
+                if (qConfig.empty) {
+                    await addDoc(collection(db, "config_site"), {
+                        titulo: "SIUTCASJNJ",
+                        subtitulo: "Sindicato Único de Trabajadores CAS - JNJ",
+                        direccion: "Av. Paseo de la Republica N° 3285",
+                        ubicacion: "San Isidro, Lima",
+                        email: "sindicatocasjnj@gmail.com",
+                        gestion: "2026-2028",
+                        footer_desc: "Unidad y compromiso por nuestros derechos.",
+                        created: Date.now()
+                    });
+                    console.log("Configuración por defecto cargada en Firebase.");
+                }
+            } catch (err) {
+                console.error("Error en seed inicial:", err);
+            }
+        }
 
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -94,14 +170,28 @@
             viewCultura.classList.add('hidden');
             if (viewGaleria) viewGaleria.classList.add('hidden');
             if (viewPortadas) viewPortadas.classList.add('hidden');
+            if (viewSecretarias) viewSecretarias.classList.add('hidden');
+            if (viewSocios) viewSocios.classList.add('hidden');
+            if (viewConfig) viewConfig.classList.add('hidden');
             activeView.classList.remove('hidden');
             viewTitle.textContent = title;
+
+            // Cerrar sidebar en mobile
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (window.innerWidth < 768 && sidebar) {
+                sidebar.classList.add('-translate-x-full');
+                if (overlay) overlay.classList.add('hidden');
+            }
         }
 
         navInicio.addEventListener('click', (e) => { e.preventDefault(); switchView(navInicio, viewInicio, 'Vista General'); });
         navCultura.addEventListener('click', (e) => { e.preventDefault(); switchView(navCultura, viewCultura, 'Gestión: Cultura y Deportes'); });
         navGaleria.addEventListener('click', (e) => { e.preventDefault(); switchView(navGaleria, viewGaleria, 'Gestión: Galería de Fotos'); window.cargarGaleria(); });
         if (navPortadas) navPortadas.addEventListener('click', (e) => { e.preventDefault(); switchView(navPortadas, viewPortadas, 'Gestión: Portadas del Carrusel'); window.cargarPortadas(); });
+        if (navSecretarias) navSecretarias.addEventListener('click', (e) => { e.preventDefault(); switchView(navSecretarias, viewSecretarias, 'Gestión: Secretarías'); window.cargarSecretarias(); });
+        if (navSocios) navSocios.addEventListener('click', (e) => { e.preventDefault(); switchView(navSocios, viewSocios, 'Gestión: Socios / Cumpleaños'); window.cargarSocios(); });
+        if (navConfig) navConfig.addEventListener('click', (e) => { e.preventDefault(); switchView(navConfig, viewConfig, 'Configuración General del Sitio'); window.cargarConfig(); });
         window.forceNavCultura = () => { navCultura.click(); } // Helper global para ir desde el home
 
         // === LÓGICA DE DOCUMENTOS ===
@@ -408,6 +498,295 @@
             }
         };
 
+        // === LÓGICA DE SECRETARÍAS ===
+        const listaSecretarias = document.getElementById('lista-secretarias');
+
+        window.cargarSecretarias = async function () {
+            if (!listaSecretarias) return;
+            try {
+                listaSecretarias.innerHTML = '<p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando secretarías...</p>';
+                const qSec = await getDocs(collection(db, "secretarias"));
+                const secretarias = [];
+                qSec.forEach(docSnap => secretarias.push({ id: docSnap.id, ...docSnap.data() }));
+                secretarias.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+
+                if (secretarias.length === 0) {
+                    listaSecretarias.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay secretarías configuradas. Usa el botón de abajo para agregar la primera.</p>';
+                    return;
+                }
+
+                let html = '';
+                secretarias.forEach((sec, idx) => {
+                    html += `
+                        <div class="border border-gray-200 rounded-lg p-5 bg-white shadow-sm relative" style="border-left: 4px solid ${sec.color || '#1e3a8a'}">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="bg-gray-100 text-gray-600 font-bold text-xs px-2 py-1 rounded">#${idx + 1}</span>
+                                    <h4 class="text-lg font-bold text-gray-800">${sec.nombre || 'Sin nombre'}</h4>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded text-xs font-bold transition btn-editar-secretaria" data-id="${sec.id}">
+                                        <ion-icon name="create" class="mr-1 align-text-bottom"></ion-icon> Editar
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded text-xs font-bold transition btn-eliminar-secretaria" data-id="${sec.id}">
+                                        <ion-icon name="trash" class="mr-1 align-text-bottom"></ion-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-blue-600 font-semibold mb-2">${sec.titular || 'Sin titular asignado'}</p>
+                            <p class="text-gray-600 text-sm">${sec.descripcion || 'Sin descripción'}</p>
+                            <p class="text-xs text-gray-400 mt-2">Archivo: ${sec.archivo_html || 'N/A'} | Orden: ${sec.orden || '-'}</p>
+                        </div>
+                    `;
+                });
+                html += `
+                    <div class="pt-4">
+                        <button onclick="window.nuevaSecretaria()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all flex items-center justify-center w-full">
+                            <ion-icon name="add" class="mr-2 text-xl"></ion-icon> Agregar Nueva Secretaría
+                        </button>
+                    </div>
+                `;
+                listaSecretarias.innerHTML = html;
+
+                document.querySelectorAll('.btn-eliminar-secretaria').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const target = e.currentTarget;
+                        const id = target.getAttribute('data-id');
+                        if (confirm('¿Eliminar esta secretaría? Desaparecerá de la página pública.')) {
+                            target.disabled = true;
+                            await deleteDoc(doc(db, "secretarias", id));
+                            await window.cargarSecretarias();
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-editar-secretaria').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        const secData = secretarias.find(s => s.id === id);
+                        if (!secData) return;
+                        const nuevoTitular = prompt('Nombre del titular:', secData.titular || '');
+                        if (nuevoTitular !== null) {
+                            const nuevaDesc = prompt('Descripción:', secData.descripcion || '');
+                            if (nuevaDesc !== null) {
+                                await updateDoc(doc(db, "secretarias", id), { titular: nuevoTitular, descripcion: nuevaDesc });
+                                await window.cargarSecretarias();
+                            }
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error cargando secretarías:", error);
+                listaSecretarias.innerHTML = '<p class="text-red-500 text-center py-4 font-bold">Error al cargar secretarías.</p>';
+            }
+        };
+
+        window.nuevaSecretaria = async function () {
+            const nombre = prompt('Nombre de la Secretaría (ej: Secretaría General):');
+            if (!nombre) return;
+            const titular = prompt('Nombre del titular:') || '';
+            const descripcion = prompt('Descripción:') || '';
+            const archivoHtml = prompt('Nombre del archivo HTML (ej: sec_general.html):') || '';
+            const color = prompt('Color del borde (ej: #1e3a8a, blue-900):', '#1e3a8a') || '#1e3a8a';
+            const ordenStr = prompt('Orden de aparición (número):', '1') || '1';
+
+            try {
+                await addDoc(collection(db, "secretarias"), {
+                    nombre, titular, descripcion, archivo_html: archivoHtml, color, orden: parseInt(ordenStr) || 1, timestamp: Date.now()
+                });
+                alert('Secretaría agregada exitosamente.');
+                await window.cargarSecretarias();
+            } catch (err) {
+                alert('Error al agregar: ' + err.message);
+            }
+        };
+
+        // === LÓGICA DE SOCIOS / CUMPLEAÑOS ===
+        const listaSocios = document.getElementById('lista-socios');
+        const socioCount = document.getElementById('socio-count');
+        const socioSearch = document.getElementById('socio-search');
+
+        window.cargarSocios = async function (filtro = '') {
+            if (!listaSocios) return;
+            try {
+                listaSocios.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">Cargando socios...</td></tr>';
+                const qSocios = await getDocs(collection(db, "socios"));
+                const socios = [];
+                qSocios.forEach(docSnap => socios.push({ id: docSnap.id, ...docSnap.data() }));
+                socios.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+                const filtrados = filtro ? socios.filter(s => s.nombre.toLowerCase().includes(filtro.toLowerCase())) : socios;
+
+                if (socioCount) socioCount.textContent = socios.length;
+
+                if (filtrados.length === 0) {
+                    listaSocios.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">${filtro ? 'No se encontraron resultados.' : 'No hay socios registrados. Usa el formulario de arriba para agregar el primero.'}</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                filtrados.forEach(s => {
+                    html += `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 font-medium text-gray-800">${s.nombre}</td>
+                            <td class="px-6 py-4"><span class="bg-pink-50 text-pink-700 px-2 py-1 rounded text-xs font-bold">${s.fecha}</span></td>
+                            <td class="px-6 py-4 text-gray-500 text-sm">${s.telefono || '-'}</td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded text-xs font-bold transition btn-editar-socio" data-id="${s.id}">Editar</button>
+                                <button class="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs font-bold transition btn-eliminar-socio" data-id="${s.id}">Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                listaSocios.innerHTML = html;
+
+                document.querySelectorAll('.btn-editar-socio').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        const socio = socios.find(s => s.id === id);
+                        if (!socio) return;
+                        document.getElementById('socio-id-edit').value = id;
+                        document.getElementById('socio-nombre').value = socio.nombre || '';
+                        document.getElementById('socio-fecha').value = socio.fecha || '';
+                        document.getElementById('socio-email').value = socio.email || '';
+                        document.getElementById('socio-telefono').value = socio.telefono || '';
+                        document.getElementById('btn-socio-text').textContent = 'Actualizar Socio';
+                        document.getElementById('btn-cancel-socio').classList.remove('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                });
+
+                document.querySelectorAll('.btn-eliminar-socio').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        if (confirm('¿Eliminar este socio de la lista?')) {
+                            await deleteDoc(doc(db, "socios", id));
+                            await window.cargarSocios(socioSearch ? socioSearch.value : '');
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error cargando socios:", error);
+                listaSocios.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error al cargar socios.</td></tr>';
+            }
+        };
+
+        if (socioSearch) {
+            socioSearch.addEventListener('input', (e) => {
+                window.cargarSocios(e.target.value);
+            });
+        }
+
+        const formSocio = document.getElementById('form-socio');
+        if (formSocio) {
+            formSocio.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const idEdit = document.getElementById('socio-id-edit').value;
+                const nombre = document.getElementById('socio-nombre').value.trim().toUpperCase();
+                const fecha = document.getElementById('socio-fecha').value.trim();
+                const email = document.getElementById('socio-email').value.trim();
+                const telefono = document.getElementById('socio-telefono').value.trim();
+
+                if (!nombre || !fecha) return;
+
+                const btn = document.getElementById('btn-submit-socio');
+                btn.disabled = true;
+                btn.innerHTML = '<ion-icon name="sync" class="animate-spin mr-2"></ion-icon> Guardando...';
+
+                try {
+                    const data = { nombre, fecha, email, telefono, timestamp: Date.now() };
+                    if (idEdit) {
+                        await updateDoc(doc(db, "socios", idEdit), data);
+                        alert('Socio actualizado exitosamente.');
+                    } else {
+                        await addDoc(collection(db, "socios"), data);
+                        alert('Socio agregado exitosamente.');
+                    }
+                    formSocio.reset();
+                    document.getElementById('socio-id-edit').value = '';
+                    document.getElementById('btn-socio-text').textContent = 'Guardar Socio';
+                    document.getElementById('btn-cancel-socio').classList.add('hidden');
+                    await window.cargarSocios();
+                } catch (err) {
+                    alert('Error al guardar: ' + err.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon><span id="btn-socio-text">Guardar Socio</span>';
+                }
+            });
+        }
+
+        const btnCancelSocio = document.getElementById('btn-cancel-socio');
+        if (btnCancelSocio) {
+            btnCancelSocio.addEventListener('click', () => {
+                formSocio.reset();
+                document.getElementById('socio-id-edit').value = '';
+                document.getElementById('btn-socio-text').textContent = 'Guardar Socio';
+                btnCancelSocio.classList.add('hidden');
+            });
+        }
+
+        // === LÓGICA DE CONFIGURACIÓN GENERAL ===
+        window.cargarConfig = async function () {
+            try {
+                const qConfig = await getDocs(collection(db, "config_site"));
+                let config = {};
+                qConfig.forEach(docSnap => { config = { id: docSnap.id, ...docSnap.data() }; });
+
+                if (config.id) {
+                    document.getElementById('cfg-titulo').value = config.titulo || '';
+                    document.getElementById('cfg-subtitulo').value = config.subtitulo || '';
+                    document.getElementById('cfg-direccion').value = config.direccion || '';
+                    document.getElementById('cfg-ubicacion').value = config.ubicacion || '';
+                    document.getElementById('cfg-email').value = config.email || '';
+                    document.getElementById('cfg-gestion').value = config.gestion || '';
+                    document.getElementById('cfg-footer-desc').value = config.footer_desc || '';
+                    document.getElementById('form-config').dataset.configId = config.id;
+                }
+            } catch (error) {
+                console.error("Error cargando config:", error);
+            }
+        };
+
+        const formConfig = document.getElementById('form-config');
+        if (formConfig) {
+            formConfig.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const configId = formConfig.dataset.configId || '';
+                const data = {
+                    titulo: document.getElementById('cfg-titulo').value.trim(),
+                    subtitulo: document.getElementById('cfg-subtitulo').value.trim(),
+                    direccion: document.getElementById('cfg-direccion').value.trim(),
+                    ubicacion: document.getElementById('cfg-ubicacion').value.trim(),
+                    email: document.getElementById('cfg-email').value.trim(),
+                    gestion: document.getElementById('cfg-gestion').value.trim(),
+                    footer_desc: document.getElementById('cfg-footer-desc').value.trim(),
+                    updated: Date.now()
+                };
+
+                const btn = document.getElementById('btn-submit-config');
+                btn.disabled = true;
+                btn.innerHTML = '<ion-icon name="sync" class="animate-spin mr-2"></ion-icon> Guardando...';
+
+                try {
+                    if (configId) {
+                        await updateDoc(doc(db, "config_site", configId), data);
+                    } else {
+                        const ref = await addDoc(collection(db, "config_site"), data);
+                        formConfig.dataset.configId = ref.id;
+                    }
+                    alert('Configuración guardada exitosamente. Los cambios se verán en la web pública.');
+                } catch (err) {
+                    alert('Error al guardar: ' + err.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Guardar Configuración';
+                }
+            });
+        }
+
         // Delay events binding (se ejecuta al renderizar)
         document.addEventListener('DOMContentLoaded', () => {
             const fAct = document.getElementById('form-actividad');
@@ -543,8 +922,14 @@
     <div id="dashboard-section" class="hidden">
         <div class="flex h-screen overflow-hidden">
 
+            <!-- Overlay para mobile -->
+            <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden" onclick="document.getElementById('sidebar-mobile-toggle').checked=false; document.getElementById('main-sidebar').classList.add('-translate-x-full'); this.classList.add('hidden');"></div>
+
+            <!-- Checkbox hack para toggle sin JS extra -->
+            <input type="checkbox" id="sidebar-mobile-toggle" class="hidden peer">
+
             <!-- Sidebar -->
-            <aside class="w-64 bg-gray-900 text-white flex flex-col hidden md:flex shrink-0 relative z-30 shadow-2xl">
+            <aside id="main-sidebar" class="w-64 bg-gray-900 text-white flex flex-col shrink-0 relative z-30 shadow-2xl transition-transform duration-300 md:translate-x-0 -translate-x-full fixed md:relative h-full">
                 <div class="p-6 text-center border-b border-gray-800/80 bg-gray-900">
                     <h2
                         class="text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-300">
@@ -572,6 +957,21 @@
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
                         <ion-icon name="image" class="mr-3 text-xl"></ion-icon>
                         Portadas del Carrusel
+                    </a>
+                    <a href="#" id="nav-secretarias"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="people" class="mr-3 text-xl"></ion-icon>
+                        Secretarías
+                    </a>
+                    <a href="#" id="nav-socios"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="person-add" class="mr-3 text-xl"></ion-icon>
+                        Socios / Cumpleaños
+                    </a>
+                    <a href="#" id="nav-config"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="settings" class="mr-3 text-xl"></ion-icon>
+                        Configuración Web
                     </a>
 
                     <div class="mt-8 mb-2 px-3 text-xs font-bold text-gray-600 uppercase tracking-wider">Próximas
@@ -601,7 +1001,12 @@
             <main class="flex-1 flex flex-col bg-gray-100 overflow-y-auto w-full relative">
                 <header
                     class="bg-white px-8 py-5 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b border-gray-200">
-                    <h2 id="view-title" class="text-2xl font-bold text-gray-800 tracking-tight">Vista General</h2>
+                    <div class="flex items-center gap-4">
+                        <label for="sidebar-mobile-toggle" class="md:hidden cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition" onclick="document.getElementById('main-sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebar-overlay').classList.toggle('hidden');">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </label>
+                        <h2 id="view-title" class="text-2xl font-bold text-gray-800 tracking-tight">Vista General</h2>
+                    </div>
                     <span
                         class="bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold px-4 py-1.5 rounded-full text-xs flex items-center shadow-sm">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> Conectado a la
@@ -904,6 +1309,205 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: GESTIÓN DE SECRETARÍAS -->
+                    <!-- =================================== -->
+                    <div id="view-secretarias" class="hidden space-y-8">
+
+                        <div class="bg-gradient-to-r from-blue-900 to-blue-700 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+                            <div class="relative z-10">
+                                <h3 class="text-2xl font-black mb-2">Gestión de Secretarías</h3>
+                                <p class="text-blue-100">Edita los nombres, titulares y descripciones de cada secretaría. Los cambios se reflejan inmediatamente en la página pública.</p>
+                            </div>
+                            <ion-icon name="people" class="absolute -right-6 -bottom-6 text-[10rem] text-white opacity-10 z-0"></ion-icon>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="list" class="text-blue-600 mr-2 text-xl"></ion-icon>
+                                    Lista de Secretarías
+                                </h3>
+                                <button onclick="window.cargarSecretarias()"
+                                    class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
+                                    <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                </button>
+                            </div>
+                            <div id="lista-secretarias" class="p-6 space-y-4">
+                                <p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando secretarías...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: GESTIÓN DE SOCIOS / CUMPLEAÑOS -->
+                    <!-- =================================== -->
+                    <div id="view-socios" class="hidden space-y-8">
+
+                        <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+                            <div class="relative z-10">
+                                <h3 class="text-2xl font-black mb-2">Gestión de Socios y Cumpleaños</h3>
+                                <p class="text-pink-100">Administra la lista de socios. El banner de cumpleaños se muestra automáticamente en la web cuando coincide la fecha.</p>
+                            </div>
+                            <ion-icon name="cake" class="absolute -right-6 -bottom-6 text-[10rem] text-white opacity-10 z-0"></ion-icon>
+                        </div>
+
+                        <!-- Formulario Agregar Socio -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="person-add" class="text-pink-500 mr-2 text-xl"></ion-icon>
+                                    Agregar / Editar Socio
+                                </h3>
+                            </div>
+                            <form id="form-socio" class="p-6 space-y-5">
+                                <input type="hidden" id="socio-id-edit" value="">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Nombre Completo</label>
+                                        <input type="text" id="socio-nombre" required placeholder="Ej: PEREZ GARCIA JUAN CARLOS"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none uppercase">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Fecha de Cumpleaños (MM-DD)</label>
+                                        <input type="text" id="socio-fecha" required placeholder="Ej: 03-15" maxlength="5" pattern="\d{2}-\d{2}"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none">
+                                        <p class="text-xs text-gray-400 mt-1">Formato: mes-día (ej: 03-15 para 15 de marzo)</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Email (opcional)</label>
+                                        <input type="email" id="socio-email" placeholder="correo@ejemplo.com"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Teléfono WhatsApp (con código país)</label>
+                                        <input type="text" id="socio-telefono" placeholder="Ej: 51999888777"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none">
+                                        <p class="text-xs text-gray-400 mt-1">Sin + ni espacios. Ej: 51999888777</p>
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100 flex gap-3">
+                                    <button type="submit" id="btn-submit-socio"
+                                        class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
+                                        <ion-icon name="save" class="mr-2 text-xl"></ion-icon>
+                                        <span id="btn-socio-text">Guardar Socio</span>
+                                    </button>
+                                    <button type="button" id="btn-cancel-socio"
+                                        class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3.5 px-6 rounded-lg transition-all">
+                                        Cancelar Edición
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tabla de Socios -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="people" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Lista de Socios (<span id="socio-count">0</span>)
+                                </h3>
+                                <div class="flex gap-2">
+                                    <input type="text" id="socio-search" placeholder="Buscar socio..."
+                                        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-pink-500">
+                                    <button onclick="window.cargarSocios()"
+                                        class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
+                                        <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left text-sm text-gray-600">
+                                    <thead class="bg-white text-gray-400 text-xs uppercase font-extrabold border-b border-gray-100">
+                                        <tr>
+                                            <th class="px-6 py-4">Nombre</th>
+                                            <th class="px-6 py-4">Cumpleaños</th>
+                                            <th class="px-6 py-4">Teléfono</th>
+                                            <th class="px-6 py-4 text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lista-socios" class="divide-y divide-gray-100">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: CONFIGURACIÓN GENERAL -->
+                    <!-- =================================== -->
+                    <div id="view-config" class="hidden space-y-8">
+
+                        <div class="bg-gradient-to-r from-gray-700 to-gray-900 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+                            <div class="relative z-10">
+                                <h3 class="text-2xl font-black mb-2">Configuración General del Sitio</h3>
+                                <p class="text-gray-300">Edita el título, subtítulo, dirección, correo y otros datos generales que aparecen en la web.</p>
+                            </div>
+                            <ion-icon name="settings" class="absolute -right-6 -bottom-6 text-[10rem] text-white opacity-10 z-0"></ion-icon>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="create" class="text-gray-600 mr-2 text-xl"></ion-icon>
+                                    Datos del Sitio
+                                </h3>
+                            </div>
+                            <form id="form-config" class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Título Principal (Header)</label>
+                                        <input type="text" id="cfg-titulo" placeholder="Ej: SIUTCASJNJ"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-gray-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Subtítulo</label>
+                                        <input type="text" id="cfg-subtitulo" placeholder="Ej: Sindicato Único de Trabajadores CAS - JNJ"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-gray-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Dirección</label>
+                                        <input type="text" id="cfg-direccion" placeholder="Ej: Av. Paseo de la Republica N° 3285"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-gray-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Distrito, Ciudad</label>
+                                        <input type="text" id="cfg-ubicacion" placeholder="Ej: San Isidro, Lima"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-gray-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Correo Electrónico</label>
+                                        <input type="email" id="cfg-email" placeholder="sindicato@ejemplo.com"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-gray-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Gestión / Período</label>
+                                        <input type="text" id="cfg-gestion" placeholder="Ej: 2026-2028"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-gray-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Texto del Footer (descripción)</label>
+                                    <input type="text" id="cfg-footer-desc" placeholder="Ej: Unidad y compromiso por nuestros derechos."
+                                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-gray-600 bg-white shadow-sm transition outline-none">
+                                </div>
+                                <div class="pt-4 border-t border-gray-100">
+                                    <button type="submit" id="btn-submit-config"
+                                        class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
+                                        <ion-icon name="save" class="mr-2 text-xl"></ion-icon>
+                                        Guardar Configuración
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                 </div>

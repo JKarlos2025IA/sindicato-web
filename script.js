@@ -1,35 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Birthday Logic ---
+    // --- Birthday Logic (carga desde Firebase con fallback local) ---
     const banner = document.getElementById('birthday-banner');
     const birthdayNamesSpan = document.getElementById('birthday-names');
     const birthdayActions = document.getElementById('birthday-actions');
     const today = new Date();
-    // Format today as MM-DD
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const todayString = `${month}-${day}`;
 
-    if (typeof socios !== 'undefined') {
-        const birthdaySocios = socios.filter(socio => socio.fecha === todayString);
-
+    async function mostrarCumpleanos(listaSocios) {
+        const birthdaySocios = listaSocios.filter(s => s.fecha === todayString);
         if (birthdaySocios.length > 0 && banner && birthdayNamesSpan) {
             const names = birthdaySocios.map(s => s.nombre).join(', ');
             birthdayNamesSpan.textContent = names;
-
-            // Remove the 'hidden' class, and ensure flex is applied
             banner.classList.remove('hidden');
             banner.classList.add('flex');
-
             if (birthdayActions) {
                 birthdayActions.innerHTML = '';
                 birthdaySocios.forEach(socio => {
                     if (socio.telefono) {
-                        // Create WhatsApp button
-                        // Generamos el nombre corto (primera palabra de los nombres)
                         const nombreCorto = socio.nombre.split(' ')[0];
                         const mensaje = `¡Feliz Cumpleaños, ${nombreCorto}! 🥳🎉\n\nDe parte de toda la gran familia del *SIUTCASJNJ*, queremos enviarte un afectuoso saludo en tu día. 🎂✨ Valoramos inmensamente tu dedicación. ¡Que la pases extraordinario junto a tus seres queridos y que este nuevo año de vida esté lleno de éxitos y bendiciones! 🫂🎊`;
                         const urlWA = `https://wa.me/${socio.telefono}?text=${encodeURIComponent(mensaje)}`;
-
                         const btn = document.createElement('a');
                         btn.href = urlWA;
                         btn.target = "_blank";
@@ -40,6 +32,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         }
+    }
+
+    // Intentar cargar desde Firebase primero
+    try {
+        import("https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js").then(async ({ initializeApp }) => {
+            const { getFirestore, collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js");
+            const firebaseConfig = {
+                apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
+                authDomain: "sindicato-jnj.firebaseapp.com",
+                projectId: "sindicato-jnj",
+                storageBucket: "sindicato-jnj.firebasestorage.app",
+                messagingSenderId: "1036915309355",
+                appId: "1:1036915309355:web:fac53de65031a39597e36e"
+            };
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const qSocios = await getDocs(collection(db, "socios"));
+            const sociosFirebase = [];
+            qSocios.forEach(docSnap => sociosFirebase.push(docSnap.data()));
+            if (sociosFirebase.length > 0) {
+                mostrarCumpleanos(sociosFirebase);
+            } else if (typeof socios !== 'undefined') {
+                mostrarCumpleanos(socios);
+            }
+        }).catch(() => {
+            if (typeof socios !== 'undefined') mostrarCumpleanos(socios);
+        });
+    } catch (e) {
+        if (typeof socios !== 'undefined') mostrarCumpleanos(socios);
     }
 
     // --- Popup Logic ---
