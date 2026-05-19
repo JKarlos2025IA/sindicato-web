@@ -1022,6 +1022,34 @@
 
             const fPortada = document.getElementById('form-portada');
             if (fPortada) {
+
+                // Redimensionar imagen a 1200x500 antes de subir
+                function resizeImage(file, w, h) {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = w;
+                            canvas.height = h;
+                            const ctx = canvas.getContext('2d');
+                            // Calcular recorte centrado (cover)
+                            const ratio = Math.max(w / img.width, h / img.height);
+                            const sw = w / ratio, sh = h / ratio;
+                            const sx = (img.width - sw) / 2, sy = (img.height - sh) / 2;
+                            // Fondo negro
+                            ctx.fillStyle = '#000000';
+                            ctx.fillRect(0, 0, w, h);
+                            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+                            canvas.toBlob(blob => {
+                                if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                                else reject(new Error('No se pudo redimensionar'));
+                            }, 'image/jpeg', 0.85);
+                        };
+                        img.onerror = () => reject(new Error('Error cargando imagen'));
+                        img.src = URL.createObjectURL(file);
+                    });
+                }
+
                 fPortada.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const titulo = document.getElementById('portada-titulo').value;
@@ -1033,13 +1061,15 @@
                     if (!file) return;
 
                     btn.disabled = true;
-                    btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
+                    btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Redimensionando...';
 
                     try {
+                        const resizedFile = await resizeImage(file, 1200, 500);
+                        btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
                         const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
                         const storagePath = `portadas/${Date.now()}_${safeName}`;
                         const sRef = ref(storage, storagePath);
-                        await uploadBytes(sRef, file);
+                        await uploadBytes(sRef, resizedFile);
                         const url = await getDownloadURL(sRef);
 
                         await addDoc(collection(db, "portadas"), {
