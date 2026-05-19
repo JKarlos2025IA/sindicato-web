@@ -12,6 +12,47 @@
             outline: 2px solid white;
             outline-offset: -5px;
         }
+
+        /* ======= TEMA: NAVIDAD ======= */
+        body.tema-navidad { --color-header: #b91c1c; --color-header-to: #7f1d1d; --color-acento: #16a34a; }
+        body.tema-navidad header { background: linear-gradient(135deg, #b91c1c, #7f1d1d) !important; }
+        body.tema-navidad .tema-banner { display: flex !important; }
+        body.tema-navidad .tema-banner-text { color: #fff; }
+        body.tema-navidad .tema-banner-inner { background: linear-gradient(90deg, #dc2626, #16a34a); }
+        body.tema-navidad .snowfall { display: block !important; }
+
+        /* ======= TEMA: FIESTAS PATRIAS ======= */
+        body.tema-fiestas { --color-header: #dc2626; --color-header-to: #991b1b; --color-acento: #fff; }
+        body.tema-fiestas header { background: linear-gradient(135deg, #dc2626, #fff 50%, #dc2626) !important; }
+        body.tema-fiestas .tema-banner { display: flex !important; }
+        body.tema-fiestas .tema-banner-inner { background: linear-gradient(90deg, #dc2626, #fff, #dc2626); }
+        body.tema-fiestas .tema-banner-text { color: #dc2626; font-weight: 900; }
+
+        /* ======= TEMA: VERANO ======= */
+        body.tema-verano { --color-header: #0284c7; --color-header-to: #0369a1; --color-acento: #f59e0b; }
+        body.tema-verano header { background: linear-gradient(135deg, #0284c7, #0ea5e9) !important; }
+        body.tema-verano .tema-banner { display: flex !important; }
+        body.tema-verano .tema-banner-inner { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        body.tema-verano .tema-banner-text { color: #78350f; }
+
+        /* Banner temático (oculto por defecto, se activa con tema) */
+        .tema-banner { display: none; }
+        .snowfall { display: none; }
+
+        /* Copos de nieve animación */
+        @keyframes snowfall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 1.5rem;
+            animation: snowfall linear infinite;
+            pointer-events: none;
+            z-index: 999;
+        }
     </style>
 </head>
 
@@ -82,8 +123,15 @@
         </div>
     </section>
 
+    <!-- Banner Temático (Navidad, Fiestas, Verano) -->
+    <div class="tema-banner flex-col items-center justify-center py-4 px-4 text-center shadow-md relative z-20" id="tema-banner">
+        <div class="tema-banner-inner rounded-xl px-8 py-3 shadow-lg inline-block">
+            <p id="tema-banner-text" class="tema-banner-text text-xl md:text-2xl font-black tracking-wide"></p>
+        </div>
+    </div>
 
-
+    <!-- Copos de nieve (solo Navidad) -->
+    <div id="snowfall-container" class="snowfall fixed inset-0 pointer-events-none z-[998]"></div>
 
     <!-- Birthday Banner -->
     <div id="birthday-banner"
@@ -365,6 +413,55 @@
         // Ejecutar cargas adicionales
         cargarConfig();
         cargarSecretarias();
+        cargarTema();
+
+        // === CARGAR TEMA VISUAL ===
+        async function cargarTema() {
+            try {
+                const qTema = await getDocs(collection(db, "config_site"));
+                let tema = 'normal';
+                qTema.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.tema) tema = data.tema;
+                });
+
+                const body = document.body;
+                body.classList.remove('tema-navidad', 'tema-fiestas', 'tema-verano');
+
+                if (tema === 'navidad') {
+                    body.classList.add('tema-navidad');
+                    document.getElementById('tema-banner-text').textContent = '🎄 ¡Feliz Navidad! — SIUTCASJNJ 🎅';
+                    crearCoposNieve();
+                } else if (tema === 'fiestas') {
+                    body.classList.add('tema-fiestas');
+                    document.getElementById('tema-banner-text').textContent = '🇵🇪 ¡Felices Fiestas Patrias! — SIUTCASJNJ 🇵🇪';
+                } else if (tema === 'verano') {
+                    body.classList.add('tema-verano');
+                    document.getElementById('tema-banner-text').textContent = '☀️ Temporada de Verano — SIUTCASJNJ 🏖️';
+                } else {
+                    document.getElementById('tema-banner').style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error cargando tema:", error);
+            }
+        }
+
+        function crearCoposNieve() {
+            const container = document.getElementById('snowfall-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const emojis = ['❄️', '❅', '❆', '⛄', '🎄'];
+            for (let i = 0; i < 30; i++) {
+                const span = document.createElement('span');
+                span.className = 'snowflake';
+                span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                span.style.left = Math.random() * 100 + '%';
+                span.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                span.style.animationDelay = Math.random() * 5 + 's';
+                span.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
+                container.appendChild(span);
+            }
+        }
     </script>
 
 </html>
