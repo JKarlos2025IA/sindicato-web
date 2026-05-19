@@ -1,79 +1,103 @@
-# Sindicato Único de Trabajadores CAS - JNJ
+# SIUTCASJNJ — Sindicato Único de Trabajadores CAS - JNJ
 
-Sitio web del **SIUTCASJNJ** — Junta Nacional de Justicia, Lima, Perú.
+Sitio web oficial. Gestión 2026-2028. Lima, Perú.
 
-> Gestión 2026-2028
+🌐 **https://sindicatocasjnj.netlify.app**
 
-## Estructura del Proyecto
+---
+
+## Estructura
 
 ```
 sindicato-web/
-├── README.md              ← Este archivo
-├── 00_public/             ← Páginas web (HTML)
-│   ├── index.html         ← Página principal
-│   ├── admin.html         ← Panel de administración
-│   ├── sec_*.html         ← Páginas de secretarías (10)
-│   ├── campeonato_2026.html
-│   └── formulario_campeonato.html
-├── 01_scripts/            ← JavaScript
-│   ├── script.js          ← Lightbox, popup, animaciones, cumpleaños
-│   └── datos_socios.js    ← Datos de socios (fallback local)
-├── 02_assets/             ← Imágenes y fotos
-│   ├── img/               ← Logos de equipos, banners
-│   ├── photos/            ← Fotos de eventos
-│   ├── ANUNCIO_PORTADA_02.png
-│   └── miembros.jpg
-├── 03_docs/               ← Documentación
-│   ├── docs/img/          ← Logo, portadas, navidad
-│   ├── 00_CONTEXTO_PROYECTO.md
-│   ├── 03_PENDIENTES.md
-│   └── 04_SESIONES.md
-└── 04_utils/              ← Utilidades
-    ├── push.bat           ← Commit + push a GitHub
-    └── ver_cambios.bat    ← Abrir vista previa local
+├── README.md
+├── netlify.toml
+├── 00_public/                ← Deploy (Netlify)
+│   ├── index.html            ← Página principal
+│   ├── admin.html            ← Panel de administración
+│   ├── script.js             ← Lógica compartida
+│   ├── datos_socios.js       ← Datos locales (fallback)
+│   ├── assets/               ← Imágenes, fotos, banners
+│   │   ├── img/              ← Logos equipos
+│   │   ├── fotos/            ← Fotos de secretarios (PNG sin fondo)
+│   │   └── photos/           ← Fotos de eventos
+│   ├── docs/                 ← Logo y assets del tema
+│   │   └── img/              ← logo_new.png, navidad
+│   └── paginas/              ← Páginas secundarias
+│       ├── sec_*.html        ← 10 páginas de secretarías
+│       ├── campeonato_2026.html
+│       ├── formulario_campeonato.html
+│       ├── actualizar_datos.html
+│       └── asignar_fotos.html
+├── 01_documentacion/         ← Documentos del proyecto (.md)
+└── 02_utilidades/            ← Scripts .bat y herramientas
 ```
+
+---
+
+## Dashboard (admin.html)
+
+Accede con tu cuenta Firebase. El panel tiene **9 módulos**:
+
+| Módulo | Función |
+|--------|---------|
+| 📸 Portadas del Carrusel | Subir, ordenar y eliminar imágenes del carrusel principal |
+| 📄 Cultura y Deportes | Subir documentos PDF/Word (bases, fichas, resultados) |
+| 🖼️ Galería de Fotos | Crear actividades y subir fotos |
+| 👥 Secretarías | Editar titulares, descripciones, colores, orden |
+| 🎂 Socios / Cumpleaños | CRUD de afiliados con búsqueda |
+| ⚙️ Configuración Web | Título, subtítulo, dirección, email, footer |
+| 🎨 Tema Visual | Cambiar tema: Normal, Navidad, Fiestas Patrias, Verano |
+| 📢 Banner de Anuncios | Aviso urgente en homepage con toggle y botón de acción |
+| 📅 Próximos Eventos | Crear, editar y eliminar eventos con imagen personalizada |
+
+---
+
+## Homepage
+
+1. 🎠 **Carrusel** — imágenes rotativas (300px móvil / 450px escritorio)
+2. 🎨 **Banner temático** — cambia según el tema (Navidad, Fiestas, Verano)
+3. 📢 **Banner de anuncios** — controlado desde el dashboard
+4. 👥 **Junta Directiva** — 10 tarjetas con foto, nombre y descripción
+5. ⚽ **Próximos Eventos** — últimos 3 eventos con imagen
+6. 🖼️ **Galería Preview** — 6 últimas fotos + link "Ver galería completa"
+7. 🔻 **Footer** — dirección, email, gestión, acceso admin
+
+---
 
 ## Tecnologías
 
 - **Frontend:** HTML + Tailwind CSS (CDN) + JavaScript vanilla
 - **Backend:** Firebase (Firestore + Storage + Auth)
-- **Deploy:** GitHub Pages (estático)
+- **Deploy:** Netlify (auto-deploy desde GitHub)
 
-## Panel de Administración
-
-Accede a `00_public/admin.html` para gestionar:
-
-| Módulo | Función |
-|--------|---------|
-| **Portadas** | Subir/reordenar imágenes del carrusel principal |
-| **Cultura y Deportes** | Subir documentos (bases, fichas, resultados) |
-| **Galería** | Crear actividades y subir fotos |
-| **Secretarías** | Editar titulares, descripciones, agregar nuevas |
-| **Socios** | CRUD completo con búsqueda y cumpleaños |
-| **Configuración** | Título, dirección, email, footer, gestión |
-
-> Al primer login, el sistema carga automáticamente los datos iniciales (10 secretarías, 17 socios, configuración) en Firebase.
-
-## Flujo de Trabajo
-
-1. **Editar contenido:** Usa el panel admin (`admin.html`) — no toques código
-2. **Ver cambios localmente:** Ejecuta `04_utils\ver_cambios.bat`
-3. **Publicar:** Ejecuta `04_utils\push.bat` (requiere autenticación GitHub)
+---
 
 ## Firebase
 
 Proyecto: **sindicato-jnj**
 
-Colecciones Firestore:
-- `portadas` — Imágenes del carrusel
-- `documentos_cultura` — Archivos de cultura/deportes
-- `actividades` — Títulos de actividades de galería
-- `fotos` — Fotos vinculadas a actividades
-- `secretarias` — Datos de cada secretaría
-- `socios` — Lista de socios y cumpleaños
-- `config_site` — Configuración general del sitio
+| Colección | Contenido |
+|-----------|-----------|
+| `portadas` | Imágenes del carrusel |
+| `documentos_cultura` | Archivos PDF/Word |
+| `actividades` | Títulos de eventos/actividades |
+| `fotos` | Fotos vinculadas a actividades |
+| `secretarias` | 10 secretarías con datos y fotos |
+| `socios` | 69 afiliados |
+| `config_site` | Título, footer, tema, anuncio |
+
+---
+
+## Flujo de trabajo
+
+1. **Editar contenido:** `admin.html` → login → módulo correspondiente
+2. **Ver cambios:** `02_utilidades/ver_cambios.bat` (servidor local)
+3. **Publicar:** `git push` (Netlify hace deploy automático)
+
+---
 
 ## Contacto
 
-- **Email:** sindicatocasjnj@gmail.com
-- **Dirección:** Av. Paseo de la Republica N° 3285, San Isidro, Lima
+- 📧 sindicatocasjnj@gmail.com
+- 📍 Av. Paseo de la Republica N° 3285, San Isidro, Lima
