@@ -159,6 +159,27 @@
 
     <!-- Main Content -->
     <main id="secretarias" class="flex-grow container mx-auto px-4 py-12">
+
+        <!-- Estadísticas -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div class="bg-white rounded-xl shadow-md p-6 text-center border-t-4 border-blue-900">
+                <span id="stat-miembros" class="text-3xl font-black text-blue-900">--</span>
+                <p class="text-xs text-gray-500 mt-1 uppercase tracking-wide font-semibold">Afiliados</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 text-center border-t-4 border-green-600">
+                <span id="stat-secretarias" class="text-3xl font-black text-green-600">--</span>
+                <p class="text-xs text-gray-500 mt-1 uppercase tracking-wide font-semibold">Secretarías</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 text-center border-t-4 border-orange-500">
+                <span id="stat-eventos" class="text-3xl font-black text-orange-500">--</span>
+                <p class="text-xs text-gray-500 mt-1 uppercase tracking-wide font-semibold">Eventos</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 text-center border-t-4 border-purple-600">
+                <span id="stat-gestion" class="text-3xl font-black text-purple-600">--</span>
+                <p class="text-xs text-gray-500 mt-1 uppercase tracking-wide font-semibold">Años Gestión</p>
+            </div>
+        </div>
+
         <div class="text-center mb-12">
             <h2 class="text-3xl font-bold text-blue-900 mb-4">Junta Directiva 2026 - 2028</h2>
             <div class="w-24 h-1 bg-blue-600 mx-auto rounded"></div>
@@ -437,6 +458,24 @@
         cargarConfig();
         cargarSecretarias();
         cargarTema();
+        cargarEstadisticas();
+
+        // === CARGAR ESTADÍSTICAS ===
+        async function cargarEstadisticas() {
+            try {
+                const [qSocios, qSec, qEventos] = await Promise.all([
+                    getDocs(collection(db, "socios")),
+                    getDocs(collection(db, "secretarias")),
+                    getDocs(collection(db, "actividades"))
+                ]);
+                document.getElementById('stat-miembros').textContent = qSocios.size;
+                document.getElementById('stat-secretarias').textContent = qSec.size;
+                document.getElementById('stat-eventos').textContent = qEventos.size;
+                document.getElementById('stat-gestion').textContent = '2';
+            } catch (error) {
+                console.error("Error cargando estadísticas:", error);
+            }
+        }
 
         // === CARGAR TEMA VISUAL ===
         async function cargarTema() {
