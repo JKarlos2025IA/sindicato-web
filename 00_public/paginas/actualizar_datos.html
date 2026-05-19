@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizar Datos — SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full text-center">
+        <h2 class="text-2xl font-black text-blue-900 mb-2">Actualizar Base de Datos</h2>
+        <p class="text-gray-500 mb-6 text-sm">Elimina duplicados y carga los 69 afiliados oficiales.</p>
+        <div id="log" class="bg-gray-900 text-green-400 font-mono text-xs text-left p-4 rounded-lg max-h-72 overflow-y-auto mb-6 min-h-[120px]">
+            Listo para iniciar...
+        </div>
+        <div class="space-y-3">
+            <button id="btn-sec" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow transition-all">
+                1. Corregir Secretarías (elimina duplicados)
+            </button>
+            <button id="btn-socios" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-xl shadow transition-all">
+                2. Cargar 69 Afiliados
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const fc = { apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0", authDomain: "sindicato-jnj.firebaseapp.com", projectId: "sindicato-jnj", storageBucket: "sindicato-jnj.firebasestorage.app", messagingSenderId: "1036915309355", appId: "1:1036915309355:web:fac53de65031a39597e36e" };
+        const app = initializeApp(fc);
+        const db = getFirestore(app);
+        const log = document.getElementById('log');
+
+        function L(t) { log.innerHTML += t + '\n'; log.scrollTop = log.scrollHeight; }
+
+        const secretariasDefault = [
+            { nombre: "Secretaría General", titular: "Pavel Ordoñez Escarza", descripcion: "Representación legal del sindicato y defensa irrestricta de los derechos de los afiliados ante las autoridades.", archivo_html: "sec_general.html", color: "#1e3a8a", orden: 1 },
+            { nombre: "Sub-Secretaría General", titular: "Katty Candy Jara Jancco", descripcion: "Apoyo directo a la gestión general y reemplazo en funciones ante la ausencia del Secretario General.", archivo_html: "sec_subgeneral.html", color: "#1d4ed8", orden: 2 },
+            { nombre: "Organización", titular: "Juan Alfredo Tisza Astete", descripcion: "Mantenimiento del padrón de afiliados y organización logística de asambleas y actividades sindicales.", archivo_html: "sec_organizacion.html", color: "#2563eb", orden: 3 },
+            { nombre: "Defensa", titular: "Richard Trejo Silva", descripcion: "Asesoría legal permanente y vigilancia del cumplimiento de las normas laborales vigentes.", archivo_html: "sec_defensa.html", color: "#3b82f6", orden: 4 },
+            { nombre: "Economía", titular: "Ricardo Molleapaza Calderón", descripcion: "Administración responsable de los fondos sindicales y transparencia contable hacia los afiliados.", archivo_html: "sec_economia.html", color: "#16a34a", orden: 5 },
+            { nombre: "Actas y Archivo", titular: "Lucy Álvarez Herrera", descripcion: "Gestión y custodia de los libros de actas y todo el acervo documentario de la organización.", archivo_html: "sec_actas.html", color: "#4b5563", orden: 6 },
+            { nombre: "Control y Disciplina", titular: "Antuaned María Montoya La Rosa", descripcion: "Fiscalización ética de los miembros y cumplimiento de los estatutos y normativas internas.", archivo_html: "sec_disciplina.html", color: "#dc2626", orden: 7 },
+            { nombre: "Prensa y Propaganda", titular: "Jimmy Geraldo Chalco Bustinza", descripcion: "Difusión de acuerdos, comunicados y actividades del sindicato a través de los canales oficiales.", archivo_html: "sec_prensa.html", color: "#9333ea", orden: 8 },
+            { nombre: "Cultura y Deporte", titular: "Juan Carlos Montenegro Gonzáles", descripcion: "Promoción y organización de eventos deportivos, artísticos y recreativos para la integración.", archivo_html: "sec_cultura_deporte.html", color: "#f97316", orden: 9 },
+            { nombre: "Bienestar Social", titular: "Gissela Margarita Silva Macetas", descripcion: "Asistencia social a los miembros y gestión de convenios de salud y beneficios.", archivo_html: "sec_bienestar.html", color: "#14b8a6", orden: 10 },
+        ];
+
+        document.getElementById('btn-sec').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-sec');
+            btn.disabled = true; btn.textContent = 'Procesando...';
+            log.innerHTML = '';
+            L('Eliminando secretarías existentes...');
+            const q = await getDocs(collection(db, "secretarias"));
+            let n = 0;
+            for (const d of q.docs) { await deleteDoc(doc(db, "secretarias", d.id)); n++; }
+            L('Eliminadas: ' + n);
+            L('Cargando 10 secretarías oficiales...');
+            const batch = writeBatch(db);
+            secretariasDefault.forEach((sec, i) => {
+                const ref = doc(collection(db, "secretarias"));
+                batch.set(ref, { ...sec, timestamp: Date.now() + i });
+            });
+            await batch.commit();
+            L('OK - 10 secretarías restauradas sin duplicados.');
+            btn.disabled = false; btn.textContent = '1. Corregir Secretarías (elimina duplicados)';
+        });
+
+        document.getElementById('btn-socios').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-socios');
+            btn.disabled = true; btn.textContent = 'Procesando...';
+            log.innerHTML = '';
+            L('Eliminando socios existentes...');
+            const q = await getDocs(collection(db, "socios"));
+            let n = 0;
+            for (const d of q.docs) { await deleteDoc(doc(db, "socios", d.id)); n++; }
+            L('Eliminados: ' + n);
+            L('Cargando 69 afiliados...');
+
+            const todos = [
+                "ALVAREZ HERRERA LUCY", "ALAYZA VARGAS JUAN REYNALDO SALVADOR", "ALVAREZ FERRANDO JOSE FERNANDO",
+                "APAZA JALLO NIELS JYEYSON", "BASURTO BALLARTA ANSELMA NOEMI", "BENITES VELA LUIS",
+                "CARBAJAL CARRASCO MARTHA BERTHA", "CARBAJAL SANCHEZ SERGIO ANTONIO", "CHALCO BUSTINZA JIMMY GERALDO",
+                "CHAVEZ HILARIO CESAR ANTONIO", "COLLANTES CARMONA LUIS ALEJANDRO", "CONDE BEDON JOSSY JASQUELINE",
+                "CORDOVA CORNEJO SAMUEL MAURO", "CRUZ MANCHEGO MARSHA JIMENA", "DE FREITAS VILLANUEVA ELIZABETH JANE",
+                "DELGADO VASQUEZ SILVIA NOHEMY", "DURAND DIAZ AUGUSTO LUIS", "ESPINOZA OCHOA DIEGO ALEXANDER",
+                "ESPINOZA VICENTE CRISTIAN YERAL COSME", "FALCONI PEÑA ANDREA PATRICIA", "FLORES MARQUEZ PRISCILA RAYZA",
+                "FLORES BELLIDO GRETA MIREYA", "FLORES HUAMBO GRECIA LUCIA", "GARCES ORTIZ CARLOS ALBERTO",
+                "GARRO VERGARA LUIS DIOFANTO", "HINOSTROZA MARINGO CARLOS GABRIEL", "HUAMANI COTACALLAPA MANUEL",
+                "INAFUKU MARAVI MIDORI PATRICIA", "JARA JANCCO KATTY CANDY", "LAZARTE ACUÑA GIOVANNA TANIA",
+                "LEON CHARCA ALY FELIX", "LLAMACURI LERMO MIRIAM RUTH", "LOZANO VILLEGAS HENRY NEISER",
+                "LUJAN MORENO JOSE ANTONIO", "MAYTA CHAMPA ANA AGRIPINA", "MERCADO CERRON JORDAN DONY",
+                "MOLLEAPAZA CALDERON RICARDO", "MONTENEGRO GONZALES JUAN CARLOS", "MONTOYA LA ROSA ANTUANED MARIA",
+                "MORALES CESPEDES EDWARD ERIC", "MUÑOZ FLORES WILLIAM ALCIDES", "ORDOÑEZ ESCARZA PAVEL",
+                "PACHECO ARREGUI SILVERIO", "PALMADERA ARROSTICO ERMELINDO JULIO", "PATIÑO LOPEZ JORGE ALEJANDRO",
+                "PISSANI LEMBCKE DELIA MERCEDES", "POMPILIO DURAN GUILIANA", "REQUE MITTANI MARTIN",
+                "RIVERO LI KATHERINE JANETT", "SAENZ ALVARADO RONY ALBERTO", "SALINAS MACHACA ALEJANDRO",
+                "SILVA MACETAS GISSELA MARGARITA", "SILVA ROMERO ANTHONY JESUS", "TARAZONA RODRIGUEZ JORGE ESTEBAN",
+                "TISZA ASTETE JUAN ALFREDO", "TORRES CASAS WELINTONG", "TREJO SILVA RICHARD",
+                "VALLEJOS HERENCIA MARIO ALBERTO", "VASQUEZ SORIA KAROL ELENA", "VASQUEZ VILLANUEVA MARGARETH PAOLA",
+                "VEGA ARQUIÑO NATHALI SUSAN", "YAÑEZ ANCIETA LUIS GUILLERMO", "CHOQUE AVALOS ROSSY MARGARITA",
+                "COLINA OSORIO LUISA MERCEDES", "BARZOLA BENITES CHRISTOPHER DARIO", "SOSA LINARES YURI ENRIQUE",
+                "CAURACURI PINO JENNIFER EDITH", "CORDOVA SALINAS CYNTHIA MABEL", "FERNANDEZ LOPEZ KAREN ESTEFANY"
+            ];
+
+            const batch = writeBatch(db);
+            todos.forEach((nombre, i) => {
+                const ref = doc(collection(db, "socios"));
+                batch.set(ref, { nombre, fecha: '', email: '', telefono: '', timestamp: Date.now() + i });
+            });
+            await batch.commit();
+            L('OK - ' + todos.length + ' afiliados cargados.');
+            btn.disabled = false; btn.textContent = '2. Cargar ' + todos.length + ' Afiliados';
+        });
+    </script>
+</body>
+</html>
