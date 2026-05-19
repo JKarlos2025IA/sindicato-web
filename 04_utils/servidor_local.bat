@@ -1,6 +1,6 @@
 @echo off
 echo =======================================
-echo Servidor local - Vista previa
+echo Servidor local - Sindicato Web
 echo =======================================
 echo.
 echo Abriendo en el navegador...
