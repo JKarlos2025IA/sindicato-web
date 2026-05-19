@@ -290,7 +290,7 @@
                     // Slide HTML
                     const div = document.createElement('div');
                     // Usar fondo negro si es contain
-                    div.className = "w-full flex-shrink-0 relative " + (portada.objectFit === 'contain' ? 'bg-black' : '');
+                    div.className = "w-full h-full flex-shrink-0 relative " + (portada.objectFit === 'contain' ? 'bg-black' : '');
                     div.innerHTML = `<img src="${portada.url}" alt="Portada ${index + 1}" class="w-full h-full object-${portada.objectFit || 'cover'}" onerror="this.src='https://via.placeholder.com/1200x500?text=Imagen+no+encontrada';">`;
                     wrapper.appendChild(div);
 

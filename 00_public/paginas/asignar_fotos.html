@@ -28,6 +28,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
@@ -40,6 +41,10 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Autenticación automática
+        signInAnonymously(auth).catch(e => console.error('Auth:', e));
 
         const fotosDisponibles = [
             { archivo: "Antuaned Maria Montoya.png", nombre: "antuane" },
