@@ -1,85 +1,104 @@
 from PIL import Image, ImageDraw, ImageFont
+import math
 
 LOGO_PATH = r"C:\Users\juan.montenegro\Desktop\PAGINA WEB-SINDICATO\sindicato-web\00_public\docs\img\logo_new.png"
 OUT = r"C:\Users\juan.montenegro\Desktop\PAGINA WEB-SINDICATO\sindicato-web\00_public\assets\banner_lucha_cas.png"
 
 W, H = 1200, 500
-img = Image.new("RGB", (W, H), "#1a0a0a")
+img = Image.new("RGB", (W, H), "#fafafa")
 draw = ImageDraw.Draw(img)
 
-# Fondo dramático
-for y in range(H):
-    r = int(26 + 40 * y / H)
-    g = int(10 - 5 * y / H)
-    b = int(10 - 5 * y / H)
-    draw.line([(0, y), (W, y)], fill=(r, max(g, 0), max(b, 0)))
+# ─── BLOQUE NEGRO IZQUIERDO ───
+draw.rectangle([(0, 0), (280, H)], fill="#0a0a0a")
 
-# Banda roja superior
-for y in range(0, 8):
-    draw.line([(0, y), (W, y)], fill=(200, 20, 20))
+# ─── BLOQUE ROJO DERECHO ───
+draw.rectangle([(900, 0), (W, H)], fill="#cc1a1a")
 
-# Banda roja inferior
-for y in range(470, 500):
-    draw.line([(0, y), (W, y)], fill=(180, 15, 15))
+# ─── DIAGONAL (la lucha que rompe) ───
+for x in range(900, W):
+    y_prop = (x - 900) / (W - 900)
+    draw.line([(x, 0), (x, int(H * y_prop))], fill="#fafafa")
 
-# Logo
+# ─── MARCOS DE CONTENCIÓN ───
+for y in range(0, 4): draw.line([(280, y), (W, y)], fill="#0a0a0a")  # borde superior
+for y in range(H-4, H): draw.line([(0, y), (W, y)], fill="#0a0a0a")  # borde inferior
+for y in range(0, H):
+    if y % 6 < 2:
+        draw.point((278, y), fill="#cc1a1a")  # línea punteada roja entre negro y contenido
+
+# ─── LOGO EN ZONA NEGRA ───
 try:
     logo = Image.open(LOGO_PATH).convert("RGBA")
-    logo = logo.resize((100, 100), Image.LANCZOS)
+    logo_w = 90
+    logo = logo.resize((logo_w, logo_w), Image.LANCZOS)
     img_rgba = img.convert("RGBA")
-    img_rgba.paste(logo, (50, 30), logo)
+    img_rgba.paste(logo, (95, 70), logo)
     img = img_rgba.convert("RGB")
     draw = ImageDraw.Draw(img)
 except:
     pass
 
-# Fuentes
+# ─── TIPOGRAFÍA ───
 try:
-    font_big = ImageFont.truetype("arialbd.ttf", 52)
-    font_med = ImageFont.truetype("arialbd.ttf", 34)
-    font_sm = ImageFont.truetype("arial.ttf", 22)
+    font_titulo = ImageFont.truetype("arialbd.ttf", 54)
+    font_lucha = ImageFont.truetype("arialbd.ttf", 62)
+    font_sub = ImageFont.truetype("arial.ttf", 24)
+    font_hashtag = ImageFont.truetype("arial.ttf", 18)
+    font_mini = ImageFont.truetype("arial.ttf", 14)
 except:
-    font_big = font_med = font_sm = ImageFont.load_default()
+    font_titulo = font_lucha = font_sub = font_hashtag = font_mini = ImageFont.load_default()
 
-ROJO = (220, 30, 30)
-BLANCO = (255, 255, 255)
-GRIS = (200, 180, 180)
+NEGRO = (10, 10, 10)
+BLANCO = (250, 250, 250)
+ROJO = (204, 26, 26)
+tx = 300  # margen izquierdo después del bloque negro
 
-tx = 180
+# ─── TEXTO EN ZONA NEGRA ───
+# Número de afiliados
+draw.text((95, 185), "69", fill=BLANCO, font=ImageFont.truetype("arialbd.ttf", 28) if "arialbd" not in str(type(font_titulo)) else font_lucha)
+draw.text((95, 218), "AFILIADOS", fill=(150, 150, 150), font=font_mini)
 
-# Línea roja lateral
-for x in range(tx - 20, tx - 16):
-    for y in range(80, 400):
-        draw.point((x, y), fill=ROJO)
+# Fecha abajo en zona negra
+draw.text((95, 450), "MAYO 2026", fill=(120, 120, 120), font=font_mini)
 
-# Título principal
-draw.text((tx + 2, 82), "SIUTCASJNJ", fill=(0, 0, 0), font=font_big)
-draw.text((tx, 80), "SIUTCASJNJ", fill=BLANCO, font=font_big)
+# ─── TEXTO PRINCIPAL ───
+# SIUTCASJNJ
+draw.text((tx, 60), "SIUTCASJNJ", fill=NEGRO, font=font_titulo)
 
-# Subtítulo 1
-draw.text((tx + 2, 152), "apoya la", fill=(0, 0, 0), font=font_med)
-draw.text((tx, 150), "apoya la", fill=GRIS, font=font_med)
+# apoya la
+draw.text((tx, 130), "apoya la", fill=(100, 100, 100), font=font_sub)
 
 # JORNADA NACIONAL
-draw.text((tx + 3, 203), "JORNADA NACIONAL DE LUCHA", fill=(0, 0, 0), font=font_big)
-draw.text((tx, 200), "JORNADA NACIONAL DE LUCHA", fill=ROJO, font=font_big)
+draw.text((tx, 170), "JORNADA NACIONAL", fill=ROJO, font=font_lucha)
 
-# Línea roja
-for x in range(tx, 1050):
-    y_l = 270
-    r = 220 - int(80 * (x - tx) / (1050 - tx))
-    draw.line([(x, y_l), (x, y_l + 3)], fill=(r, 20, 20))
+# DE LUCHA
+draw.text((tx, 240), "DE LUCHA", fill=NEGRO, font=font_lucha)
 
-# Subtítulo 2
-draw.text((tx + 2, 302), "Por la defensa de los derechos laborales CAS", fill=(0, 0, 0), font=font_med)
-draw.text((tx, 300), "Por la defensa de los derechos laborales CAS", fill=BLANCO, font=font_med)
+# ─── LÍNEA DECORATIVA ───
+for x in range(tx, 890):
+    draw.line([(x, 320), (x, 322)], fill=NEGRO)
 
-# Mensaje final
-draw.text((tx + 2, 362), "#UnidadSindical  •  #CASenLucha  •  #SIUTCASJNJ", fill=(0, 0, 0), font=font_sm)
-draw.text((tx, 360), "#UnidadSindical  •  #CASenLucha  •  #SIUTCASJNJ", fill=(180, 140, 140), font=font_sm)
+# ─── SUBTEXTO ───
+draw.text((tx, 342), "Por la defensa de los derechos laborales de los trabajadores CAS", fill=(60, 60, 60), font=font_sub)
 
-# Puños (emoji aproximado con texto)
-draw.text((1050, 420), "✊", fill=(220, 50, 50), font=font_big)
+draw.text((tx, 382), "Unidad • Dignidad • Justicia Laboral", fill=(100, 100, 100), font=font_sub)
+
+# ─── PUÑO EN ZONA ROJA ───
+# Círculo blanco como fondo del puño
+r = 42
+cx, cy = 960, 60
+draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=BLANCO)
+# Mano simple (trapecio + dedos)
+draw.rectangle([cx - 14, cy - 5, cx + 14, cy + 18], fill=NEGRO)
+draw.rectangle([cx - 18, cy - 18, cx - 9, cy - 5], fill=NEGRO)
+draw.rectangle([cx - 6, cy - 22, cx + 2, cy - 5], fill=NEGRO)
+draw.rectangle([cx + 6, cy - 22, cx + 14, cy - 5], fill=NEGRO)
+draw.rectangle([cx + 15, cy - 16, cx + 22, cy - 5], fill=NEGRO)
+
+# ─── HASHTAGS EN DIAGONAL ROJA ───
+draw.text((925, 430), "CASenLucha", fill=BLANCO, font=font_hashtag)
+draw.text((925, 455), "UnidadSindical", fill=BLANCO, font=font_hashtag)
+draw.text((925, 480), "SIUTCASJNJ", fill=BLANCO, font=font_hashtag)
 
 img.save(OUT, "PNG")
-print(f"Banner de lucha creado: {OUT}")
+print(f"Banner Rojo Obrero creado: {OUT}")
