@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicializar Datos - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full text-center">
+        <h2 class="text-2xl font-black text-blue-900 mb-2">Inicializar Base de Datos</h2>
+        <p class="text-gray-500 mb-6">Esto carga las secretarías y socios iniciales en Firebase.</p>
+        <div id="log" class="bg-gray-900 text-green-400 font-mono text-xs text-left p-4 rounded-lg max-h-60 overflow-y-auto mb-6 min-h-[100px]">
+            Esperando...
+        </div>
+        <button id="btn-init" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all">
+            Inicializar Ahora
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, writeBatch, doc as fsDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
+            authDomain: "sindicato-jnj.firebaseapp.com",
+            projectId: "sindicato-jnj",
+            storageBucket: "sindicato-jnj.firebasestorage.app",
+            messagingSenderId: "1036915309355",
+            appId: "1:1036915309355:web:fac53de65031a39597e36e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const log = document.getElementById('log');
+
+        function logLine(text) {
+            log.innerHTML += `${new Date().toLocaleTimeString()} - ${text}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        const secretariasDefault = [
+            { nombre: "Secretaría General", titular: "Pavel Ordoñez Escarza", descripcion: "Representación legal del sindicato y defensa irrestricta de los derechos de los afiliados ante las autoridades.", archivo_html: "sec_general.html", color: "#1e3a8a", orden: 1 },
+            { nombre: "Sub-Secretaría General", titular: "Katty Candy Jara Jancco", descripcion: "Apoyo directo a la gestión general y reemplazo en funciones ante la ausencia del Secretario General.", archivo_html: "sec_subgeneral.html", color: "#1d4ed8", orden: 2 },
+            { nombre: "Organización", titular: "Juan Alfredo Tisza Astete", descripcion: "Mantenimiento del padrón de afiliados y organización logística de asambleas y actividades sindicales.", archivo_html: "sec_organizacion.html", color: "#2563eb", orden: 3 },
+            { nombre: "Defensa", titular: "Richard Trejo Silva", descripcion: "Asesoría legal permanente y vigilancia del cumplimiento de las normas laborales vigentes.", archivo_html: "sec_defensa.html", color: "#3b82f6", orden: 4 },
+            { nombre: "Economía", titular: "Ricardo Molleapaza Calderón", descripcion: "Administración responsable de los fondos sindicales y transparencia contable hacia los afiliados.", archivo_html: "sec_economia.html", color: "#16a34a", orden: 5 },
+            { nombre: "Actas y Archivo", titular: "Lucy Álvarez Herrera", descripcion: "Gestión y custodia de los libros de actas y todo el acervo documentario de la organización.", archivo_html: "sec_actas.html", color: "#4b5563", orden: 6 },
+            { nombre: "Control y Disciplina", titular: "Antuaned María Montoya La Rosa", descripcion: "Fiscalización ética de los miembros y cumplimiento de los estatutos y normativas internas.", archivo_html: "sec_disciplina.html", color: "#dc2626", orden: 7 },
+            { nombre: "Prensa y Propaganda", titular: "Jimmy Geraldo Chalco Bustinza", descripcion: "Difusión de acuerdos, comunicados y actividades del sindicato a través de los canales oficiales.", archivo_html: "sec_prensa.html", color: "#9333ea", orden: 8 },
+            { nombre: "Cultura y Deporte", titular: "Juan Carlos Montenegro Gonzáles", descripcion: "Promoción y organización de eventos deportivos, artísticos y recreativos para la integración.", archivo_html: "sec_cultura_deporte.html", color: "#f97316", orden: 9 },
+            { nombre: "Bienestar Social", titular: "Gissela Margarita Silva Macetas", descripcion: "Asistencia social a los miembros y gestión de convenios de salud y beneficios.", archivo_html: "sec_bienestar.html", color: "#14b8a6", orden: 10 },
+        ];
+
+        const sociosDefault = [
+            { nombre: "JARA JANCCO KATTY CANDY", fecha: "03-01", email: "", telefono: "" },
+            { nombre: "ALVAREZ HERRERA LUCY", fecha: "03-02", email: "", telefono: "" },
+            { nombre: "FAIRLIE CHAVEZ MARJORIE MARCELA IVONNE", fecha: "03-06", email: "", telefono: "" },
+            { nombre: "MEJIA VARGAS MACHUCA ANGELA PATRICIA", fecha: "03-06", email: "", telefono: "" },
+            { nombre: "CONDE BEDON JOSSY JACQUELINE", fecha: "03-09", email: "", telefono: "" },
+            { nombre: "FERNANDEZ CORNEJO JACKELINE LIZBETH", fecha: "03-13", email: "", telefono: "" },
+            { nombre: "BRUNO SANCHEZ HENRY JIMMY", fecha: "03-16", email: "", telefono: "" },
+            { nombre: "LUNA LIZA MARIO HAMLET", fecha: "03-17", email: "", telefono: "" },
+            { nombre: "GUERRERO SAAVEDRA CARLOS AUGUSTO", fecha: "03-20", email: "", telefono: "" },
+            { nombre: "NUÑEZ GUTIERREZ ADRIAN", fecha: "03-20", email: "", telefono: "" },
+            { nombre: "CASAFRANCA GARCIA ROGER REYNALDO", fecha: "03-22", email: "", telefono: "" },
+            { nombre: "DELGADO VASQUEZ SILVIA NOHEMY", fecha: "03-22", email: "", telefono: "" },
+            { nombre: "GUTARRA NINAHUANCA GIANELLA ANDREA", fecha: "03-22", email: "", telefono: "" },
+            { nombre: "CORREA ROJAS MARIA DOLORES", fecha: "03-23", email: "", telefono: "" },
+            { nombre: "ROJO ROJAS MARCO ANTONIO", fecha: "03-29", email: "", telefono: "" },
+            { nombre: "CHANDUVI CORNEJO VICTOR HUGO", fecha: "03-31", email: "", telefono: "" },
+            { nombre: "LUJAN MORENO JOSE ANTONIO", fecha: "03-31", email: "", telefono: "" },
+        ];
+
+        document.getElementById('btn-init').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-init');
+            btn.disabled = true;
+            btn.textContent = 'Inicializando...';
+            log.innerHTML = '';
+            logLine('Conectado a Firebase. Iniciando...');
+
+            try {
+                // SECRETARIAS
+                const qSec = await getDocs(collection(db, "secretarias"));
+                if (qSec.empty) {
+                    logLine('Colección "secretarias" vacía. Cargando 10 secretarías...');
+                    const batch = writeBatch(db);
+                    secretariasDefault.forEach((sec, i) => {
+                        const ref = fsDoc(collection(db, "secretarias"));
+                        batch.set(ref, { ...sec, timestamp: Date.now() + i });
+                    });
+                    await batch.commit();
+                    logLine('OK - 10 secretarías creadas.');
+                } else {
+                    logLine(`Colección "secretarias" ya tiene ${qSec.size} documentos. No se modifica.`);
+                }
+
+                // SOCIOS
+                const qSocios = await getDocs(collection(db, "socios"));
+                if (qSocios.empty) {
+                    logLine('Colección "socios" vacía. Cargando 17 socios...');
+                    const batch2 = writeBatch(db);
+                    sociosDefault.forEach((socio, i) => {
+                        const ref = fsDoc(collection(db, "socios"));
+                        batch2.set(ref, { ...socio, timestamp: Date.now() + i });
+                    });
+                    await batch2.commit();
+                    logLine('OK - 17 socios creados.');
+                } else {
+                    logLine(`Colección "socios" ya tiene ${qSocios.size} documentos. No se modifica.`);
+                }
+
+                // CONFIG
+                const qConfig = await getDocs(collection(db, "config_site"));
+                if (qConfig.empty) {
+                    const ref = fsDoc(collection(db, "config_site"));
+                    await addDoc(collection(db, "config_site"), {
+                        titulo: "SIUTCASJNJ",
+                        subtitulo: "Sindicato Único de Trabajadores CAS - JNJ",
+                        direccion: "Av. Paseo de la Republica N° 3285",
+                        ubicacion: "San Isidro, Lima",
+                        email: "sindicatocasjnj@gmail.com",
+                        gestion: "2026-2028",
+                        footer_desc: "Unidad y compromiso por nuestros derechos.",
+                        created: Date.now()
+                    });
+                    logLine('OK - Configuración creada.');
+                } else {
+                    logLine('Configuración ya existe. No se modifica.');
+                }
+
+                logLine('');
+                logLine('INICIALIZACIÓN COMPLETA. Ya puedes cerrar esta página.');
+                logLine('Abre index.html en 1 minuto para ver los cambios.');
+                btn.textContent = 'Completado';
+                btn.classList.add('bg-green-600');
+            } catch (error) {
+                logLine('ERROR: ' + error.message);
+                console.error(error);
+                btn.disabled = false;
+                btn.textContent = 'Reintentar';
+            }
+        });
+    </script>
+</body>
+</html>
