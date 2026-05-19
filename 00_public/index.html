@@ -439,10 +439,15 @@
                     card.className = "block bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4";
                     card.style.borderTopColor = sec.color || '#1e3a8a';
                     card.innerHTML = `
-                        <div class="p-6">
-                            <h3 class="text-lg font-bold text-blue-900 mb-1">${sec.nombre}</h3>
-                            <p class="text-sm text-blue-600 font-semibold mb-4">${sec.titular || ''}</p>
-                            <p class="text-gray-600 text-sm leading-relaxed">${sec.descripcion || ''}</p>
+                        <div class="p-6 flex items-start gap-4">
+                            <div class="flex-shrink-0">
+                                <img src="${sec.foto || 'assets/icon-user.png'}" alt="${sec.nombre}" class="w-16 h-16 rounded-full object-cover border-2 shadow" style="border-color: ${sec.color || '#1e3a8a'}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect fill=%22%23e5e7eb%22 width=%2264%22 height=%2264%22/><text x=%2232%22 y=%2240%22 text-anchor=%22middle%22 font-size=%2224%22 fill=%22%239ca3af%22>👤</text></svg>'">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg font-bold text-blue-900 mb-1">${sec.nombre}</h3>
+                                <p class="text-sm text-blue-600 font-semibold mb-2">${sec.titular || ''}</p>
+                                <p class="text-gray-600 text-sm leading-relaxed">${sec.descripcion || ''}</p>
+                            </div>
                         </div>
                     `;
                     grid.appendChild(card);

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Asignar Fotos - Secretarias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h2 class="text-2xl font-black text-blue-900 mb-2">Asignar Fotos a Secretarías</h2>
+            <p class="text-gray-500 mb-4">Selecciona la foto que corresponde a cada secretario.</p>
+            <button id="btn-auto" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow transition-all mb-2">
+                Asignación Automática
+            </button>
+            <span id="auto-result" class="text-sm text-gray-500 ml-3"></span>
+        </div>
+        <div id="lista" class="space-y-4">
+            <p class="text-center py-8 text-gray-400">Cargando...</p>
+        </div>
+        <div class="mt-6 text-center">
+            <button id="btn-guardar" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-10 rounded-xl shadow-lg transition-all text-lg">
+                Guardar Todas
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
+            authDomain: "sindicato-jnj.firebaseapp.com",
+            projectId: "sindicato-jnj",
+            storageBucket: "sindicato-jnj.firebasestorage.app",
+            messagingSenderId: "1036915309355",
+            appId: "1:1036915309355:web:fac53de65031a39597e36e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const fotosDisponibles = [
+            { archivo: "Antuaned Maria Montoya.jpeg", nombre: "antuane" },
+            { archivo: "Gissela Margarita Silva.jpeg", nombre: "gissela" },
+            { archivo: "Jimmy Geraldo Chalco.jpeg", nombre: "jimmy" },
+            { archivo: "Juan Alfredo Tisza Astete.jpeg", nombre: "juan alfredo" },
+            { archivo: "Juan Carlos Montenegro.jpeg", nombre: "juan carlos" },
+            { archivo: "Katty Cindy Jara.jpeg", nombre: "katty" },
+            { archivo: "Luvy Alvarez.jpeg", nombre: "lucy" },
+            { archivo: "Pavel ordonez.jpeg", nombre: "pavel" },
+            { archivo: "Ricardo Molleapaza.jpeg", nombre: "ricardo" },
+        ];
+
+        let secretarias = [];
+
+        function matchFoto(nombreTitular) {
+            if (!nombreTitular) return '';
+            const n = nombreTitular.toLowerCase();
+            for (const f of fotosDisponibles) {
+                if (n.includes(f.nombre)) return 'assets/fotos/' + f.archivo;
+            }
+            return '';
+        }
+
+        async function cargar() {
+            const q = await getDocs(collection(db, "secretarias"));
+            secretarias = [];
+            q.forEach(d => secretarias.push({ id: d.id, ...d.data() }));
+            secretarias.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+
+            const lista = document.getElementById('lista');
+            lista.innerHTML = '';
+            secretarias.forEach(s => {
+                const fotoActual = s.foto || '';
+                let options = '<option value="">Sin foto</option>';
+                fotosDisponibles.forEach(f => {
+                    const sel = fotoActual.includes(f.archivo) ? 'selected' : '';
+                    options += `<option value="assets/fotos/${f.archivo}" ${sel}>${f.archivo}</option>`;
+                });
+
+                lista.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center gap-4">
+                        <div class="flex-shrink-0 w-16 h-16 rounded-full bg-gray-200 overflow-hidden border-2" style="border-color: ${s.color || '#ccc'}">
+                            <img src="${fotoActual || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect fill=%22%23e5e7eb%22 width=%2264%22 height=%2264%22/><text x=%2232%22 y=%2240%22 text-anchor=%22middle%22 font-size=%2224%22 fill=%22%239ca3af%22>👤</text></svg>'}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-gray-800">${s.nombre}</p>
+                            <p class="text-sm text-blue-600">${s.titular || ''}</p>
+                            <select data-id="${s.id}" class="foto-select mt-2 w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-blue-500 outline-none">${options}</select>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('btn-auto').addEventListener('click', () => {
+            let asignados = 0;
+            document.querySelectorAll('.foto-select').forEach(sel => {
+                const id = sel.dataset.id;
+                const s = secretarias.find(x => x.id === id);
+                if (!s) return;
+                const match = matchFoto(s.titular);
+                if (match) {
+                    for (let opt of sel.options) {
+                        if (opt.value === match) { opt.selected = true; asignados++; break; }
+                    }
+                }
+            });
+            document.getElementById('auto-result').textContent = asignados + ' asignadas. Revisa y haz clic en Guardar.';
+        });
+
+        document.getElementById('btn-guardar').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-guardar');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+            try {
+                const batch = writeBatch(db);
+                document.querySelectorAll('.foto-select').forEach(sel => {
+                    const id = sel.dataset.id;
+                    if (sel.value) {
+                        batch.update(doc(db, "secretarias", id), { foto: sel.value });
+                    }
+                });
+                await batch.commit();
+                alert('Fotos asignadas. Recarga la web principal.');
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar Todas';
+            }
+        });
+
+        cargar();
+    </script>
+</body>
+</html>
