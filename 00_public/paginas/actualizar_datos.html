@@ -25,13 +25,24 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
         const fc = { apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0", authDomain: "sindicato-jnj.firebaseapp.com", projectId: "sindicato-jnj", storageBucket: "sindicato-jnj.firebasestorage.app", messagingSenderId: "1036915309355", appId: "1:1036915309355:web:fac53de65031a39597e36e" };
         const app = initializeApp(fc);
         const db = getFirestore(app);
+        const auth = getAuth(app);
         const log = document.getElementById('log');
 
         function L(t) { log.innerHTML += t + '\n'; log.scrollTop = log.scrollHeight; }
+
+        // Autenticación anónima automática
+        L('Autenticando...');
+        try {
+            await signInAnonymously(auth);
+            L('Autenticado. Listo para operar.');
+        } catch (e) {
+            L('ERROR auth: ' + e.message + ' - Habilita "Anónimo" en Authentication > Sign-in method');
+        }
 
         const secretariasDefault = [
             { nombre: "Secretaría General", titular: "Pavel Ordoñez Escarza", descripcion: "Representación legal del sindicato y defensa irrestricta de los derechos de los afiliados ante las autoridades.", archivo_html: "sec_general.html", color: "#1e3a8a", orden: 1 },
