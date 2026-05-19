@@ -1055,7 +1055,7 @@
                         alert('¡Portada publicada en el inicio exitosamente!');
                         await window.cargarPortadas();
                     } catch (err) {
-                        alert("Error subiendo portada.");
+                        alert("Error: " + (err.message || err) + "\n\nVerifica las reglas de Storage en Firebase Console.");
                         console.error(err);
                     } finally {
                         btn.disabled = false;
