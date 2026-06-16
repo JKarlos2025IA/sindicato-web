@@ -449,7 +449,7 @@
                             <button class="absolute top-4 right-4 text-red-500 hover:text-red-700 bg-red-50 text-xs font-bold px-3 py-1.5 rounded transition btn-eliminar-actividad border border-red-200" data-id="${act.id}" title="Eliminar Actividad">
                                 Eliminar Actividad
                             </button>
-                            <h4 class="text-xl font-bold text-blue-800 mb-5 pb-2 border-b border-gray-100">Actividad ${idx + 1}: ${act.titulo}</h4>
+                            <h4 class="text-xl font-bold text-blue-800 mb-5 pb-2 border-b border-gray-100">Actividad ${idx + 1}: ${act.titulo} ${act.pagina_html ? `<a href="${act.pagina_html}" target="_blank" class="text-xs text-blue-500 font-normal hover:underline ml-2">📄 ${act.pagina_html}</a>` : ''}</h4>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     `;
 
@@ -819,13 +819,17 @@
                 actividades.forEach((act, idx) => {
                     const div = document.createElement('div');
                     div.className = 'flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4';
+                    const paginaLink = act.pagina_html ? `<a href="${act.pagina_html}" target="_blank" class="text-xs text-blue-500 hover:underline ml-2">📄 ${act.pagina_html}</a>` : '<span class="text-xs text-gray-400 ml-2">Sin pagina</span>';
                     div.innerHTML = `
                         <div class="flex items-center gap-3">
                             <span class="bg-orange-100 text-orange-700 font-bold text-xs px-2 py-1 rounded">#${idx + 1}</span>
-                            <span class="font-semibold text-gray-800">${act.titulo}</span>
+                            <div>
+                                <span class="font-semibold text-gray-800">${act.titulo}</span>
+                                ${paginaLink}
+                            </div>
                         </div>
                         <div class="flex gap-2">
-                            <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded text-xs font-bold transition btn-editar-evento" data-id="${act.id}" data-titulo="${act.titulo.replace(/"/g, '&quot;')}">Editar</button>
+                            <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded text-xs font-bold transition btn-editar-evento" data-id="${act.id}" data-titulo="${act.titulo.replace(/"/g, '&quot;')}" data-pagina="${act.pagina_html || ''}">Editar</button>
                             <button class="text-red-500 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded text-xs font-bold transition btn-eliminar-evento" data-id="${act.id}">Eliminar</button>
                         </div>
                     `;
@@ -836,9 +840,13 @@
                     btn.addEventListener('click', async (e) => {
                         const id = e.currentTarget.dataset.id;
                         const tituloActual = e.currentTarget.dataset.titulo;
-                        const nuevo = prompt('Nuevo nombre:', tituloActual);
-                        if (nuevo && nuevo.trim()) {
-                            await updateDoc(doc(db, "actividades", id), { titulo: nuevo.trim() });
+                        const paginaActual = e.currentTarget.dataset.pagina;
+                        const nuevo = prompt('Editar nombre del evento:', tituloActual);
+                        if (nuevo !== null) {
+                            const nuevaPagina = prompt('Pagina HTML del evento (dejar vacio para ninguna):', paginaActual);
+                            const updateData = { titulo: nuevo.trim() };
+                            if (nuevaPagina !== null) updateData.pagina_html = nuevaPagina.trim();
+                            await updateDoc(doc(db, "actividades", id), updateData);
                             await window.cargarEventosAdmin();
                         }
                     });
@@ -865,11 +873,13 @@
                 e.preventDefault();
                 const titulo = document.getElementById('evento-titulo').value.trim();
                 if (!titulo) return;
+                const pagina = document.getElementById('evento-pagina').value.trim();
                 const btn = document.getElementById('btn-submit-evento');
                 const file = document.getElementById('evento-imagen').files[0];
                 btn.disabled = true; btn.innerHTML = 'Creando...';
                 try {
                     const data = { titulo, timestamp: Date.now() };
+                    if (pagina) data.pagina_html = pagina;
                     if (file) {
                         const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
                         const path = `eventos/${Date.now()}_${safeName}`;
@@ -986,10 +996,13 @@
                 fAct.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const titulo = document.getElementById('actividad-titulo').value;
+                    const pagina = document.getElementById('actividad-pagina').value.trim();
                     const btn = document.getElementById('btn-submit-actividad');
                     btn.disabled = true; btn.innerHTML = 'Creando...';
                     try {
-                        await addDoc(collection(db, "actividades"), { titulo: titulo, timestamp: Date.now() });
+                        const data = { titulo: titulo, timestamp: Date.now() };
+                        if (pagina) data.pagina_html = pagina;
+                        await addDoc(collection(db, "actividades"), data);
                         fAct.reset();
                         await window.cargarGaleria();
                     } catch (err) { alert("Error creando actividad."); }
@@ -1389,6 +1402,13 @@
                                             Actividad</label>
                                         <input type="text" id="actividad-titulo" required
                                             placeholder="Ej: Campeonato Relámpago de Fulbito"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col md:flex-row gap-4 mt-4">
+                                    <div class="flex-grow">
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Pagina HTML del evento <span class="text-gray-400 font-normal">(opcional)</span></label>
+                                        <input type="text" id="actividad-pagina" placeholder="Ej: campeonato_2026.html"
                                             class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none">
                                     </div>
                                     <div class="flex items-end">
@@ -1877,14 +1897,20 @@
                             <form id="form-evento" class="p-6 space-y-4">
                                 <div>
                                     <label class="block text-sm font-bold text-gray-700 mb-1.5">Nombre del Evento</label>
-                                    <input type="text" id="evento-titulo" required placeholder="Ej: Campeonato Relámpago de Fulbito"
+                                    <input type="text" id="evento-titulo" required placeholder="Ej: Campeonato Relampago de Fulbito"
                                         class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-700 mb-1.5">Imagen (opcional)</label>
                                     <input type="file" id="evento-imagen" accept="image/*"
                                         class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer text-sm text-gray-600">
-                                    <p class="text-xs text-gray-400 mt-1">Si no subes imagen, se usará un emoji por defecto.</p>
+                                    <p class="text-xs text-gray-400 mt-1">Si no subes imagen, se usara un emoji por defecto.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Pagina HTML del evento <span class="text-gray-400 font-normal">(opcional)</span></label>
+                                    <input type="text" id="evento-pagina" placeholder="Ej: campeonato_2026.html"
+                                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none">
+                                    <p class="text-xs text-gray-400 mt-1">Link a la pagina de detalle del evento. Visible en el Registro Historico de Cultura y Deporte.</p>
                                 </div>
                                 <div class="pt-2 border-t border-gray-100">
                                     <button type="submit" id="btn-submit-evento"
