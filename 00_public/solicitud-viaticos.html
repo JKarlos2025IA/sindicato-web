@@ -237,7 +237,7 @@
     <!-- Firebase + Logica -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
         const fc = { apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0", authDomain: "sindicato-jnj.firebaseapp.com", projectId: "sindicato-jnj", storageBucket: "sindicato-jnj.firebasestorage.app", messagingSenderId: "1036915309355", appId: "1:1036915309355:web:fac53de65031a39597e36e" };
@@ -462,22 +462,33 @@ ${archivosList}
             const btn = document.getElementById('btn-confirmar-envio');
             btn.disabled = true; btn.innerHTML = '<span class="animate-spin mr-2">&#9696;</span> Enviando...';
             try {
+                // Calcular N-REG del dia
+                const fechaHoy = new Date().toISOString().slice(0,10).replace(/-/g,'.');
+                const tipo = dataPendiente.tipo;
+                const qReg = query(collection(db,'viaticos'), where('fechaReg','>=',fechaHoy), where('tipo','==',tipo));
+                const snapReg = await getDocs(qReg);
+                const nroRegistro = snapReg.size + 1;
+                const prefijo = `${fechaHoy}-${tipo}`;
+                dataPendiente.nroRegistro = nroRegistro;
+                dataPendiente.fechaReg = fechaHoy;
+
                 // Subir plantilla firmada
                 if(archivoFirmado){
-                    const r = ref(storage, `viaticos/firmado_${Date.now()}_${archivoFirmado.name.replace(/[^a-zA-Z0-9.\-]/g,'_')}`);
+                    const ext = archivoFirmado.name.split('.').pop();
+                    const r = ref(storage, `viaticos/${prefijo}-FIRMADA_SOLICITANTE-N-REG-${String(nroRegistro).padStart(2,'0')}.${ext}`);
                     await uploadBytes(r, archivoFirmado);
                     dataPendiente.plantillaFirmadaURL = await getDownloadURL(r);
-                    dataPendiente.plantillaFirmadaNombre = archivoFirmado.name;
+                    dataPendiente.plantillaFirmadaNombre = `${prefijo}-FIRMADA_SOLICITANTE-N-REG-${String(nroRegistro).padStart(2,'0')}.${ext}`;
                 }
                 // Subir comprobantes
                 if(archivosSeleccionados.length){
-                    const stamp = Date.now();
-                    for(const f of archivosSeleccionados){
-                        if(f.size>20*1024*1024){ alert(f.name+' excede 20MB.'); continue; }
-                        const r = ref(storage, `viaticos/${stamp}_${f.name.replace(/[^a-zA-Z0-9.\-]/g,'_')}`);
+                    archivosSeleccionados.forEach(async (f,i) => {
+                        if(f.size>20*1024*1024){ alert(f.name+' excede 20MB.'); return; }
+                        const ext = f.name.split('.').pop();
+                        const r = ref(storage, `viaticos/${prefijo}-SUSTENTO-N-REG-${String(nroRegistro).padStart(2,'0')}-${String(i+1).padStart(2,'0')}.${ext}`);
                         await uploadBytes(r, f);
                         dataPendiente.archivos.push({ nombre: f.name, url: await getDownloadURL(r) });
-                    }
+                    });
                 }
                 await addDoc(collection(db,'viaticos'), dataPendiente);
                 form.classList.add('hidden');

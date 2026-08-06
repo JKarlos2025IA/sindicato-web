@@ -43,6 +43,7 @@ async function cargarSolicitudes() {
             const v = d.data();
             const id = d.id;
             const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : '';
+            const nroReg = v.nroRegistro ? `<span class="text-gray-400 text-[10px]">#${String(v.nroRegistro).padStart(2,'0')}</span> ` : '';
             const badge = v.estado === 'anotado'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Anotado</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pendiente</span>';
@@ -66,7 +67,7 @@ async function cargarSolicitudes() {
                 : '';
 
             return `<tr class="border-b hover:bg-gray-50">
-                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${f}</td>
+                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${nroReg}${f}</td>
                 <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.nombre||''}</td>
                 <td class="px-2 py-2.5 text-sm">${tipoBadge}</td>
                 <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.descripcion||''}</td>
@@ -124,7 +125,14 @@ async function cargarSolicitudes() {
                 const vid = this.dataset.id;
                 try {
                     this.disabled = true;
-                    const r = ref(storage, `viaticos/aprobado_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-]/g,'_')}`);
+                    // Leer datos del doc para el naming
+                    const docSnap = snapCache?.find(d => d.id === vid);
+                    const dv = docSnap?.data() || {};
+                    const fechaHoy = new Date().toISOString().slice(0,10).replace(/-/g,'.');
+                    const tipo = dv.tipo || 'GASTO';
+                    const nroReg = dv.nroRegistro || '01';
+                    const ext = file.name.split('.').pop();
+                    const r = ref(storage, `viaticos/${fechaHoy}-${tipo}-APROBACION_CONTADOR-N-REG-${String(nroReg).padStart(2,'0')}.${ext}`);
                     await uploadBytes(r, file);
                     const url = await getDownloadURL(r);
                     await updateDoc(doc(db, 'viaticos', vid), { firmadoURL: url });
