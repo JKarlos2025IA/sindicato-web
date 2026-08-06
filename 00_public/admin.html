@@ -778,13 +778,13 @@
                 const ws = wb.Sheets[bestSheet];
                 const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-                // Buscar fila con APELLIDOS / NOMBRES
+                // Buscar fila con APELLIDOS / NOMBRES / NOMBRE
                 let headerRow = -1;
                 for (let i = 0; i < Math.min(rows.length, 10); i++) {
                     const row = rows[i];
                     if (!row || !Array.isArray(row)) continue;
                     const txt = row.map(c => String(c || '').toUpperCase().trim()).join(' ');
-                    if (txt.includes('APELLIDOS') || txt.includes('NOMBRES')) { headerRow = i; break; }
+                    if (txt.includes('APELLIDOS') || txt.includes('NOMBRES') || txt.includes('NOMBRE')) { headerRow = i; break; }
                 }
                 if (headerRow < 0) { alert('No se encontro cabecera con APELLIDOS Y NOMBRES.'); event.target.value = ''; return; }
 
@@ -923,7 +923,7 @@
                 ];
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Afiliados');
-                XLSX.writeFile(wb, 'Afiliados_SIUTCASJNJ.xlsx');
+                XLSX.writeFile(wb, 'Afiliados_Exportado_' + new Date().toISOString().slice(0,10) + '.xlsx');
             } catch (err) {
                 alert('Error al exportar: ' + err.message);
             }
