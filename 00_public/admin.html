@@ -761,7 +761,21 @@
             try {
                 const data = await file.arrayBuffer();
                 const wb = XLSX.read(data, { type: 'array' });
-                const ws = wb.Sheets[wb.SheetNames[0]];
+
+                // Elegir la mejor hoja: la que tenga columna CARGO
+                let bestSheet = wb.SheetNames[0];
+                for (const name of wb.SheetNames) {
+                    const sh = wb.Sheets[name];
+                    const preview = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '' });
+                    for (let r = 0; r < Math.min(preview.length, 5); r++) {
+                        const txt = (preview[r] || []).map(c => String(c || '').toUpperCase().trim()).join(' ');
+                        if (txt.includes('CARGO') && !txt.includes('ESTADO')) {
+                            bestSheet = name;
+                            break;
+                        }
+                    }
+                }
+                const ws = wb.Sheets[bestSheet];
                 const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
                 // Buscar fila con APELLIDOS / NOMBRES
