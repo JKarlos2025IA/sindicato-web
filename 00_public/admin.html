@@ -2156,7 +2156,7 @@
                                 <ion-icon name="list-outline" class="mr-1 align-middle"></ion-icon> Solicitudes
                             </button>
                             <button id="subtab-libro" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
-                                <ion-icon name="book-outline" class="mr-1 align-middle"></ion-icon> Libro de Gastos
+                                <ion-icon name="book-outline" class="mr-1 align-middle"></ion-icon> Libro Contable
                             </button>
                             <button id="subtab-ingresos" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
                                 <ion-icon name="trending-up-outline" class="mr-1 align-middle"></ion-icon> Ingresos
@@ -2191,7 +2191,7 @@
                         <div id="panel-libro" class="hidden">
                             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                                 <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex justify-between items-center">
-                                    <h3 class="font-bold text-gray-800">Libro de Gastos (Anotados)</h3>
+                                    <h3 class="font-bold text-gray-800">Libro Contable (Anotados)</h3>
                                     <div class="flex gap-2">
                                         <button onclick="window.cargarLibroGastos?.()" class="text-sm font-semibold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded flex items-center transition">
                                             <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
@@ -2214,20 +2214,6 @@
                                 <div class="bg-emerald-50 px-6 py-3 border-t border-emerald-100 flex justify-between items-center">
                                     <span class="font-bold text-emerald-800">Total registrado:</span>
                                     <span id="total-libro" class="text-xl font-black text-emerald-800">0.00</span>
-                                </div>
-                            </div>
-
-                            <!-- Subir formulario firmado -->
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mt-6">
-                                <div class="bg-gray-50 border-b border-gray-200 px-6 py-3">
-                                    <h3 class="font-bold text-gray-800">Subir Formulario Firmado</h3>
-                                </div>
-                                <div class="p-6 flex flex-wrap gap-4 items-end">
-                                    <select id="signed-solicitud-select" class="border-gray-300 rounded-lg p-2.5 border-2 focus:border-emerald-500 outline-none text-sm flex-1 min-w-[250px]">
-                                        <option value="">Seleccionar solicitud anotada...</option>
-                                    </select>
-                                    <input type="file" id="signed-file-input" accept=".pdf,.jpg,.jpeg,.png" class="border-gray-300 rounded-lg p-2 border-2 focus:border-emerald-500 outline-none text-sm flex-1 min-w-[200px] file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700">
-                                    <button id="btn-subir-firmado" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-5 rounded-lg transition text-sm">Subir</button>
                                 </div>
                             </div>
                         </div>

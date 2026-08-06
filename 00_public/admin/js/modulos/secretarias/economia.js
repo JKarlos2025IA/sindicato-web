@@ -35,7 +35,7 @@ async function cargarSolicitudes() {
         const snap = await getDocs(q);
         snapCache = snap.docs;
 
-        const docs = snap.docs.filter(d => d.data().estado !== 'eliminado');
+        const docs = snap.docs.filter(d => d.data().estado === 'pendiente');
         if (docs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-gray-400">No hay solicitudes.</td></tr>';
             return;
