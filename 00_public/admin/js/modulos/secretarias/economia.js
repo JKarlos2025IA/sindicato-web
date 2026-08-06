@@ -37,7 +37,7 @@ async function cargarSolicitudes() {
 
         const docs = snap.docs.filter(d => d.data().estado !== 'eliminado');
         if (docs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-gray-400">No hay solicitudes.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="13" class="text-center py-8 text-gray-400">No hay solicitudes.</td></tr>';
             return;
         }
 
@@ -55,31 +55,31 @@ async function cargarSolicitudes() {
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Anotado</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pendiente</span>';
             const btnAnotar = v.estado !== 'anotado'
-                ? `<button class="text-emerald-600 hover:bg-emerald-50 px-1 py-0.5 rounded text-[10px] font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
+                ? `<button class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-xs font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
                 : '';
             const btnDevolver = v.estado === 'anotado'
-                ? `<button class="text-amber-600 hover:bg-amber-50 px-1 py-0.5 rounded text-[10px] font-bold" data-act="devolver" data-id="${id}">Devolver</button>`
+                ? `<button class="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded text-xs font-bold" data-act="devolver" data-id="${id}">Devolver</button>`
                 : '';
 
             return `<tr class="border-b hover:bg-gray-50">
-                <td class="px-1.5 py-1.5 text-xs">${f}</td>
-                <td class="px-1.5 py-1.5 text-xs truncate" title="${v.nombre||''}">${v.nombre||''}</td>
-                <td class="px-1.5 py-1.5 text-xs truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
-                <td class="px-1.5 py-1.5 text-xs text-center">${v.cantidad||''}</td>
-                <td class="px-1.5 py-1.5 text-xs text-center">${v.unidad||''}</td>
-                <td class="px-1.5 py-1.5 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
-                <td class="px-1.5 py-1.5 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
-                <td class="px-1.5 py-1.5 text-xs truncate" title="${v.observacion||''}">${v.observacion||''}</td>
-                <td class="px-1.5 py-1.5 text-xs truncate" title="${v.sustento||''}">${v.sustento||''}</td>
-                <td class="px-1.5 py-1.5 text-xs">${archivos||'<span class="text-gray-300">-</span>'}</td>
-                <td class="px-1.5 py-1.5 text-xs">${plantilla}</td>
-                <td class="px-1.5 py-1.5 text-center">${badge}</td>
-                <td class="px-1.5 py-1.5 text-center whitespace-nowrap">
-                    <div class="flex gap-0.5 justify-center text-[10px]">
+                <td class="px-2 py-2.5 text-sm">${f}</td>
+                <td class="px-2 py-2.5 text-sm truncate" title="${v.nombre||''}">${v.nombre||''}</td>
+                <td class="px-2 py-2.5 text-sm truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
+                <td class="px-2 py-2.5 text-sm text-center">${v.cantidad||''}</td>
+                <td class="px-2 py-2.5 text-sm text-center">${v.unidad||''}</td>
+                <td class="px-2 py-2.5 text-sm text-right">${(v.pu||0).toFixed(2)}</td>
+                <td class="px-2 py-2.5 text-sm text-right font-bold">${(v.total||0).toFixed(2)}</td>
+                <td class="px-2 py-2.5 text-sm truncate" title="${v.observacion||''}">${v.observacion||''}</td>
+                <td class="px-2 py-2.5 text-sm truncate" title="${v.sustento||''}">${v.sustento||''}</td>
+                <td class="px-2 py-2.5 text-sm">${archivos||'<span class="text-gray-300">-</span>'}</td>
+                <td class="px-2 py-2.5 text-sm">${plantilla}</td>
+                <td class="px-2 py-2.5 text-center">${badge}</td>
+                <td class="px-2 py-2.5 text-center whitespace-nowrap">
+                    <div class="flex gap-1 justify-center text-xs">
                         ${btnAnotar}
                         ${btnDevolver}
-                        <button class="text-blue-600 hover:bg-blue-50 px-1 py-0.5 rounded text-[10px]" data-act="modificar" data-id="${id}">Editar</button>
-                        <button class="text-red-500 hover:bg-red-50 px-1 py-0.5 rounded text-[10px]" data-act="eliminar" data-id="${id}">Eliminar</button>
+                        <button class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs" data-act="modificar" data-id="${id}">Editar</button>
+                        <button class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs" data-act="eliminar" data-id="${id}">Eliminar</button>
                     </div>
                 </td>
             </tr>`;
@@ -113,7 +113,7 @@ async function cargarSolicitudes() {
             });
         });
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
     }
 }
 
