@@ -62,8 +62,8 @@ async function cargarSolicitudes() {
                 : '';
 
             return `<tr class="border-b hover:bg-gray-50">
-                <td class="px-1.5 py-1.5 text-xs whitespace-nowrap">${f}</td>
-                <td class="px-1.5 py-1.5 text-xs">${v.nombre||''}</td>
+                <td class="px-1.5 py-1.5 text-xs">${f}</td>
+                <td class="px-1.5 py-1.5 text-xs truncate" title="${v.nombre||''}">${v.nombre||''}</td>
                 <td class="px-1.5 py-1.5 text-xs truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
                 <td class="px-1.5 py-1.5 text-xs text-center">${v.cantidad||''}</td>
                 <td class="px-1.5 py-1.5 text-xs text-center">${v.unidad||''}</td>
@@ -74,7 +74,7 @@ async function cargarSolicitudes() {
                 <td class="px-1.5 py-1.5 text-xs">${archivos||'<span class="text-gray-300">-</span>'}</td>
                 <td class="px-1.5 py-1.5 text-xs">${plantilla}</td>
                 <td class="px-1.5 py-1.5 text-center">${badge}</td>
-                <td class="px-1.5 py-1.5 whitespace-nowrap">
+                <td class="px-1.5 py-1.5 text-center">
                     <div class="flex gap-1 justify-center">
                         ${btnAnotar}
                         ${btnDevolver}
