@@ -759,9 +759,16 @@
                     return;
                 }
 
-                // Generar codigos unicos y cargar nombres existentes (una sola consulta)
-                const existingCodes = new Set();
+                // Cargar codigos pre-generados desde afiliados_codigos.json
+                let codigosPre = [];
+                try {
+                    const r = await fetch('admin/afiliados_codigos.json');
+                    codigosPre = await r.json();
+                } catch (e) { console.warn('No se pudo cargar codigos pre-generados, usando aleatorios.'); }
+
+                // Cargar nombres existentes en Firestore para evitar duplicados
                 const existingNames = new Set();
+                const existingCodes = new Set();
                 const qSnap = await getDocs(collection(db, 'socios'));
                 qSnap.forEach(d => {
                     const data = d.data();
@@ -778,14 +785,18 @@
                     return c;
                 }
 
-                let importados = 0, saltados = 0;
+                let importados = 0, saltados = 0, idx = 0;
                 for (let i = headerRow + 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (!row || !row[colNombre]) continue;
                     const nombre = String(row[colNombre]).trim().toUpperCase();
                     if (!nombre || nombre.length < 5) continue;
 
-                    const codigo = genCode();
+                    // Usar codigo pre-generado si existe en el JSON (mismo orden que el Excel)
+                    let codigo = (idx < codigosPre.length) ? codigosPre[idx].codigo : genCode();
+                    if (existingCodes.has(codigo)) codigo = genCode();
+                    existingCodes.add(codigo);
+                    idx++;
                     const socio = {
                         nombre,
                         dni: colDNI >= 0 && row[colDNI] ? String(row[colDNI]).trim() : '',
