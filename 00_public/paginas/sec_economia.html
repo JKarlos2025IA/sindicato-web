@@ -61,125 +61,37 @@
                                 <div class="bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-2xl shadow-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
                                     <div>
                                         <h3 class="text-xl font-black mb-1">Solicitudes de Viáticos</h3>
-                                        <p class="text-emerald-100 text-sm">Registre y consulte sus solicitudes de gastos y viáticos.</p>
+                                        <p class="text-emerald-100 text-sm">Registre su solicitud de gastos y viáticos.</p>
                                     </div>
-                                    <div class="flex gap-3">
-                                        <a href="../solicitud-viaticos.html" class="bg-white text-emerald-700 font-bold px-5 py-3 rounded-xl hover:bg-emerald-50 transition text-sm flex items-center shadow">
-                                            <ion-icon name="add-circle" class="mr-2 text-lg"></ion-icon> Nueva Solicitud
-                                        </a>
-                                        <a href="../consulta-viaticos.html" class="bg-emerald-800 bg-opacity-30 border border-white border-opacity-30 text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-800 hover:bg-opacity-50 transition text-sm flex items-center">
-                                            <ion-icon name="list" class="mr-2 text-lg"></ion-icon> Ver Solicitudes
-                                        </a>
-                                    </div>
+                                    <a href="../solicitud-viaticos.html" class="bg-white text-emerald-700 font-bold px-5 py-3 rounded-xl hover:bg-emerald-50 transition text-sm flex items-center shadow">
+                                        <ion-icon name="add-circle" class="mr-2 text-lg"></ion-icon> Nueva Solicitud
+                                    </a>
                                 </div>
 
-                                <!-- Section A: Transparencia -->
+                                <!-- Section A: Transparencia - Balances -->
                                 <section class="mb-12 bg-white rounded-xl shadow-md p-8 border-t-4 border-green-600">
                                     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                                         <span class="bg-green-100 text-green-600 p-2 rounded-lg mr-3">📊</span>
-                                        Transparencia - Balances 2024
+                                        Transparencia - Balances
                                     </h3>
-                                    <div class="overflow-x-auto">
-                                        <table class="min-w-full leading-normal">
-                                            <thead>
-                                                <tr>
-                                                    <th
-                                                        class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                        Mes</th>
-                                                    <th
-                                                        class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                        Ingresos</th>
-                                                    <th
-                                                        class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                        Egresos</th>
-                                                    <th
-                                                        class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                        Saldo</th>
-                                                    <th
-                                                        class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                        Detalle</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                                        Octubre</td>
-                                                    <td
-                                                        class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-green-600 font-bold">
-                                                        S/ 2,500.00</td>
-                                                    <td
-                                                        class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-red-600 font-bold">
-                                                        S/ 1,200.00</td>
-                                                    <td
-                                                        class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold">
-                                                        S/ 1,300.00
-                                                    </td>
-                                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><a
-                                                            href="#" class="text-blue-600 hover:underline">Ver PDF</a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                                        Septiembre</td>
-                                                    <td
-                                                        class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-green-600 font-bold">
-                                                        S/ 2,450.00</td>
-                                                    <td
-                                                        class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-red-600 font-bold">
-                                                        S/ 800.00</td>
-                                                    <td
-                                                        class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold">
-                                                        S/ 1,650.00
-                                                    </td>
-                                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><a
-                                                            href="#" class="text-blue-600 hover:underline">Ver PDF</a>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                    <p class="text-gray-600 mb-4">Consulte el balance de gastos por periodo.</p>
+                                    <div class="flex flex-wrap gap-3 mb-4">
+                                        <select id="pub-balance-tipo" class="border-gray-300 rounded-lg p-2.5 border-2 focus:border-emerald-500 outline-none text-sm">
+                                            <option value="mes">Por Mes</option>
+                                            <option value="anio">Por Año</option>
+                                            <option value="detalle">Detalle Completo</option>
+                                        </select>
+                                        <select id="pub-balance-mes" class="border-gray-300 rounded-lg p-2.5 border-2 focus:border-emerald-500 outline-none text-sm">
+                                            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                                        </select>
+                                        <select id="pub-balance-anio" class="border-gray-300 rounded-lg p-2.5 border-2 focus:border-emerald-500 outline-none text-sm"></select>
+                                    </div>
+                                    <div id="pub-balance-detalle"><p class="text-center py-8 text-gray-400">Seleccione un periodo para ver el balance.</p></div>
+                                    <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                                        <span class="font-bold text-gray-700">Total del periodo:</span>
+                                        <span id="pub-balance-total" class="text-2xl font-black text-emerald-700">S/ 0.00</span>
                                     </div>
                                 </section>
-
-                                <div class="grid md:grid-cols-2 gap-8">
-                                    <!-- Section B: Cronograma de Aportes -->
-                                    <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-green-500">
-                                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                                            <span class="bg-green-100 text-green-500 p-2 rounded-lg mr-3">🗓️</span>
-                                            Cronograma de Aportes
-                                        </h3>
-                                        <p class="text-gray-600 mb-4">Los descuentos por planilla se realizan
-                                            mensualmente según el
-                                            siguiente calendario:</p>
-                                        <ul class="space-y-2 text-sm text-gray-600">
-                                            <li class="flex justify-between border-b py-2"><span>Enero - Marzo</span>
-                                                <span class="font-bold">Día 20</span></li>
-                                            <li class="flex justify-between border-b py-2"><span>Abril - Junio</span>
-                                                <span class="font-bold">Día 21</span></li>
-                                            <li class="flex justify-between border-b py-2"><span>Julio -
-                                                    Septiembre</span> <span class="font-bold">Día 20</span></li>
-                                            <li class="flex justify-between py-2"><span>Octubre - Diciembre</span> <span
-                                                    class="font-bold">Día 19</span></li>
-                                        </ul>
-                                    </section>
-
-                                    <!-- Section C: Presupuesto Anual -->
-                                    <section class="bg-white rounded-xl shadow-md p-8 border-t-4 border-green-400">
-                                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                                            <span class="bg-green-100 text-green-400 p-2 rounded-lg mr-3">📉</span>
-                                            Presupuesto Anual
-                                        </h3>
-                                        <div
-                                            class="flex items-center justify-center h-48 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                                            <div class="text-center">
-                                                <p class="text-gray-400 text-sm mb-2">Gráfico de Distribución de Gastos
-                                                </p>
-                                                <div
-                                                    class="w-32 h-32 rounded-full border-8 border-green-200 border-t-green-600 mx-auto">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
-                                </div>
                             </div>
                         </main>
 
@@ -207,5 +119,57 @@
                             </div>
                         </footer>
                     </body>
+
+                    <!-- Firebase para Balance publico -->
+                    <script type="module">
+                        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+                        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+                        const fc = { apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0", authDomain: "sindicato-jnj.firebaseapp.com", projectId: "sindicato-jnj", storageBucket: "sindicato-jnj.firebasestorage.app", messagingSenderId: "1036915309355", appId: "1:1036915309355:web:fac53de65031a39597e36e" };
+                        const db = getFirestore(initializeApp(fc));
+
+                        const MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                        const now = new Date();
+                        document.getElementById('pub-balance-mes').value = now.getMonth()+1;
+                        const selAnio = document.getElementById('pub-balance-anio');
+                        for (let y = now.getFullYear(); y >= 2020; y--) selAnio.innerHTML += `<option value="${y}">${y}</option>`;
+                        selAnio.value = now.getFullYear();
+
+                        async function cargarPubBalance() {
+                            const tipo = document.getElementById('pub-balance-tipo').value;
+                            const mes = parseInt(document.getElementById('pub-balance-mes').value);
+                            const anio = parseInt(document.getElementById('pub-balance-anio').value);
+                            const cont = document.getElementById('pub-balance-detalle');
+                            const totalEl = document.getElementById('pub-balance-total');
+                            try {
+                                const q = query(collection(db,'viaticos'), orderBy('timestamp','desc'));
+                                const snap = await getDocs(q);
+                                const gastos = [];
+                                snap.forEach(d => {
+                                    const v = d.data();
+                                    if (v.estado !== 'anotado' || !v.timestamp?.toDate) return;
+                                    const dt = v.timestamp.toDate();
+                                    gastos.push({ fecha: dt, nombre: v.nombre, descripcion: v.descripcion, total: v.total||0, mes: dt.getMonth()+1, anio: dt.getFullYear(), unidad: v.unidad, cantidad: v.cantidad, pu: v.pu });
+                                });
+                                let f = gastos;
+                                if (tipo === 'mes') f = gastos.filter(g => g.mes===mes && g.anio===anio);
+                                else if (tipo === 'anio') f = gastos.filter(g => g.anio===anio);
+                                const total = f.reduce((s,g)=>s+g.total,0);
+                                totalEl.textContent = 'S/ '+total.toFixed(2);
+                                if (f.length===0) { cont.innerHTML = '<p class="text-center py-8 text-gray-400">Sin gastos en este periodo.</p>'; return; }
+                                if (tipo==='mes') {
+                                    cont.innerHTML = `<table class="w-full text-sm"><thead><tr class="bg-emerald-50"><th class="p-2 text-left">Fecha</th><th class="p-2 text-left">Solicitante</th><th class="p-2 text-left">Descripcion</th><th class="p-2 text-right">Monto</th></tr></thead><tbody>${f.sort((a,b)=>b.fecha-a.fecha).map(g=>`<tr class="border-b"><td class="p-2 text-xs">${g.fecha.toLocaleDateString('es-PE')}</td><td class="p-2 text-xs">${g.nombre}</td><td class="p-2 text-xs">${g.descripcion}</td><td class="p-2 text-xs text-right font-bold">S/ ${g.total.toFixed(2)}</td></tr>`).join('')}</tbody></table>`;
+                                } else if (tipo==='anio') {
+                                    const pm = {}; f.forEach(g=>{ const k=g.mes.toString().padStart(2,'0'); if(!pm[k]) pm[k]={total:0,mes:g.mes,items:[]}; pm[k].total+=g.total; pm[k].items.push(g); });
+                                    cont.innerHTML = Object.values(pm).sort((a,b)=>b.mes-a.mes).map(m=>`<div class="bg-white rounded-lg border p-3 mb-2"><div class="flex justify-between font-bold"><span>${MESES[m.mes]}</span><span class="text-emerald-700">S/ ${m.total.toFixed(2)}</span></div></div>`).join('');
+                                } else {
+                                    cont.innerHTML = `<table class="w-full text-xs"><thead><tr class="bg-emerald-50"><th class="p-1">Fecha</th><th class="p-1">Solicitante</th><th class="p-1">Desc</th><th class="p-1 text-right">Total</th></tr></thead><tbody>${gastos.sort((a,b)=>b.fecha-a.fecha).map(g=>`<tr class="border-b"><td class="p-1">${g.fecha.toLocaleDateString('es-PE')}</td><td class="p-1">${g.nombre}</td><td class="p-1">${g.descripcion}</td><td class="p-1 text-right font-bold">S/ ${g.total.toFixed(2)}</td></tr>`).join('')}</tbody></table>`;
+                                }
+                            } catch(e) { cont.innerHTML = `<p class="text-red-500">${e.message}</p>`; }
+                        }
+                        document.getElementById('pub-balance-tipo').addEventListener('change', cargarPubBalance);
+                        document.getElementById('pub-balance-mes').addEventListener('change', cargarPubBalance);
+                        document.getElementById('pub-balance-anio').addEventListener('change', cargarPubBalance);
+                        cargarPubBalance();
+                    </script>
 
                     </html>
