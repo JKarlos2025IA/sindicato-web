@@ -55,10 +55,10 @@ async function cargarSolicitudes() {
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Anotado</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pendiente</span>';
             const btnAnotar = v.estado !== 'anotado'
-                ? `<button class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-xs font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
+                ? `<button class="text-emerald-600 hover:bg-emerald-50 px-1 py-0.5 rounded text-[10px] font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
                 : '';
             const btnDevolver = v.estado === 'anotado'
-                ? `<button class="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded text-xs font-bold" data-act="devolver" data-id="${id}">Devolver</button>`
+                ? `<button class="text-amber-600 hover:bg-amber-50 px-1 py-0.5 rounded text-[10px] font-bold" data-act="devolver" data-id="${id}">Devolver</button>`
                 : '';
 
             return `<tr class="border-b hover:bg-gray-50">
@@ -74,12 +74,12 @@ async function cargarSolicitudes() {
                 <td class="px-1.5 py-1.5 text-xs">${archivos||'<span class="text-gray-300">-</span>'}</td>
                 <td class="px-1.5 py-1.5 text-xs">${plantilla}</td>
                 <td class="px-1.5 py-1.5 text-center">${badge}</td>
-                <td class="px-1.5 py-1.5 text-center">
-                    <div class="flex gap-1 justify-center">
+                <td class="px-1.5 py-1.5 text-center whitespace-nowrap">
+                    <div class="flex gap-0.5 justify-center text-[10px]">
                         ${btnAnotar}
                         ${btnDevolver}
-                        <button class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs" data-act="modificar" data-id="${id}">Editar</button>
-                        <button class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs" data-act="eliminar" data-id="${id}">Eliminar</button>
+                        <button class="text-blue-600 hover:bg-blue-50 px-1 py-0.5 rounded text-[10px]" data-act="modificar" data-id="${id}">Editar</button>
+                        <button class="text-red-500 hover:bg-red-50 px-1 py-0.5 rounded text-[10px]" data-act="eliminar" data-id="${id}">Eliminar</button>
                     </div>
                 </td>
             </tr>`;
