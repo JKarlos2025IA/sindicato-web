@@ -804,69 +804,93 @@
                 let codigosPre = [];
                 try { const r = await fetch('admin/afiliados_codigos.json'); codigosPre = await r.json(); } catch (e) {}
 
-                // Cargar nombres y codigos existentes (solo codigos para evitar colision)
+                // Cargar existentes para hacer merge (no borrar)
+                const existingMap = new Map();  // nombre -> { id, data }
                 const existingCodes = new Set();
                 const qSnap = await getDocs(collection(db, 'socios'));
-                qSnap.forEach(d => { const dt = d.data(); if (dt.codigo) existingCodes.add(dt.codigo); });
+                qSnap.forEach(d => {
+                    const dt = d.data();
+                    if (dt.codigo) existingCodes.add(dt.codigo);
+                    if (dt.nombre) existingMap.set(dt.nombre.toUpperCase(), { id: d.id, data: dt });
+                });
 
-                // Construir lista de afiliados a importar
-                const nuevos = [];
-                let idx = 0;
+                // Construir lista: nuevos para crear, existentes para actualizar
+                const paraCrear = [];
+                const paraActualizar = [];
+                let idx = 0, nuevos = 0, actualizados = 0;
                 for (let i = headerRow + 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (!row || !row[colNombre]) continue;
                     const nombre = String(row[colNombre]).trim().toUpperCase();
                     if (!nombre || nombre.length < 5) continue;
 
-                    let codigo = '';
-                    if (colCodigo >= 0 && row[colCodigo]) codigo = String(row[colCodigo]).trim().toUpperCase();
-                    else if (idx < codigosPre.length) codigo = codigosPre[idx].codigo;
-                    if (!codigo || existingCodes.has(codigo)) {
-                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                        do { codigo = ''; for (let j = 0; j < 6; j++) codigo += chars[Math.floor(Math.random() * chars.length)]; }
-                        while (existingCodes.has(codigo));
+                    const existente = existingMap.get(nombre);
+                    const dniExcel = colDNI >= 0 && row[colDNI] ? String(row[colDNI]).trim() : '';
+                    const uoExcel = colUO >= 0 && row[colUO] ? String(row[colUO]).trim().toUpperCase() : '';
+                    const cargoExcel = colCargo >= 0 && row[colCargo] ? String(row[colCargo]).trim().toUpperCase() : '';
+
+                    if (existente) {
+                        // Actualizar solo campos del Excel, preservar manuales
+                        const upd = {
+                            dni: dniExcel || existente.data.dni || '',
+                            uo: uoExcel || existente.data.uo || '',
+                            cargo: cargoExcel || existente.data.cargo || '',
+                            timestamp: Date.now()
+                        };
+                        if (colCodigo >= 0 && row[colCodigo] && !existente.data.codigo) {
+                            upd.codigo = String(row[colCodigo]).trim().toUpperCase();
+                        }
+                        paraActualizar.push({ ref: doc(db, 'socios', existente.id), data: upd });
+                        actualizados++;
+                    } else {
+                        // Nuevo afiliado
+                        let codigo = '';
+                        if (colCodigo >= 0 && row[colCodigo]) codigo = String(row[colCodigo]).trim().toUpperCase();
+                        else if (idx < codigosPre.length) codigo = codigosPre[idx].codigo;
+                        if (!codigo || existingCodes.has(codigo)) {
+                            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                            do { codigo = ''; for (let j = 0; j < 6; j++) codigo += chars[Math.floor(Math.random() * chars.length)]; }
+                            while (existingCodes.has(codigo));
+                        }
+                        existingCodes.add(codigo);
+                        paraCrear.push({
+                            nombre, codigo,
+                            dni: dniExcel,
+                            uo: uoExcel,
+                            cargo: cargoExcel,
+                            fecha: '', email: '', telefono: '', activo: true, timestamp: Date.now()
+                        });
+                        nuevos++;
                     }
-                    existingCodes.add(codigo);
                     idx++;
-
-                    nuevos.push({
-                        nombre, codigo,
-                        dni: colDNI >= 0 && row[colDNI] ? String(row[colDNI]).trim() : '',
-                        uo: colUO >= 0 && row[colUO] ? String(row[colUO]).trim().toUpperCase() : '',
-                        cargo: colCargo >= 0 && row[colCargo] ? String(row[colCargo]).trim().toUpperCase() : '',
-                        fecha: '', email: '', telefono: '', activo: true, timestamp: Date.now()
-                    });
                 }
 
-                if (nuevos.length === 0) { alert('No hay afiliados nuevos para importar (todos ya existen).'); event.target.value = ''; return; }
-
-                // Limpiar TODOS los existentes antes de importar (evita duplicados/residuos)
-                const snapOld = await getDocs(collection(db, 'socios'));
-                if (!snapOld.empty) {
-                    const oldDocs = [];
-                    snapOld.forEach(d => oldDocs.push(d));
-                    for (let i = 0; i < oldDocs.length; i += 400) {
-                        const batchDel = writeBatch(db);
-                        oldDocs.slice(i, i + 400).forEach(d => batchDel.delete(d.ref));
-                        await batchDel.commit();
-                    }
+                if (paraCrear.length === 0 && paraActualizar.length === 0) {
+                    alert('No hay cambios para importar.');
+                    event.target.value = '';
+                    return;
                 }
 
-                // Escritura por lotes (500 docs max por batch)
+                // Escribir actualizaciones
                 const BATCH_SIZE = 400;
-                let escritos = 0;
-                for (let i = 0; i < nuevos.length; i += BATCH_SIZE) {
+                for (let i = 0; i < paraActualizar.length; i += BATCH_SIZE) {
                     const batch = writeBatch(db);
-                    const chunk = nuevos.slice(i, i + BATCH_SIZE);
+                    const chunk = paraActualizar.slice(i, i + BATCH_SIZE);
+                    for (const u of chunk) batch.update(u.ref, u.data);
+                    await batch.commit();
+                }
+
+                // Escribir nuevos
+                for (let i = 0; i < paraCrear.length; i += BATCH_SIZE) {
+                    const batch = writeBatch(db);
+                    const chunk = paraCrear.slice(i, i + BATCH_SIZE);
                     for (const a of chunk) {
-                        const ref = doc(collection(db, 'socios'));
-                        batch.set(ref, a);
+                        batch.set(doc(collection(db, 'socios')), a);
                     }
                     await batch.commit();
-                    escritos += chunk.length;
                 }
 
-                alert(`Importacion completada: ${escritos} afiliados cargados.`);
+                alert(`Importacion: ${nuevos} nuevos, ${actualizados} actualizados (cumpleanos, email y telefono preservados).`);
                 await window.cargarSocios();
             } catch (err) {
                 alert('Error al importar Excel: ' + err.message);
