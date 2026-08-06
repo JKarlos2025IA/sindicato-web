@@ -792,15 +792,15 @@
                 let colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1, colCodigo = -1, colCumple = -1, colEmail = -1, colTelefono = -1, colEstado = -1;
                 for (let i = 0; i < headers.length; i++) {
                     const h = headers[i]; if (!h) continue;
-                    if (h.includes('APELLIDOS') || h.includes('NOMBRES') || h === 'NOMBRE') colNombre = i;
-                    else if (h.includes('CODIGO')) colCodigo = i;
-                    else if (h.includes('CUMPLE')) colCumple = i;
-                    else if (h.includes('DNI')) colDNI = i;
-                    else if (h.includes('EMAIL') || h.includes('CORREO')) colEmail = i;
-                    else if (h.includes('TELEFONO') || h.includes('CELULAR') || h.includes('WHATSAPP')) colTelefono = i;
-                    else if (h.includes('ESTADO')) colEstado = i;
-                    else if (h.includes('UO') || h.includes('UNIDAD') || h.includes('OFICINA')) colUO = i;
-                    else if (h.includes('CARGO')) colCargo = i;
+                    if (h.includes('APELLIDOS') || h.includes('NOMBRE')) colNombre = i;
+                    if (h.includes('CODIGO')) colCodigo = i;
+                    if (h.includes('CUMPLE')) colCumple = i;
+                    if (h === 'DNI' || h.startsWith('DNI')) colDNI = i;
+                    if (h.includes('EMAIL') || h.includes('CORREO')) colEmail = i;
+                    if (h.includes('TELEFONO') || h.includes('CELULAR')) colTelefono = i;
+                    if (h === 'ESTADO' || h.startsWith('ESTADO')) colEstado = i;
+                    if (h === 'UO' || h.startsWith('UO') || h.includes('UNIDAD') || h.includes('OFICINA')) colUO = i;
+                    if (h.includes('CARGO')) colCargo = i;
                 }
                 if (colNombre < 0) { alert('No se encontro columna NOMBRE. Cabeceras: ' + headers.filter(h => h).join(', ')); event.target.value = ''; return; }
 
