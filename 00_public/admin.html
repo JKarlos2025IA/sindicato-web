@@ -718,39 +718,46 @@
         window.importarSociosExcel = async function (event) {
             const file = event.target.files[0];
             if (!file) return;
-            const btn = document.getElementById('btn-submit-socio');
             try {
                 const data = await file.arrayBuffer();
                 const wb = XLSX.read(data, { type: 'array' });
                 const ws = wb.Sheets[wb.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-                // Buscar la fila de cabecera (contiene "APELLIDOS Y NOMBRES")
+                // Buscar fila con APELLIDOS / NOMBRES en los primeros 10 registros
                 let headerRow = -1;
-                for (let i = 0; i < Math.min(rows.length, 5); i++) {
+                for (let i = 0; i < Math.min(rows.length, 10); i++) {
                     const row = rows[i];
-                    if (!row) continue;
-                    const txt = row.join(' ').toUpperCase();
-                    if (txt.includes('APELLIDOS') || txt.includes('NOMBRES') || txt.includes('N°')) {
+                    if (!row || !Array.isArray(row)) continue;
+                    const txt = row.map(c => String(c || '').toUpperCase().trim()).join(' ');
+                    if (txt.includes('APELLIDOS') || txt.includes('NOMBRES')) {
                         headerRow = i;
                         break;
                     }
                 }
-                if (headerRow < 0) { alert('No se encontro la cabecera en el Excel. Debe contener: APELLIDOS Y NOMBRES'); return; }
+                if (headerRow < 0) {
+                    alert('No se encontro fila de cabecera. Verifica que el Excel tenga "APELLIDOS Y NOMBRES".');
+                    event.target.value = '';
+                    return;
+                }
 
                 // Mapear columnas
                 const headers = rows[headerRow].map(h => String(h || '').toUpperCase().trim());
-                let colNum = -1, colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1;
+                let colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1;
                 for (let i = 0; i < headers.length; i++) {
                     const h = headers[i];
-                    if (h.includes('N°') && !h.includes('DNI')) colNum = i;
-                    if (h.includes('APELLIDOS') || h.includes('NOMBRES') || h.includes('NOMBRE')) colNombre = i;
-                    if (h.includes('UO') || h.includes('UNIDAD')) colUO = i;
-                    if (h.includes('CARGO')) colCargo = i;
-                    if (h.includes('DNI')) colDNI = i;
+                    if (!h) continue;
+                    if (h.includes('APELLIDOS') || h.includes('NOMBRES') || h === 'NOMBRE') colNombre = i;
+                    else if (h.includes('UO') || h.includes('UNIDAD') || h.includes('OFICINA')) colUO = i;
+                    else if (h.includes('CARGO')) colCargo = i;
+                    else if (h.includes('DNI')) colDNI = i;
                 }
 
-                if (colNombre < 0) { alert('No se encontro columna de nombre. Buscando: APELLIDOS Y NOMBRES'); return; }
+                if (colNombre < 0) {
+                    alert('No se encontro columna de NOMBRE. Cabeceras: ' + headers.filter(h => h).join(', '));
+                    event.target.value = '';
+                    return;
+                }
 
                 // Generar codigos unicos
                 const existingCodes = new Set();
