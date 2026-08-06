@@ -402,7 +402,7 @@ async function cargarBalance() {
 
         if (tipo === 'mes') {
             const sorted = filtrados.sort((a,b) => b.fecha - a.fecha);
-            container.innerHTML = `<table class="w-full text-sm"><thead><tr class="bg-emerald-50"><th class="p-2 text-left">Fecha</th><th class="p-2 text-left">Solicitante</th><th class="p-2 text-left">Descripcion</th><th class="p-2 text-right">Monto</th></tr></thead><tbody>${sorted.map(g => `<tr class="border-b"><td class="p-2 text-xs">${g.fecha.toLocaleDateString('es-PE')}</td><td class="p-2 text-xs">${g.nombre}</td><td class="p-2 text-xs">${g.descripcion}</td><td class="p-2 text-xs text-right font-bold">S/ ${g.total.toFixed(2)}</td></tr>`).join('')}</tbody></table>`;
+            container.innerHTML = `<table class="w-full text-sm"><thead><tr class="bg-emerald-50"><th class="p-2 text-left">Fecha</th><th class="p-2 text-left">Solicitante</th><th class="p-2 text-left">Descripcion</th><th class="p-2 text-right">Monto</th></tr></thead><tbody>${sorted.map(g => `<tr class="border-b"><td class="p-2 text-xs">${g.fecha.toLocaleDateString('es-PE')}</td><td class="p-2 text-xs">${g.nombre}</td><td class="p-2 text-xs">${g.descripcion}</td><td class="p-2 text-xs text-right font-bold ${g.tipo==='INGRESO'?'text-blue-700':'text-red-500'}">${g.tipo==='INGRESO'?'+':'-'} S/ ${g.total.toFixed(2)}</td></tr>`).join('')}</tbody></table>`;
         } else if (tipo === 'anio') {
             const porMes = {};
             filtrados.forEach(g => {
