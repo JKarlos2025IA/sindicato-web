@@ -154,7 +154,7 @@
                 <div id="drop-zone" class="file-upload-area rounded-xl p-6 text-center cursor-pointer">
                     <ion-icon name="cloud-upload" class="text-3xl text-gray-400 mb-1"></ion-icon>
                     <p class="text-gray-500 font-medium text-sm">Arrastre archivos aquí o haga clic para seleccionar</p>
-                    <p class="text-gray-400 text-xs mt-1">PDF, JPG, PNG (máx. 5MB c/u) — No es obligatorio</p>
+                    <p class="text-gray-400 text-xs mt-1">PDF, JPG, PNG (máx. 20MB c/u) — No es obligatorio</p>
                     <input type="file" id="solic-archivos" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
                 </div>
                 <div id="file-list" class="mt-3 space-y-2"></div>
@@ -330,10 +330,10 @@
         fileInput.addEventListener('change', ()=>{ rawFiles(Array.from(fileInput.files)); });
 
         function rawFiles(files){
-            const oversized = files.filter(f => f.size > 5*1024*1024);
+            const oversized = files.filter(f => f.size > 20*1024*1024);
             if(oversized.length){
-                alert('Los siguientes archivos superan 5MB y no se cargaran:\n' + oversized.map(f => f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)').join('\n'));
-                files = files.filter(f => f.size <= 5*1024*1024);
+                alert('Los siguientes archivos superan 20MB y no se cargaran:\n' + oversized.map(f => f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)').join('\n'));
+                files = files.filter(f => f.size <= 20*1024*1024);
             }
             archivosSeleccionados = files;
             mostrarArchivos();
@@ -489,7 +489,7 @@ ${archivosList}
                 if(archivosSeleccionados.length){
                     const stamp = Date.now();
                     for(const f of archivosSeleccionados){
-                        if(f.size>5*1024*1024){ alert(f.name+' excede 5MB.'); continue; }
+                        if(f.size>20*1024*1024){ alert(f.name+' excede 20MB.'); continue; }
                         const r = ref(storage, `viaticos/${stamp}_${f.name.replace(/[^a-zA-Z0-9.\-]/g,'_')}`);
                         await uploadBytes(r, f);
                         dataPendiente.archivos.push({ nombre: f.name, url: await getDownloadURL(r) });
