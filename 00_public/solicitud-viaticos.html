@@ -322,7 +322,9 @@
                 alert('Los siguientes archivos superan 20MB y no se cargaran:\n' + oversized.map(f => f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)').join('\n'));
                 files = files.filter(f => f.size <= 20*1024*1024);
             }
-            archivosSeleccionados = files;
+            // Acumular en vez de reemplazar
+            const existentes = new Set(archivosSeleccionados.map(f => f.name + f.size));
+            files.forEach(f => { if(!existentes.has(f.name + f.size)) archivosSeleccionados.push(f); });
             mostrarArchivos();
         }
         function mostrarArchivos(){
@@ -482,13 +484,14 @@ ${archivosList}
                 }
                 // Subir comprobantes
                 if(archivosSeleccionados.length){
-                    archivosSeleccionados.forEach(async (f,i) => {
-                        if(f.size>20*1024*1024){ alert(f.name+' excede 20MB.'); return; }
+                    for(let i = 0; i < archivosSeleccionados.length; i++){
+                        const f = archivosSeleccionados[i];
+                        if(f.size>20*1024*1024){ alert(f.name+' excede 20MB.'); continue; }
                         const ext = f.name.split('.').pop();
                         const r = ref(storage, `viaticos/${prefijo}-SUSTENTO-N-REG-${String(nroRegistro).padStart(2,'0')}-${String(i+1).padStart(2,'0')}.${ext}`);
                         await uploadBytes(r, f);
                         dataPendiente.archivos.push({ nombre: f.name, url: await getDownloadURL(r) });
-                    });
+                    }
                 }
                 await addDoc(collection(db,'viaticos'), dataPendiente);
                 form.classList.add('hidden');
