@@ -859,22 +859,6 @@
             }
         };
 
-                    // Verificar duplicados en memoria (no consultar Firestore)
-                    if (existingNames.has(nombre)) { saltados++; continue; }
-                    existingNames.add(nombre);
-
-                    await addDoc(collection(db, 'socios'), socio);
-                    importados++;
-                }
-
-                alert(`Importacion completada: ${importados} afiliados nuevos, ${saltados} duplicados omitidos.`);
-                await window.cargarSocios();
-            } catch (err) {
-                alert('Error al importar Excel: ' + err.message);
-            }
-            event.target.value = '';
-        };
-
         // === EXPORTAR AFILIADOS A EXCEL ===
         window.exportarSociosExcel = async function () {
             try {
