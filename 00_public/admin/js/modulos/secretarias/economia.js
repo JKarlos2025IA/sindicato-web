@@ -1,8 +1,8 @@
 // ============================================================
 // SIUTCASJNJ - Modulo: Economia y Finanzas (v2)
 // ============================================================
-import { db, storage, collection, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, where } from '../core.js';
-import { ref, uploadBytes, getDownloadURL } from '../core.js';
+import { db, storage, collection, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, where } from '../../core.js';
+import { ref, uploadBytes, getDownloadURL } from '../../core.js';
 
 let snapCache = null;
 
