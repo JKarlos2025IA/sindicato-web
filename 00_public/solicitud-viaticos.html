@@ -42,9 +42,18 @@
                         class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Bien o Servicio</label>
-                    <input type="text" id="solic-descripcion" required placeholder="Ej: SUSCRIPCION DE PAGINA WEB"
-                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Tipo de Servicio / Bien</label>
+                    <select id="solic-descripcion" required
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase font-bold">
+                        <option value="">Seleccione una opción...</option>
+                        <option value="COMISION DE REPRESENTACION">COMISION DE REPRESENTACION</option>
+                        <option value="SERVICIO DE PAGINA WEB">SERVICIO DE PAGINA WEB</option>
+                        <option value="SERVICIO DE TELEFONIA CELULAR">SERVICIO DE TELEFONIA CELULAR</option>
+                        <option value="SERVICIO DE DATOS Y ALMACENAMIENTO">SERVICIO DE DATOS Y ALMACENAMIENTO</option>
+                        <option value="OTROS">OTROS (ESPECIFICAR)</option>
+                    </select>
+                    <input type="text" id="solic-descripcion-otro" placeholder="ESPECIFIQUE EL SERVICIO O BIEN"
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase mt-2 hidden">
                 </div>
             </div>
 
@@ -167,6 +176,25 @@
             document.getElementById('solic-total').value = (c * p).toFixed(2);
         }
 
+        // Toggle "Otros" en descripción
+        const selDesc = document.getElementById('solic-descripcion');
+        const otroInput = document.getElementById('solic-descripcion-otro');
+        selDesc.addEventListener('change', () => {
+            if (selDesc.value === 'OTROS') {
+                otroInput.classList.remove('hidden');
+                otroInput.required = true;
+            } else {
+                otroInput.classList.add('hidden');
+                otroInput.required = false;
+                otroInput.value = '';
+            }
+        });
+
+        function obtenerDescripcion() {
+            if (selDesc.value === 'OTROS') return otroInput.value.trim().toUpperCase();
+            return selDesc.value;
+        }
+
         // Drop zone
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('solic-archivos');
@@ -219,7 +247,7 @@
                 const data = {
                     nombre: document.getElementById('solic-nombre').value.trim().toUpperCase(),
                     fecha: document.getElementById('solic-fecha').value,
-                    descripcion: document.getElementById('solic-descripcion').value.trim().toUpperCase(),
+                    descripcion: obtenerDescripcion(),
                     cantidad: parseFloat(document.getElementById('solic-cantidad').value) || 0,
                     unidad: document.getElementById('solic-unidad').value,
                     pu: parseFloat(document.getElementById('solic-pu').value) || 0,
@@ -265,7 +293,7 @@
         document.getElementById('btn-whatsapp').addEventListener('click', function () {
             const nombre = document.getElementById('solic-nombre').value.trim().toUpperCase() || '(sin nombre)';
             const fecha = document.getElementById('solic-fecha').value || '(sin fecha)';
-            const desc = document.getElementById('solic-descripcion').value.trim().toUpperCase() || '(sin desc)';
+            const desc = obtenerDescripcion() || '(sin desc)';
             const c = document.getElementById('solic-cantidad').value;
             const u = document.getElementById('solic-unidad').value;
             const p = document.getElementById('solic-pu').value;
@@ -285,6 +313,10 @@
             fileList.innerHTML = '';
             document.getElementById('solic-unidad').value = 'UNIDAD';
             document.getElementById('solic-cantidad').value = '1';
+            document.getElementById('solic-descripcion').value = '';
+            otroInput.classList.add('hidden');
+            otroInput.required = false;
+            otroInput.value = '';
         };
     </script>
 </body>
