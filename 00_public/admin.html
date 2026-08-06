@@ -960,8 +960,12 @@
                 if (!nombre) return;
 
                 const btn = document.getElementById('btn-submit-socio');
+                const btnText = document.getElementById('btn-socio-text');
+                const btnIcon = btn.querySelector('ion-icon');
                 btn.disabled = true;
-                btn.innerHTML = '<ion-icon name="sync" class="animate-spin mr-2"></ion-icon> Guardando...';
+                btnIcon.setAttribute('name', 'sync');
+                btnIcon.classList.add('animate-spin');
+                btnText.textContent = 'Guardando...';
 
                 try {
                     const data = { nombre, dni, codigo, fecha, email, telefono, uo, cargo, activo, timestamp: Date.now() };
@@ -975,14 +979,16 @@
                     document.getElementById('socio-activo').checked = true;
                     document.getElementById('socio-activo-label').textContent = 'Activo';
                     document.getElementById('socio-activo-label').className = 'text-sm font-semibold text-emerald-600';
-                    document.getElementById('btn-socio-text').textContent = 'Guardar Afiliado';
+                    btnText.textContent = 'Guardar Afiliado';
                     document.getElementById('btn-cancel-socio').classList.add('hidden');
                     await window.cargarSocios();
                 } catch (err) {
                     alert('Error al guardar: ' + err.message);
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon><span id="btn-socio-text">Guardar Afiliado</span>';
+                    btnIcon.setAttribute('name', 'save');
+                    btnIcon.classList.remove('animate-spin');
+                    btnText.textContent = 'Guardar Afiliado';
                 }
             });
         }
