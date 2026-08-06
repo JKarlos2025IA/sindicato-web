@@ -18,7 +18,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
         // Las reglas del índice pueden pedir configurar Firestore para Ordenar por fecha. Por ahora limitamos los problemas.
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -714,7 +714,7 @@
             }
         };
 
-        // === IMPORTAR AFILIADOS DESDE EXCEL ===
+        // === IMPORTAR AFILIADOS DESDE EXCEL (BATCH) ===
         window.importarSociosExcel = async function (event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -724,99 +724,112 @@
                 const ws = wb.Sheets[wb.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-                // Buscar fila con APELLIDOS / NOMBRES en los primeros 10 registros
+                // Buscar fila con APELLIDOS / NOMBRES
                 let headerRow = -1;
                 for (let i = 0; i < Math.min(rows.length, 10); i++) {
                     const row = rows[i];
                     if (!row || !Array.isArray(row)) continue;
                     const txt = row.map(c => String(c || '').toUpperCase().trim()).join(' ');
-                    if (txt.includes('APELLIDOS') || txt.includes('NOMBRES')) {
-                        headerRow = i;
-                        break;
-                    }
+                    if (txt.includes('APELLIDOS') || txt.includes('NOMBRES')) { headerRow = i; break; }
                 }
-                if (headerRow < 0) {
-                    alert('No se encontro fila de cabecera. Verifica que el Excel tenga "APELLIDOS Y NOMBRES".');
-                    event.target.value = '';
-                    return;
-                }
+                if (headerRow < 0) { alert('No se encontro cabecera con APELLIDOS Y NOMBRES.'); event.target.value = ''; return; }
 
-                // Mapear columnas
                 const headers = rows[headerRow].map(h => String(h || '').toUpperCase().trim());
                 let colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1, colCodigo = -1;
                 for (let i = 0; i < headers.length; i++) {
-                    const h = headers[i];
-                    if (!h) continue;
+                    const h = headers[i]; if (!h) continue;
                     if (h.includes('APELLIDOS') || h.includes('NOMBRES') || h === 'NOMBRE') colNombre = i;
                     else if (h.includes('CODIGO')) colCodigo = i;
                     else if (h.includes('DNI')) colDNI = i;
                     else if (h.includes('UO') || h.includes('UNIDAD') || h.includes('OFICINA')) colUO = i;
                     else if (h.includes('CARGO')) colCargo = i;
                 }
+                if (colNombre < 0) { alert('No se encontro columna NOMBRE. Cabeceras: ' + headers.filter(h => h).join(', ')); event.target.value = ''; return; }
 
-                if (colNombre < 0) {
-                    alert('No se encontro columna de NOMBRE. Cabeceras: ' + headers.filter(h => h).join(', '));
-                    event.target.value = '';
-                    return;
-                }
-
-                // Cargar codigos pre-generados desde afiliados_codigos.json
+                // Cargar codigos pre-generados
                 let codigosPre = [];
-                try {
-                    const r = await fetch('admin/afiliados_codigos.json');
-                    codigosPre = await r.json();
-                } catch (e) { console.warn('No se pudo cargar codigos pre-generados, usando aleatorios.'); }
+                try { const r = await fetch('admin/afiliados_codigos.json'); codigosPre = await r.json(); } catch (e) {}
 
-                // Cargar nombres existentes en Firestore para evitar duplicados
+                // Cargar nombres y codigos existentes
                 const existingNames = new Set();
                 const existingCodes = new Set();
                 const qSnap = await getDocs(collection(db, 'socios'));
-                qSnap.forEach(d => {
-                    const data = d.data();
-                    if (data.codigo) existingCodes.add(data.codigo);
-                    if (data.nombre) existingNames.add(data.nombre.toUpperCase());
-                });
+                qSnap.forEach(d => { const dt = d.data(); if (dt.codigo) existingCodes.add(dt.codigo); if (dt.nombre) existingNames.add(dt.nombre.toUpperCase()); });
 
-                function genCode() {
-                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                    let c;
-                    do { c = ''; for (let i = 0; i < 6; i++) c += chars[Math.floor(Math.random() * chars.length)]; }
-                    while (existingCodes.has(c));
-                    existingCodes.add(c);
-                    return c;
-                }
-
-                let importados = 0, saltados = 0, idx = 0;
+                // Construir lista de afiliados a importar
+                const nuevos = [];
+                let idx = 0;
                 for (let i = headerRow + 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (!row || !row[colNombre]) continue;
                     const nombre = String(row[colNombre]).trim().toUpperCase();
-                    if (!nombre || nombre.length < 5) continue;
+                    if (!nombre || nombre.length < 5 || existingNames.has(nombre)) continue;
 
-                    // Usar codigo del Excel si existe, sino del JSON pre-generado, sino aleatorio
                     let codigo = '';
-                    if (colCodigo >= 0 && row[colCodigo]) {
-                        codigo = String(row[colCodigo]).trim().toUpperCase();
-                    } else if (idx < codigosPre.length) {
-                        codigo = codigosPre[idx].codigo;
-                    } else {
-                        codigo = genCode();
+                    if (colCodigo >= 0 && row[colCodigo]) codigo = String(row[colCodigo]).trim().toUpperCase();
+                    else if (idx < codigosPre.length) codigo = codigosPre[idx].codigo;
+                    if (!codigo || existingCodes.has(codigo)) {
+                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                        do { codigo = ''; for (let j = 0; j < 6; j++) codigo += chars[Math.floor(Math.random() * chars.length)]; }
+                        while (existingCodes.has(codigo));
                     }
-                    if (!codigo || existingCodes.has(codigo)) codigo = genCode();
                     existingCodes.add(codigo);
+                    existingNames.add(nombre);
                     idx++;
-                    const socio = {
-                        nombre,
+
+                    nuevos.push({
+                        nombre, codigo,
                         dni: colDNI >= 0 && row[colDNI] ? String(row[colDNI]).trim() : '',
-                        codigo,
-                        fecha: '',
-                        email: '',
-                        telefono: '',
                         uo: colUO >= 0 && row[colUO] ? String(row[colUO]).trim().toUpperCase() : '',
                         cargo: colCargo >= 0 && row[colCargo] ? String(row[colCargo]).trim().toUpperCase() : '',
-                        activo: true,
-                        timestamp: Date.now()
-                    };
+                        fecha: '', email: '', telefono: '', activo: true, timestamp: Date.now()
+                    });
+                }
+
+                if (nuevos.length === 0) { alert('No hay afiliados nuevos para importar (todos ya existen).'); event.target.value = ''; return; }
+
+                // Escritura por lotes (500 docs max por batch)
+                const BATCH_SIZE = 400;
+                let escritos = 0;
+                for (let i = 0; i < nuevos.length; i += BATCH_SIZE) {
+                    const batch = writeBatch(db);
+                    const chunk = nuevos.slice(i, i + BATCH_SIZE);
+                    for (const a of chunk) {
+                        const ref = doc(collection(db, 'socios'));
+                        batch.set(ref, a);
+                    }
+                    await batch.commit();
+                    escritos += chunk.length;
+                }
+
+                alert(`Importacion completada: ${escritos} afiliados cargados.`);
+                await window.cargarSocios();
+            } catch (err) {
+                alert('Error al importar Excel: ' + err.message);
+            }
+            event.target.value = '';
+        };
+
+        // === ELIMINAR TODOS LOS AFILIADOS ===
+        window.eliminarTodosSocios = async function () {
+            if (!confirm('Estas seguro? Se eliminaran TODOS los afiliados. Esta accion no se puede deshacer.')) return;
+            try {
+                const snap = await getDocs(collection(db, 'socios'));
+                const BATCH_SIZE = 400;
+                const docs = [];
+                snap.forEach(d => docs.push(d));
+                for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+                    const batch = writeBatch(db);
+                    const chunk = docs.slice(i, i + BATCH_SIZE);
+                    for (const d of chunk) batch.delete(d.ref);
+                    await batch.commit();
+                }
+                alert(`Eliminados: ${docs.length} afiliados.`);
+                await window.cargarSocios();
+            } catch (err) {
+                alert('Error al eliminar: ' + err.message);
+            }
+        };
 
                     // Verificar duplicados en memoria (no consultar Firestore)
                     if (existingNames.has(nombre)) { saltados++; continue; }
@@ -1964,6 +1977,10 @@
                                     <button onclick="window.exportarSociosExcel()"
                                         class="text-sm font-semibold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded flex items-center transition">
                                         <ion-icon name="download" class="mr-1"></ion-icon> Descargar Datos
+                                    </button>
+                                    <button onclick="window.eliminarTodosSocios()"
+                                        class="text-sm font-semibold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded flex items-center transition">
+                                        <ion-icon name="trash" class="mr-1"></ion-icon> Eliminar Todos
                                     </button>
                                 </div>
                             </div>
