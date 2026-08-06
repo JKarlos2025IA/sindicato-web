@@ -127,13 +127,6 @@
                 </div>
             </div>
 
-            <!-- Monto directo (solo Ingreso) -->
-            <div id="row-monto" class="hidden">
-                <label class="block text-sm font-bold text-gray-700 mb-1">Monto S/</label>
-                <input type="number" id="solic-monto" placeholder="0.00" step="0.01" min="0"
-                    class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-500 outline-none text-lg font-bold">
-            </div>
-
             <!-- Observación -->
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Observación o Detalle</label>
@@ -259,12 +252,9 @@
         const selDesc = document.getElementById('solic-descripcion');
         const otroInput = document.getElementById('solic-descripcion-otro');
         const lblDesc = document.getElementById('lbl-descripcion');
-        const rowCant = document.getElementById('row-cantidad');
-        const rowMonto = document.getElementById('row-monto');
+        const inpTotal = document.getElementById('solic-total');
         const inpCant = document.getElementById('solic-cantidad');
         const inpPU = document.getElementById('solic-pu');
-        const inpTotal = document.getElementById('solic-total');
-        const inpMonto = document.getElementById('solic-monto');
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('solic-archivos');
         const fileList = document.getElementById('file-list');
@@ -293,14 +283,11 @@
         // --- Cambiar tipo Gasto/Ingreso ---
         window.cambiarTipo = function(){
             const tipo = document.querySelector('input[name="solic-tipo"]:checked').value;
-            const isGasto = tipo === 'GASTO';
-            rowCant.classList.toggle('hidden', !isGasto);
-            rowMonto.classList.toggle('hidden', isGasto);
-            lblDesc.textContent = isGasto ? 'Tipo de Servicio / Bien' : 'Tipo de Ingreso';
-            selDesc.innerHTML = '<option value="">Seleccione una opcion...</option>' + (isGasto ? OPCIONES_GASTO : OPCIONES_INGRESO).map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
+            lblDesc.textContent = tipo==='GASTO' ? 'Tipo de Servicio / Bien' : 'Tipo de Ingreso';
+            selDesc.innerHTML = '<option value="">Seleccione una opcion...</option>' + (tipo==='GASTO' ? OPCIONES_GASTO : OPCIONES_INGRESO).map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
             otroInput.classList.add('hidden'); otroInput.required = false; otroInput.value = '';
-            if (isGasto) { inpMonto.removeAttribute('required'); inpCant.setAttribute('required',''); inpPU.setAttribute('required',''); }
-            else { inpCant.removeAttribute('required'); inpPU.removeAttribute('required'); inpMonto.setAttribute('required',''); }
+            // Ambos tipos usan cantidad/unidad/PU/total
+            inpCant.setAttribute('required',''); inpPU.setAttribute('required','');
         };
 
         // --- Total automatico ---
@@ -372,9 +359,7 @@
             const obs = document.getElementById('solic-observacion').value.trim().toUpperCase() || '-';
             const sust = document.getElementById('solic-sustento').value.trim().toUpperCase() || '-';
             const tipoLabel = tipo==='GASTO' ? 'GASTO / EGRESO' : 'INGRESO';
-            const detalleExtra = tipo==='GASTO'
-                ? `<tr><td class="label">Cantidad</td><td>${inpCant.value||'-'}</td></tr><tr><td class="label">Unidad</td><td>${document.getElementById('solic-unidad').value||'-'}</td></tr><tr><td class="label">Precio Unitario</td><td>S/ ${(parseFloat(inpPU.value)||0).toFixed(2)}</td></tr>`
-                : '';
+            const detalleExtra = `<tr><td class="label">Cantidad</td><td>${inpCant.value||'-'}</td></tr><tr><td class="label">Unidad</td><td>${document.getElementById('solic-unidad').value||'-'}</td></tr><tr><td class="label">Precio Unitario</td><td>S/ ${(parseFloat(inpPU.value)||0).toFixed(2)}</td></tr>`;
             const archivosList = archivosSeleccionados.length > 0
                 ? `<tr><td class="label">Documentos Adjuntos</td><td>${archivosSeleccionados.map(f=>f.name+' ('+(f.size/1024).toFixed(1)+' KB)').join('<br>')}</td></tr>`
                 : '';
@@ -421,15 +406,14 @@ ${archivosList}
         // --- Construir datos ---
         function buildData(){
             const tipo = document.querySelector('input[name="solic-tipo"]:checked').value;
-            const isGasto = tipo==='GASTO';
             return {
                 tipo, nombre: obtenerNombre(),
                 fecha: document.getElementById('solic-fecha').value,
                 descripcion: obtenerDescripcion(),
-                cantidad: isGasto ? (parseFloat(inpCant.value)||0) : 0,
-                unidad: isGasto ? document.getElementById('solic-unidad').value : '',
-                pu: isGasto ? (parseFloat(inpPU.value)||0) : 0,
-                total: isGasto ? (parseFloat(inpTotal.value)||0) : (parseFloat(inpMonto.value)||0),
+                cantidad: parseFloat(inpCant.value)||0,
+                unidad: document.getElementById('solic-unidad').value,
+                pu: parseFloat(inpPU.value)||0,
+                total: parseFloat(inpTotal.value)||0,
                 observacion: document.getElementById('solic-observacion').value.trim().toUpperCase(),
                 sustento: document.getElementById('solic-sustento').value.trim().toUpperCase(),
                 archivos: [], plantillaFirmadaURL: '', plantillaFirmadaNombre: '',
@@ -445,7 +429,7 @@ ${archivosList}
             const nombre = obtenerNombre();
             const fecha = document.getElementById('solic-fecha').value;
             const desc = obtenerDescripcion();
-            const total = tipo==='GASTO' ? inpTotal.value : inpMonto.value;
+            const total = inpTotal.value;
 
             if(!nombre){ alert('Seleccione su nombre.'); return; }
             if(!fecha){ alert('Ingrese la fecha.'); return; }
@@ -512,8 +496,7 @@ ${archivosList}
             const nombre = obtenerNombre()||'(sin nombre)';
             const fecha = document.getElementById('solic-fecha').value||'(sin fecha)';
             const desc = obtenerDescripcion()||'(sin desc)';
-            const total = tipo==='GASTO' ? (inpTotal.value||'0') : (inpMonto.value||'0');
-            window.open(`https://wa.me/51955153250?text=${encodeURIComponent(`*SOLICITUD*\nNombre: ${nombre}\nTipo: ${tipo}\nFecha: ${fecha}\nDesc: ${desc}\nTotal: S/ ${total}`)}`,'_blank');
+            window.open(`https://wa.me/51955153250?text=${encodeURIComponent(`*SOLICITUD*\nNombre: ${nombre}\nTipo: ${tipo}\nFecha: ${fecha}\nDesc: ${desc}\nTotal: S/ ${inpTotal.value||'0'}`)}`,'_blank');
         });
 
         // --- Nueva solicitud ---
@@ -521,7 +504,7 @@ ${archivosList}
             document.getElementById('confirmacion').classList.add('hidden');
             form.classList.remove('hidden');
             form.reset();
-            inpTotal.value=''; inpMonto.value='';
+            inpTotal.value='';
             archivosSeleccionados=[]; fileList.innerHTML='';
             archivoFirmado=null; firmadoInput.value=''; firmadoNombre.classList.add('hidden'); btnQuitarFirmado.classList.add('hidden');
             document.getElementById('plantilla-estado').innerHTML='1. Descargue la plantilla → 2. Firmela digitalmente → 3. Subala aqui';
