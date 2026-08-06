@@ -383,15 +383,17 @@ async function cargarBalance() {
             const v = d.data();
             if (!v.timestamp?.toDate) return;
             const date = v.timestamp.toDate();
-            gastos.push({ fecha: date, nombre: v.nombre, descripcion: v.descripcion, total: v.total||0, mes: date.getMonth()+1, anio: date.getFullYear(), unidad: v.unidad, cantidad: v.cantidad, pu: v.pu });
+            gastos.push({ fecha: date, nombre: v.nombre, descripcion: v.descripcion, total: v.total||0, tipo: v.tipo||'GASTO', mes: date.getMonth()+1, anio: date.getFullYear(), unidad: v.unidad, cantidad: v.cantidad, pu: v.pu });
         });
 
         let filtrados = gastos;
         if (tipo === 'mes') filtrados = gastos.filter(g => g.mes === mes && g.anio === anio);
         else if (tipo === 'anio') filtrados = gastos.filter(g => g.anio === anio);
 
-        const total = filtrados.reduce((s,g) => s+g.total, 0);
-        if (totalEl) totalEl.textContent = 'S/ ' + total.toFixed(2);
+        const totalIng = filtrados.filter(g => g.tipo === 'INGRESO').reduce((s,g) => s + g.total, 0);
+        const totalGas = filtrados.filter(g => g.tipo === 'GASTO').reduce((s,g) => s + g.total, 0);
+        const neto = totalIng - totalGas;
+        if (totalEl) totalEl.innerHTML = `<span class="text-blue-700 text-sm">Ing: +S/ ${totalIng.toFixed(2)}</span> <span class="text-red-500 text-sm mx-2">Gas: -S/ ${totalGas.toFixed(2)}</span> <span class="text-sm">=</span> <span class="${neto>=0?'text-emerald-700':'text-red-600'} text-lg">S/ ${neto.toFixed(2)}</span>`;
 
         if (filtrados.length === 0) {
             container.innerHTML = '<p class="text-center py-8 text-gray-400">Sin gastos en este periodo.</p>';
