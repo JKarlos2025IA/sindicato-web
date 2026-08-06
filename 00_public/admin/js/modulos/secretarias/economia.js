@@ -62,15 +62,15 @@ async function cargarSolicitudes() {
                 : '';
 
             return `<tr class="border-b hover:bg-gray-50">
-                <td class="px-2 py-2.5 text-sm">${f}</td>
-                <td class="px-2 py-2.5 text-sm truncate" title="${v.nombre||''}">${v.nombre||''}</td>
-                <td class="px-2 py-2.5 text-sm truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
+                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${f}</td>
+                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.nombre||''}</td>
+                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.descripcion||''}</td>
                 <td class="px-2 py-2.5 text-sm text-center">${v.cantidad||''}</td>
                 <td class="px-2 py-2.5 text-sm text-center">${v.unidad||''}</td>
                 <td class="px-2 py-2.5 text-sm text-right">${(v.pu||0).toFixed(2)}</td>
                 <td class="px-2 py-2.5 text-sm text-right font-bold">${(v.total||0).toFixed(2)}</td>
-                <td class="px-2 py-2.5 text-sm truncate" title="${v.observacion||''}">${v.observacion||''}</td>
-                <td class="px-2 py-2.5 text-sm truncate" title="${v.sustento||''}">${v.sustento||''}</td>
+                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.observacion||''}</td>
+                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.sustento||''}</td>
                 <td class="px-2 py-2.5 text-sm">${archivos||'<span class="text-gray-300">-</span>'}</td>
                 <td class="px-2 py-2.5 text-sm">${plantilla}</td>
                 <td class="px-2 py-2.5 text-center">${badge}</td>
