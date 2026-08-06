@@ -663,7 +663,7 @@
         window.cargarSocios = async function (filtro = '') {
             if (!listaSocios) return;
             try {
-                listaSocios.innerHTML = '<tr><td colspan="10" class="px-3 py-4 text-center">Cargando afiliados...</td></tr>';
+                listaSocios.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center">Cargando afiliados...</td></tr>';
                 const qSocios = await getDocs(collection(db, "socios"));
                 const socios = [];
                 qSocios.forEach(docSnap => socios.push({ id: docSnap.id, ...docSnap.data() }));
@@ -683,7 +683,7 @@
                 if (socioCount) socioCount.textContent = socios.length;
 
                 if (filtrados.length === 0) {
-                    listaSocios.innerHTML = `<tr><td colspan="10" class="px-3 py-4 text-center text-gray-500">${filtro ? 'No se encontraron resultados.' : 'No hay afiliados registrados. Usa el formulario de arriba para agregar el primero.'}</td></tr>`;
+                    listaSocios.innerHTML = `<tr><td colspan="11" class="px-3 py-4 text-center text-gray-500">${filtro ? 'No se encontraron resultados.' : 'No hay afiliados registrados. Usa el formulario de arriba para agregar el primero.'}</td></tr>`;
                     return;
                 }
 
@@ -693,6 +693,11 @@
                     const badge = activo
                         ? '<span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs font-bold">Activo</span>'
                         : '<span class="bg-red-50 text-red-500 px-2 py-1 rounded text-xs font-bold">Inactivo</span>';
+                    const genIcon = s.genero === 'F'
+                        ? '<span class="text-pink-500 font-bold" title="Femenino">F</span>'
+                        : s.genero === 'M'
+                        ? '<span class="text-blue-500 font-bold" title="Masculino">M</span>'
+                        : '-';
                     html += `
                         <tr class="hover:bg-gray-50 transition ${activo ? '' : 'opacity-60'}">
                             <td class="px-3 py-2 font-mono text-xs font-bold text-blue-600 whitespace-nowrap">${s.codigo || '-'}</td>
@@ -703,6 +708,7 @@
                             <td class="px-3 py-2"><span class="bg-pink-50 text-pink-700 px-1.5 py-0.5 rounded text-xs font-bold whitespace-nowrap">${s.fecha || '-'}</span></td>
                             <td class="px-3 py-2 text-gray-500 text-xs max-w-[150px] truncate" title="${s.email || ''}">${s.email || '-'}</td>
                             <td class="px-3 py-2 text-gray-500 text-xs whitespace-nowrap">${s.telefono || '-'}</td>
+                            <td class="px-3 py-2 text-center">${genIcon}</td>
                             <td class="px-3 py-2">${badge}</td>
                             <td class="px-3 py-2 text-right space-x-1 whitespace-nowrap">
                                 <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded text-xs font-bold transition btn-editar-socio" data-id="${s.id}">Editar</button>
@@ -727,6 +733,7 @@
                         document.getElementById('socio-telefono').value = socio.telefono || '';
                         document.getElementById('socio-uo').value = socio.uo || '';
                         document.getElementById('socio-cargo').value = socio.cargo || '';
+                        document.getElementById('socio-genero').value = socio.genero || '';
                         const cb = document.getElementById('socio-activo');
                         const lbl = document.getElementById('socio-activo-label');
                         cb.checked = socio.activo !== false;
@@ -750,7 +757,7 @@
 
             } catch (error) {
                 console.error("Error cargando afiliados:", error);
-                listaSocios.innerHTML = '<tr><td colspan="10" class="px-3 py-4 text-center text-red-500">Error al cargar afiliados.</td></tr>';
+                listaSocios.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-red-500">Error al cargar afiliados.</td></tr>';
             }
         };
 
@@ -789,7 +796,7 @@
                 if (headerRow < 0) { alert('No se encontro cabecera con APELLIDOS Y NOMBRES.'); event.target.value = ''; return; }
 
                 const headers = rows[headerRow].map(h => String(h || '').toUpperCase().trim());
-                let colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1, colCodigo = -1, colCumple = -1, colEmail = -1, colTelefono = -1, colEstado = -1;
+                let colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1, colCodigo = -1, colCumple = -1, colEmail = -1, colTelefono = -1, colEstado = -1, colGenero = -1;
                 for (let i = 0; i < headers.length; i++) {
                     const h = headers[i]; if (!h) continue;
                     if (h.includes('APELLIDOS') || h.includes('NOMBRE')) colNombre = i;
@@ -801,6 +808,7 @@
                     if (h === 'ESTADO' || h.startsWith('ESTADO')) colEstado = i;
                     if (h === 'UO' || h.startsWith('UO') || h.includes('UNIDAD') || h.includes('OFICINA')) colUO = i;
                     if (h.includes('CARGO')) colCargo = i;
+                    if (h.includes('GENERO') || h.includes('SEXO')) colGenero = i;
                 }
                 if (colNombre < 0) { alert('No se encontro columna NOMBRE. Cabeceras: ' + headers.filter(h => h).join(', ')); event.target.value = ''; return; }
 
@@ -841,6 +849,7 @@
                         if (ev === 'INACTIVO' || ev === 'SUSPENDIDO') activoExcel = false;
                         else if (ev === 'ACTIVO') activoExcel = true;
                     }
+                    const generoExcel = colGenero >= 0 && row[colGenero] ? String(row[colGenero]).trim().toUpperCase().charAt(0) : '';
 
                     if (existente) {
                         // Actualizar solo campos del Excel, preservar manuales
@@ -854,6 +863,7 @@
                         if (emailExcel) upd.email = emailExcel;
                         if (telExcel) upd.telefono = telExcel;
                         if (activoExcel !== null) upd.activo = activoExcel;
+                        if (generoExcel) upd.genero = generoExcel;
                         if (colCodigo >= 0 && row[colCodigo] && !existente.data.codigo) {
                             upd.codigo = String(row[colCodigo]).trim().toUpperCase();
                         }
@@ -879,6 +889,7 @@
                             email: emailExcel,
                             telefono: telExcel,
                             activo: activoExcel !== null ? activoExcel : true,
+                            genero: generoExcel,
                             timestamp: Date.now()
                         });
                         nuevos++;
@@ -956,7 +967,8 @@
                         'Cumpleanos': s.fecha || '',
                         'Email': s.email || '',
                         'Telefono': s.telefono || '',
-                        'Estado': s.activo !== false ? 'Activo' : 'Inactivo'
+                        'Estado': s.activo !== false ? 'Activo' : 'Inactivo',
+                        'Genero': s.genero === 'F' ? 'Femenino' : s.genero === 'M' ? 'Masculino' : ''
                     });
                 });
                 data.sort((a, b) => a.Nombre.localeCompare(b.Nombre));
@@ -964,7 +976,7 @@
                 const ws = XLSX.utils.json_to_sheet(data);
                 ws['!cols'] = [
                     { wch: 10 }, { wch: 45 }, { wch: 12 }, { wch: 40 },
-                    { wch: 25 }, { wch: 10 }, { wch: 35 }, { wch: 15 }, { wch: 10 }
+                    { wch: 25 }, { wch: 10 }, { wch: 35 }, { wch: 15 }, { wch: 8 }, { wch: 10 }
                 ];
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Afiliados');
@@ -1001,6 +1013,7 @@
                 const uo = document.getElementById('socio-uo').value.trim().toUpperCase();
                 const cargo = document.getElementById('socio-cargo').value.trim().toUpperCase();
                 const activo = document.getElementById('socio-activo').checked;
+                const genero = document.getElementById('socio-genero').value;
 
                 if (!nombre) return;
 
@@ -1013,7 +1026,7 @@
                 btnText.textContent = 'Guardando...';
 
                 try {
-                    const data = { nombre, dni, codigo, fecha, email, telefono, uo, cargo, activo, timestamp: Date.now() };
+                    const data = { nombre, dni, codigo, fecha, email, telefono, uo, cargo, activo, genero, timestamp: Date.now() };
                     if (idEdit) {
                         await updateDoc(doc(db, "socios", idEdit), data);
                     } else {
@@ -2066,6 +2079,15 @@
                                             class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
                                         <span id="socio-activo-label" class="text-sm font-semibold text-emerald-600">Activo</span>
                                     </label>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-sm font-bold text-gray-700">Genero:</span>
+                                        <select id="socio-genero"
+                                            class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-pink-500 bg-white">
+                                            <option value="">Sin definir</option>
+                                            <option value="M">Masculino</option>
+                                            <option value="F">Femenino</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="pt-4 border-t border-gray-100 flex gap-3">
                                     <button type="submit" id="btn-submit-socio"
@@ -2131,6 +2153,7 @@
                                             <th class="px-3 py-3">Cumple</th>
                                             <th class="px-3 py-3">Email</th>
                                             <th class="px-3 py-3">Telefono</th>
+                                            <th class="px-3 py-3">Gen</th>
                                             <th class="px-3 py-3">Estado</th>
                                             <th class="px-3 py-3 text-right">Acciones</th>
                                         </tr>
