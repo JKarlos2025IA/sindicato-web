@@ -623,32 +623,46 @@
         const socioCount = document.getElementById('socio-count');
         const socioSearch = document.getElementById('socio-search');
 
+        window.generarCodigoSocio = function () {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+            document.getElementById('socio-codigo').value = code;
+        };
+
         window.cargarSocios = async function (filtro = '') {
             if (!listaSocios) return;
             try {
-                listaSocios.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">Cargando socios...</td></tr>';
+                listaSocios.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center">Cargando afiliados...</td></tr>';
                 const qSocios = await getDocs(collection(db, "socios"));
                 const socios = [];
                 qSocios.forEach(docSnap => socios.push({ id: docSnap.id, ...docSnap.data() }));
-                socios.sort((a, b) => a.fecha.localeCompare(b.fecha));
+                socios.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
 
-                const filtrados = filtro ? socios.filter(s => s.nombre.toLowerCase().includes(filtro.toLowerCase())) : socios;
+                const filtrados = filtro ? socios.filter(s => (s.nombre || '').toLowerCase().includes(filtro.toLowerCase()) || (s.dni || '').includes(filtro) || (s.codigo || '').toLowerCase().includes(filtro.toLowerCase())) : socios;
 
                 if (socioCount) socioCount.textContent = socios.length;
 
                 if (filtrados.length === 0) {
-                    listaSocios.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">${filtro ? 'No se encontraron resultados.' : 'No hay socios registrados. Usa el formulario de arriba para agregar el primero.'}</td></tr>`;
+                    listaSocios.innerHTML = `<tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">${filtro ? 'No se encontraron resultados.' : 'No hay afiliados registrados. Usa el formulario de arriba para agregar el primero.'}</td></tr>`;
                     return;
                 }
 
                 let html = '';
                 filtrados.forEach(s => {
+                    const activo = s.activo !== false;
+                    const badge = activo
+                        ? '<span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs font-bold">Activo</span>'
+                        : '<span class="bg-red-50 text-red-500 px-2 py-1 rounded text-xs font-bold">Inactivo</span>';
                     html += `
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 font-medium text-gray-800">${s.nombre}</td>
-                            <td class="px-6 py-4"><span class="bg-pink-50 text-pink-700 px-2 py-1 rounded text-xs font-bold">${s.fecha}</span></td>
-                            <td class="px-6 py-4 text-gray-500 text-sm">${s.telefono || '-'}</td>
-                            <td class="px-6 py-4 text-right space-x-2">
+                        <tr class="hover:bg-gray-50 transition ${activo ? '' : 'opacity-60'}">
+                            <td class="px-4 py-3 font-mono text-sm font-bold text-blue-600">${s.codigo || '-'}</td>
+                            <td class="px-4 py-3 font-medium text-gray-800">${s.nombre || '-'}</td>
+                            <td class="px-4 py-3 text-gray-500 text-sm">${s.dni || '-'}</td>
+                            <td class="px-4 py-3"><span class="bg-pink-50 text-pink-700 px-2 py-1 rounded text-xs font-bold">${s.fecha || '-'}</span></td>
+                            <td class="px-4 py-3 text-gray-500 text-sm">${s.telefono || '-'}</td>
+                            <td class="px-4 py-3">${badge}</td>
+                            <td class="px-4 py-3 text-right space-x-1">
                                 <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded text-xs font-bold transition btn-editar-socio" data-id="${s.id}">Editar</button>
                                 <button class="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs font-bold transition btn-eliminar-socio" data-id="${s.id}">Eliminar</button>
                             </td>
@@ -664,10 +678,19 @@
                         if (!socio) return;
                         document.getElementById('socio-id-edit').value = id;
                         document.getElementById('socio-nombre').value = socio.nombre || '';
+                        document.getElementById('socio-dni').value = socio.dni || '';
+                        document.getElementById('socio-codigo').value = socio.codigo || '';
                         document.getElementById('socio-fecha').value = socio.fecha || '';
                         document.getElementById('socio-email').value = socio.email || '';
                         document.getElementById('socio-telefono').value = socio.telefono || '';
-                        document.getElementById('btn-socio-text').textContent = 'Actualizar Socio';
+                        document.getElementById('socio-uo').value = socio.uo || '';
+                        document.getElementById('socio-cargo').value = socio.cargo || '';
+                        const cb = document.getElementById('socio-activo');
+                        const lbl = document.getElementById('socio-activo-label');
+                        cb.checked = socio.activo !== false;
+                        lbl.textContent = cb.checked ? 'Activo' : 'Inactivo';
+                        lbl.className = cb.checked ? 'text-sm font-semibold text-emerald-600' : 'text-sm font-semibold text-red-500';
+                        document.getElementById('btn-socio-text').textContent = 'Actualizar Afiliado';
                         document.getElementById('btn-cancel-socio').classList.remove('hidden');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     });
@@ -676,7 +699,7 @@
                 document.querySelectorAll('.btn-eliminar-socio').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const id = e.currentTarget.getAttribute('data-id');
-                        if (confirm('¿Eliminar este socio de la lista?')) {
+                        if (confirm('Eliminar este afiliado de la lista?')) {
                             await deleteDoc(doc(db, "socios", id));
                             await window.cargarSocios(socioSearch ? socioSearch.value : '');
                         }
@@ -684,8 +707,8 @@
                 });
 
             } catch (error) {
-                console.error("Error cargando socios:", error);
-                listaSocios.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error al cargar socios.</td></tr>';
+                console.error("Error cargando afiliados:", error);
+                listaSocios.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-red-500">Error al cargar afiliados.</td></tr>';
             }
         };
 
@@ -701,36 +724,52 @@
                 e.preventDefault();
                 const idEdit = document.getElementById('socio-id-edit').value;
                 const nombre = document.getElementById('socio-nombre').value.trim().toUpperCase();
+                const dni = document.getElementById('socio-dni').value.trim();
+                const codigo = document.getElementById('socio-codigo').value.trim();
                 const fecha = document.getElementById('socio-fecha').value.trim();
                 const email = document.getElementById('socio-email').value.trim();
                 const telefono = document.getElementById('socio-telefono').value.trim();
+                const uo = document.getElementById('socio-uo').value.trim().toUpperCase();
+                const cargo = document.getElementById('socio-cargo').value.trim().toUpperCase();
+                const activo = document.getElementById('socio-activo').checked;
 
-                if (!nombre || !fecha) return;
+                if (!nombre) return;
 
                 const btn = document.getElementById('btn-submit-socio');
                 btn.disabled = true;
                 btn.innerHTML = '<ion-icon name="sync" class="animate-spin mr-2"></ion-icon> Guardando...';
 
                 try {
-                    const data = { nombre, fecha, email, telefono, timestamp: Date.now() };
+                    const data = { nombre, dni, codigo, fecha, email, telefono, uo, cargo, activo, timestamp: Date.now() };
                     if (idEdit) {
                         await updateDoc(doc(db, "socios", idEdit), data);
-                        alert('Socio actualizado exitosamente.');
                     } else {
                         await addDoc(collection(db, "socios"), data);
-                        alert('Socio agregado exitosamente.');
                     }
                     formSocio.reset();
                     document.getElementById('socio-id-edit').value = '';
-                    document.getElementById('btn-socio-text').textContent = 'Guardar Socio';
+                    document.getElementById('socio-activo').checked = true;
+                    document.getElementById('socio-activo-label').textContent = 'Activo';
+                    document.getElementById('socio-activo-label').className = 'text-sm font-semibold text-emerald-600';
+                    document.getElementById('btn-socio-text').textContent = 'Guardar Afiliado';
                     document.getElementById('btn-cancel-socio').classList.add('hidden');
                     await window.cargarSocios();
                 } catch (err) {
                     alert('Error al guardar: ' + err.message);
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon><span id="btn-socio-text">Guardar Socio</span>';
+                    btn.innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon><span id="btn-socio-text">Guardar Afiliado</span>';
                 }
+            });
+        }
+
+        // Toggle activo/inactivo
+        const cbActivo = document.getElementById('socio-activo');
+        if (cbActivo) {
+            cbActivo.addEventListener('change', function () {
+                const lbl = document.getElementById('socio-activo-label');
+                lbl.textContent = this.checked ? 'Activo' : 'Inactivo';
+                lbl.className = this.checked ? 'text-sm font-semibold text-emerald-600' : 'text-sm font-semibold text-red-500';
             });
         }
 
@@ -739,7 +778,10 @@
             btnCancelSocio.addEventListener('click', () => {
                 formSocio.reset();
                 document.getElementById('socio-id-edit').value = '';
-                document.getElementById('btn-socio-text').textContent = 'Guardar Socio';
+                document.getElementById('socio-activo').checked = true;
+                document.getElementById('socio-activo-label').textContent = 'Activo';
+                document.getElementById('socio-activo-label').className = 'text-sm font-semibold text-emerald-600';
+                document.getElementById('btn-socio-text').textContent = 'Guardar Afiliado';
                 btnCancelSocio.classList.add('hidden');
             });
         }
@@ -1655,18 +1697,18 @@
 
                         <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
                             <div class="relative z-10">
-                                <h3 class="text-2xl font-black mb-2">Gestión de Socios y Cumpleaños</h3>
-                                <p class="text-pink-100">Administra la lista de socios. El banner de cumpleaños se muestra automáticamente en la web cuando coincide la fecha.</p>
+                                <h3 class="text-2xl font-black mb-2">Centro de Datos de Afiliados</h3>
+                                <p class="text-pink-100">Administra los datos completos de cada afiliado. Codigo de descarga, DNI, estado activo/inactivo y cumpleanos.</p>
                             </div>
-                            <ion-icon name="cake" class="absolute -right-6 -bottom-6 text-[10rem] text-white opacity-10 z-0"></ion-icon>
+                            <ion-icon name="people" class="absolute -right-6 -bottom-6 text-[10rem] text-white opacity-10 z-0"></ion-icon>
                         </div>
 
-                        <!-- Formulario Agregar Socio -->
+                        <!-- Formulario Agregar / Editar Afiliado -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                                     <ion-icon name="person-add" class="text-pink-500 mr-2 text-xl"></ion-icon>
-                                    Agregar / Editar Socio
+                                    Agregar / Editar Afiliado
                                 </h3>
                             </div>
                             <form id="form-socio" class="p-6 space-y-5">
@@ -1678,48 +1720,82 @@
                                             class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none uppercase">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Fecha de Cumpleaños (MM-DD)</label>
-                                        <input type="text" id="socio-fecha" required placeholder="Ej: 03-15" maxlength="5" pattern="\d{2}-\d{2}"
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">DNI</label>
+                                        <input type="text" id="socio-dni" placeholder="Ej: 12345678" maxlength="8"
                                             class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none">
-                                        <p class="text-xs text-gray-400 mt-1">Formato: mes-día (ej: 03-15 para 15 de marzo)</p>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Email (opcional)</label>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Codigo de Descarga</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="socio-codigo" readonly placeholder="Auto-generado"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 bg-gray-100 shadow-sm outline-none font-mono text-lg tracking-widest text-center uppercase text-gray-500">
+                                            <button type="button" onclick="window.generarCodigoSocio()"
+                                                class="bg-gray-200 hover:bg-gray-300 px-3 rounded-lg font-bold text-gray-600 transition text-sm whitespace-nowrap">Generar</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Fecha de Cumpleanos (MM-DD)</label>
+                                        <input type="text" id="socio-fecha" required placeholder="Ej: 03-15" maxlength="5" pattern="\d{2}-\d{2}"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Email</label>
                                         <input type="email" id="socio-email" placeholder="correo@ejemplo.com"
                                             class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Teléfono WhatsApp (con código país)</label>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Telefono / WhatsApp</label>
                                         <input type="text" id="socio-telefono" placeholder="Ej: 51999888777"
                                             class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none">
-                                        <p class="text-xs text-gray-400 mt-1">Sin + ni espacios. Ej: 51999888777</p>
                                     </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Unidad Organica (UO)</label>
+                                        <input type="text" id="socio-uo" placeholder="Ej: OFICINA DE ADMINISTRACION Y FINANZAS"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none uppercase">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Cargo</label>
+                                        <input type="text" id="socio-cargo" placeholder="Ej: APOYO PROFESIONAL"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-pink-500 bg-white shadow-sm transition outline-none uppercase">
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6 pt-2">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <span class="text-sm font-bold text-gray-700">Estado:</span>
+                                        <input type="checkbox" id="socio-activo" checked
+                                            class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                        <span id="socio-activo-label" class="text-sm font-semibold text-emerald-600">Activo</span>
+                                    </label>
                                 </div>
                                 <div class="pt-4 border-t border-gray-100 flex gap-3">
                                     <button type="submit" id="btn-submit-socio"
                                         class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
                                         <ion-icon name="save" class="mr-2 text-xl"></ion-icon>
-                                        <span id="btn-socio-text">Guardar Socio</span>
+                                        <span id="btn-socio-text">Guardar Afiliado</span>
                                     </button>
                                     <button type="button" id="btn-cancel-socio"
                                         class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3.5 px-6 rounded-lg transition-all">
-                                        Cancelar Edición
+                                        Cancelar Edicion
                                     </button>
                                 </div>
                             </form>
                         </div>
 
-                        <!-- Tabla de Socios -->
+                        <!-- Tabla de Afiliados -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                                     <ion-icon name="people" class="text-gray-500 mr-2 text-xl"></ion-icon>
-                                    Lista de Socios (<span id="socio-count">0</span>)
+                                    Afiliados (<span id="socio-count">0</span>)
                                 </h3>
                                 <div class="flex gap-2">
-                                    <input type="text" id="socio-search" placeholder="Buscar socio..."
+                                    <input type="text" id="socio-search" placeholder="Buscar afiliado..."
                                         class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-pink-500">
                                     <button onclick="window.cargarSocios()"
                                         class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
@@ -1731,10 +1807,13 @@
                                 <table class="min-w-full text-left text-sm text-gray-600">
                                     <thead class="bg-white text-gray-400 text-xs uppercase font-extrabold border-b border-gray-100">
                                         <tr>
-                                            <th class="px-6 py-4">Nombre</th>
-                                            <th class="px-6 py-4">Cumpleaños</th>
-                                            <th class="px-6 py-4">Teléfono</th>
-                                            <th class="px-6 py-4 text-right">Acciones</th>
+                                            <th class="px-4 py-3">Codigo</th>
+                                            <th class="px-4 py-3">Nombre</th>
+                                            <th class="px-4 py-3">DNI</th>
+                                            <th class="px-4 py-3">Cumple</th>
+                                            <th class="px-4 py-3">Telefono</th>
+                                            <th class="px-4 py-3">Estado</th>
+                                            <th class="px-4 py-3 text-right">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody id="lista-socios" class="divide-y divide-gray-100">

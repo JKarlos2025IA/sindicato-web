@@ -71,8 +71,15 @@
                 btn.textContent = 'Verificando...';
 
                 try {
-                    const q = query(collection(db, 'afiliados'), where('codigo', '==', codigo.toUpperCase()));
-                    const snap = await getDocs(q);
+                    // Buscar en afiliados (importados del Excel)
+                    let q = query(collection(db, 'afiliados'), where('codigo', '==', codigo.toUpperCase()));
+                    let snap = await getDocs(q);
+
+                    // Si no encuentra, buscar en socios (centro de datos)
+                    if (snap.empty) {
+                        q = query(collection(db, 'socios'), where('codigo', '==', codigo.toUpperCase()));
+                        snap = await getDocs(q);
+                    }
 
                     if (snap.empty) {
                         input.classList.add('descarga-input-error');
@@ -84,6 +91,16 @@
                     }
 
                     const afiliado = snap.docs[0].data();
+
+                    // Verificar si esta activo (solo aplica en coleccion socios)
+                    if (afiliado.activo === false) {
+                        input.classList.add('descarga-input-error');
+                        input.value = '';
+                        input.placeholder = 'Afiliado inactivo';
+                        btn.disabled = false;
+                        btn.textContent = 'Confirmar';
+                        return;
+                    }
 
                     // Registrar descarga
                     await addDoc(collection(db, 'descargas'), {
