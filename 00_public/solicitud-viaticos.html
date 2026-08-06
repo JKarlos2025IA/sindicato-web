@@ -30,8 +30,23 @@
             <!-- Nombre del solicitante -->
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Nombre del Solicitante</label>
-                <input type="text" id="solic-nombre" required placeholder="NOMBRE COMPLETO"
-                    class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase">
+                <select id="solic-nombre" required
+                    class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase font-bold">
+                    <option value="">Seleccione un secretario...</option>
+                    <option value="PAVEL ORDOÑEZ ESCARZA">PAVEL ORDOÑEZ ESCARZA - Secretaría General</option>
+                    <option value="KATTY CANDY JARA JANCCO">KATTY CANDY JARA JANCCO - Sub-Secretaría General</option>
+                    <option value="JUAN ALFREDO TISZA ASTETE">JUAN ALFREDO TISZA ASTETE - Organización</option>
+                    <option value="RICHARD TREJO SILVA">RICHARD TREJO SILVA - Defensa</option>
+                    <option value="RICARDO MOLLEAPAZA CALDERON">RICARDO MOLLEAPAZA CALDERON - Economía</option>
+                    <option value="LUCY ALVAREZ HERRERA">LUCY ALVAREZ HERRERA - Actas y Archivo</option>
+                    <option value="ANTUANED MARIA MONTOYA LA ROSA">ANTUANED MARIA MONTOYA LA ROSA - Control y Disciplina</option>
+                    <option value="JIMMY GERALDO CHALCO BUSTINZA">JIMMY GERALDO CHALCO BUSTINZA - Prensa y Propaganda</option>
+                    <option value="JUAN CARLOS MONTENEGRO GONZALES">JUAN CARLOS MONTENEGRO GONZALES - Cultura y Deporte</option>
+                    <option value="GISSELA MARGARITA SILVA MACETAS">GISSELA MARGARITA SILVA MACETAS - Bienestar Social</option>
+                    <option value="OTROS">OTROS (ESCRIBIR NOMBRE)</option>
+                </select>
+                <input type="text" id="solic-nombre-otro" placeholder="NOMBRE COMPLETO DEL SOLICITANTE"
+                    class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase mt-2 hidden">
             </div>
 
             <!-- Fecha y Descripción -->
@@ -176,6 +191,25 @@
             document.getElementById('solic-total').value = (c * p).toFixed(2);
         }
 
+        // Toggle "Otros" en nombre
+        const selNombre = document.getElementById('solic-nombre');
+        const otroNombre = document.getElementById('solic-nombre-otro');
+        selNombre.addEventListener('change', () => {
+            if (selNombre.value === 'OTROS') {
+                otroNombre.classList.remove('hidden');
+                otroNombre.required = true;
+            } else {
+                otroNombre.classList.add('hidden');
+                otroNombre.required = false;
+                otroNombre.value = '';
+            }
+        });
+
+        function obtenerNombre() {
+            if (selNombre.value === 'OTROS') return otroNombre.value.trim().toUpperCase();
+            return selNombre.value;
+        }
+
         // Toggle "Otros" en descripción
         const selDesc = document.getElementById('solic-descripcion');
         const otroInput = document.getElementById('solic-descripcion-otro');
@@ -245,7 +279,7 @@
 
             try {
                 const data = {
-                    nombre: document.getElementById('solic-nombre').value.trim().toUpperCase(),
+                    nombre: obtenerNombre(),
                     fecha: document.getElementById('solic-fecha').value,
                     descripcion: obtenerDescripcion(),
                     cantidad: parseFloat(document.getElementById('solic-cantidad').value) || 0,
@@ -291,7 +325,7 @@
 
         // WhatsApp directo (sin guardar en Firestore)
         document.getElementById('btn-whatsapp').addEventListener('click', function () {
-            const nombre = document.getElementById('solic-nombre').value.trim().toUpperCase() || '(sin nombre)';
+            const nombre = obtenerNombre() || '(sin nombre)';
             const fecha = document.getElementById('solic-fecha').value || '(sin fecha)';
             const desc = obtenerDescripcion() || '(sin desc)';
             const c = document.getElementById('solic-cantidad').value;
@@ -317,6 +351,10 @@
             otroInput.classList.add('hidden');
             otroInput.required = false;
             otroInput.value = '';
+            document.getElementById('solic-nombre').value = '';
+            otroNombre.classList.add('hidden');
+            otroNombre.required = false;
+            otroNombre.value = '';
         };
     </script>
 </body>
