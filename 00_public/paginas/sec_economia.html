@@ -6,6 +6,8 @@
                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
                         <title>Economía y Finanzas - SIUTCASJNJ</title>
                         <script src="https://cdn.tailwindcss.com"></script>
+                        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+                        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
                         <style>
                             .logo-circle {
                                 border: 3px solid #1e3a8a;
@@ -54,6 +56,22 @@
                                 <h2
                                     class="text-3xl md:text-4xl font-bold text-blue-900 mb-8 border-b-4 border-green-600 pb-2 inline-block">
                                     Economía y Finanzas</h2>
+
+                                <!-- Acceso rápido: Viáticos -->
+                                <div class="bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-2xl shadow-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                                    <div>
+                                        <h3 class="text-xl font-black mb-1">Solicitudes de Viáticos</h3>
+                                        <p class="text-emerald-100 text-sm">Registre y consulte sus solicitudes de gastos y viáticos.</p>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <a href="../solicitud-viaticos.html" class="bg-white text-emerald-700 font-bold px-5 py-3 rounded-xl hover:bg-emerald-50 transition text-sm flex items-center shadow">
+                                            <ion-icon name="add-circle" class="mr-2 text-lg"></ion-icon> Nueva Solicitud
+                                        </a>
+                                        <a href="../consulta-viaticos.html" class="bg-emerald-800 bg-opacity-30 border border-white border-opacity-30 text-white font-bold px-5 py-3 rounded-xl hover:bg-emerald-800 hover:bg-opacity-50 transition text-sm flex items-center">
+                                            <ion-icon name="list" class="mr-2 text-lg"></ion-icon> Ver Solicitudes
+                                        </a>
+                                    </div>
+                                </div>
 
                                 <!-- Section A: Transparencia -->
                                 <section class="mb-12 bg-white rounded-xl shadow-md p-8 border-t-4 border-green-600">
