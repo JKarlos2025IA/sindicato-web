@@ -2169,16 +2169,16 @@
                         <!-- ===== SUBVISTA: SOLICITUDES ===== -->
                         <div id="panel-solicitudes">
                             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                                <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex justify-between items-center">
-                                    <h3 class="font-bold text-gray-800">Pedidos / Solicitudes de Viáticos</h3>
-                                    <button onclick="window.cargarSolicitudes?.()" class="text-sm font-semibold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded flex items-center transition">
+                                <div class="bg-gray-50 border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+                                    <h3 class="font-bold text-gray-800 text-sm">Pedidos / Solicitudes de Viaticos</h3>
+                                    <button onclick="window.cargarSolicitudes?.()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded flex items-center transition">
                                         <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
                                     </button>
                                 </div>
                                 <div class="overflow-x-auto">
-                                    <table class="w-full text-sm">
-                                        <thead><tr class="bg-gray-50 text-left text-xs font-bold text-gray-600 uppercase">
-                                            <th class="p-2">Fecha</th><th class="p-2">Solicitante</th><th class="p-2">Descripción</th><th class="p-2 text-center">Cant</th><th class="p-2 text-center">Unidad</th><th class="p-2 text-right">P.U.</th><th class="p-2 text-right">Total</th><th class="p-2">Observación</th><th class="p-2">Sustento</th><th class="p-2">Archivos</th><th class="p-2">Firmada</th><th class="p-2 text-center">Estado</th><th class="p-2 text-center">Opciones</th>
+                                    <table class="w-full text-xs whitespace-nowrap">
+                                        <thead><tr class="bg-gray-50 text-left font-bold text-gray-600 uppercase" style="font-size:10px">
+                                            <th class="px-1.5 py-1.5">Fecha</th><th class="px-1.5 py-1.5">Solicitante</th><th class="px-1.5 py-1.5">Descripcion</th><th class="px-1.5 py-1.5 text-center">Cant</th><th class="px-1.5 py-1.5 text-center">Unid</th><th class="px-1.5 py-1.5 text-right">P.U.</th><th class="px-1.5 py-1.5 text-right">Total</th><th class="px-1.5 py-1.5">Observacion</th><th class="px-1.5 py-1.5">Sustento</th><th class="px-1.5 py-1.5">Archivos</th><th class="px-1.5 py-1.5">Firmada</th><th class="px-1.5 py-1.5 text-center">Estado</th><th class="px-1.5 py-1.5 text-center">Opciones</th>
                                         </tr></thead>
                                         <tbody id="tbl-solicitudes">
                                             <tr><td colspan="13" class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-2xl"></ion-icon><br>Cargando solicitudes...</td></tr>

@@ -62,19 +62,19 @@ async function cargarSolicitudes() {
                 : '';
 
             return `<tr class="border-b hover:bg-gray-50">
-                <td class="p-2 text-xs whitespace-nowrap">${f}</td>
-                <td class="p-2 text-xs">${v.nombre||''}</td>
-                <td class="p-2 text-xs max-w-[380px] truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
-                <td class="p-2 text-xs text-center">${v.cantidad||''}</td>
-                <td class="p-2 text-xs text-center">${v.unidad||''}</td>
-                <td class="p-2 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
-                <td class="p-2 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
-                <td class="p-2 text-xs max-w-[200px] truncate" title="${v.observacion||''}">${v.observacion||''}</td>
-                <td class="p-2 text-xs max-w-[200px] truncate" title="${v.sustento||''}">${v.sustento||''}</td>
-                <td class="p-2 text-xs">${archivos||'<span class="text-gray-300">-</span>'}</td>
-                <td class="p-2 text-xs">${plantilla}</td>
-                <td class="p-2 text-center">${badge}</td>
-                <td class="p-2 whitespace-nowrap">
+                <td class="px-1.5 py-1.5 text-xs whitespace-nowrap">${f}</td>
+                <td class="px-1.5 py-1.5 text-xs">${v.nombre||''}</td>
+                <td class="px-1.5 py-1.5 text-xs truncate" style="max-width:400px" title="${v.descripcion||''}">${v.descripcion||''}</td>
+                <td class="px-1.5 py-1.5 text-xs text-center">${v.cantidad||''}</td>
+                <td class="px-1.5 py-1.5 text-xs text-center">${v.unidad||''}</td>
+                <td class="px-1.5 py-1.5 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
+                <td class="px-1.5 py-1.5 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
+                <td class="px-1.5 py-1.5 text-xs truncate" style="max-width:250px" title="${v.observacion||''}">${v.observacion||''}</td>
+                <td class="px-1.5 py-1.5 text-xs truncate" style="max-width:250px" title="${v.sustento||''}">${v.sustento||''}</td>
+                <td class="px-1.5 py-1.5 text-xs">${archivos||'<span class="text-gray-300">-</span>'}</td>
+                <td class="px-1.5 py-1.5 text-xs">${plantilla}</td>
+                <td class="px-1.5 py-1.5 text-center">${badge}</td>
+                <td class="px-1.5 py-1.5 whitespace-nowrap">
                     <div class="flex gap-1 justify-center">
                         ${btnAnotar}
                         ${btnDevolver}
