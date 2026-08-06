@@ -37,7 +37,7 @@ async function cargarSolicitudes() {
 
         const docs = snap.docs.filter(d => d.data().estado !== 'eliminado');
         if (docs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-gray-400">No hay solicitudes.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-gray-400">No hay solicitudes.</td></tr>';
             return;
         }
 
@@ -45,23 +45,23 @@ async function cargarSolicitudes() {
             const v = d.data();
             const id = d.id;
             const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : '';
-            const archivos = (v.archivos || []).map(a =>
-                `<a href="${a.url}" target="_blank" class="text-blue-600 hover:underline text-xs block truncate max-w-[250px]">${a.nombre}</a>`
-            ).join('');
-            const plantilla = v.plantillaFirmadaURL
-                ? `<a href="${v.plantillaFirmadaURL}" target="_blank" class="text-blue-600 hover:underline text-xs font-bold">Ver Firmada</a>`
-                : '<span class="text-gray-300 text-xs">-</span>';
             const badge = v.estado === 'anotado'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Anotado</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pendiente</span>';
             const tipoBadge = v.tipo === 'INGRESO'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Ingreso</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Gasto</span>';
-            const tieneFirmada = v.plantillaFirmadaURL ? true : false;
+            const fichaSol = v.plantillaFirmadaURL
+                ? `<a href="${v.plantillaFirmadaURL}" target="_blank" class="text-blue-600 hover:underline text-xs font-bold">Ver</a>`
+                : '<span class="text-gray-400 text-xs">-</span>';
+            const fichaCont = v.firmadoURL
+                ? `<a href="${v.firmadoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs font-bold">Aprobado</a>`
+                : `<label class="cursor-pointer text-blue-500 hover:text-blue-700 text-xs font-bold">Subir <input type="file" class="hidden upload-contador" data-id="${id}" accept=".pdf"></label>`;
+            const tieneAprobacion = v.firmadoURL ? true : false;
             const btnAnotar = v.estado !== 'anotado'
-                ? (tieneFirmada
+                ? (tieneAprobacion
                     ? `<button class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-xs font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
-                    : `<span class="text-gray-400 text-xs" title="Falta plantilla firmada">Sin firmada</span>`)
+                    : `<span class="text-gray-400 text-xs">Pendiente</span>`)
                 : '';
             const btnDevolver = v.estado === 'anotado'
                 ? `<button class="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded text-xs font-bold" data-act="devolver" data-id="${id}">Devolver</button>`
@@ -76,10 +76,8 @@ async function cargarSolicitudes() {
                 <td class="px-2 py-2.5 text-sm text-center">${v.unidad||''}</td>
                 <td class="px-2 py-2.5 text-sm text-right">${(v.pu||0).toFixed(2)}</td>
                 <td class="px-2 py-2.5 text-sm text-right font-bold">${(v.total||0).toFixed(2)}</td>
-                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.observacion||''}</td>
-                <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.sustento||''}</td>
-                <td class="px-2 py-2.5 text-sm">${archivos||'<span class="text-gray-300">-</span>'}</td>
-                <td class="px-2 py-2.5 text-sm">${plantilla}</td>
+                <td class="px-2 py-2.5 text-sm text-center">${fichaSol}</td>
+                <td class="px-2 py-2.5 text-sm text-center">${fichaCont}</td>
                 <td class="px-2 py-2.5 text-center">${badge}</td>
                 <td class="px-2 py-2.5 text-center whitespace-nowrap">
                     <div class="flex gap-1 justify-center text-xs">
@@ -119,8 +117,26 @@ async function cargarSolicitudes() {
                 } catch (err) { alert('Error: ' + err.message); }
             });
         });
+
+        // Upload ficha contador inline
+        tbody.querySelectorAll('.upload-contador').forEach(input => {
+            input.addEventListener('change', async function () {
+                const file = this.files[0];
+                if (!file) return;
+                const vid = this.dataset.id;
+                try {
+                    this.disabled = true;
+                    const r = ref(storage, `viaticos/aprobado_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-]/g,'_')}`);
+                    await uploadBytes(r, file);
+                    const url = await getDownloadURL(r);
+                    await updateDoc(doc(db, 'viaticos', vid), { firmadoURL: url });
+                    cargarSolicitudes();
+                    cargarLibroGastos();
+                } catch (err) { alert('Error: ' + err.message); }
+            });
+        });
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="14" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
     }
 }
 
