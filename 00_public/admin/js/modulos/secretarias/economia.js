@@ -1,7 +1,7 @@
 // ============================================================
 // SIUTCASJNJ - Modulo: Economia y Finanzas (v2)
 // ============================================================
-import { db, storage, collection, getDocs, query, orderBy, serverTimestamp, doc, updateDoc } from '../../core.js';
+import { db, storage, collection, getDocs, addDoc, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from '../../core.js';
 import { ref, uploadBytes, getDownloadURL } from '../../core.js';
 
 let snapCache = null;
@@ -13,12 +13,14 @@ export function initEconomia() {
     window.descargarLibro = descargarLibro;
     window.actualizarSelectFirmado = actualizarSelectFirmado;
     window.cerrarModal = cerrarModal;
+    window.cargarIngresos = cargarIngresos;
 
     cargarSolicitudes();
     cargarLibroGastos();
     initBalance();
     initUploadSigned();
     initModalButtons();
+    initIngresos();
 }
 
 // ============================================================
@@ -83,6 +85,7 @@ async function cargarSolicitudes() {
             btn.addEventListener('click', async function () {
                 const act = this.dataset.act;
                 const vid = this.dataset.id;
+                try {
                 if (act === 'anotar') {
                     await updateDoc(doc(db, 'viaticos', vid), { estado: 'anotado' });
                     cargarSolicitudes();
@@ -102,6 +105,7 @@ async function cargarSolicitudes() {
                 } else if (act === 'modificar') {
                     abrirModal(vid);
                 }
+                } catch (err) { alert('Error: ' + err.message); }
             });
         });
     } catch (e) {
@@ -335,5 +339,73 @@ async function cargarBalance() {
         }
     } catch (e) {
         container.innerHTML = `<p class="text-center py-8 text-red-500">${e.message}</p>`;
+    }
+}
+
+// ============================================================
+// 4. INGRESOS
+// ============================================================
+
+function initIngresos() {
+    document.getElementById('form-ingreso')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-ingreso');
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+        try {
+            await addDoc(collection(db, 'ingresos'), {
+                tipo: document.getElementById('ing-tipo').value,
+                monto: parseFloat(document.getElementById('ing-monto').value) || 0,
+                descripcion: document.getElementById('ing-desc').value.trim().toUpperCase(),
+                fecha: document.getElementById('ing-fecha').value,
+                responsable: document.getElementById('ing-responsable').value.trim().toUpperCase(),
+                timestamp: serverTimestamp()
+            });
+            document.getElementById('form-ingreso').reset();
+            cargarIngresos();
+        } catch (err) { alert('Error: ' + err.message); }
+        btn.disabled = false;
+        btn.innerHTML = 'Registrar Ingreso';
+    });
+}
+
+async function cargarIngresos() {
+    const tbody = document.getElementById('tbl-ingresos');
+    const totalEl = document.getElementById('total-ingresos');
+    if (!tbody) return;
+    try {
+        const q = query(collection(db, 'ingresos'), orderBy('timestamp', 'desc'));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-400">No hay ingresos registrados.</td></tr>';
+            if (totalEl) totalEl.textContent = 'S/ 0.00';
+            return;
+        }
+        let total = 0;
+        tbody.innerHTML = snap.docs.map(d => {
+            const v = d.data();
+            total += v.monto || 0;
+            const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : (v.fecha || '');
+            return `<tr class="border-b hover:bg-gray-50">
+                <td class="p-2 text-xs whitespace-nowrap">${f}</td>
+                <td class="p-2 text-xs"><span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">${v.tipo||''}</span></td>
+                <td class="p-2 text-xs">${v.descripcion||''}</td>
+                <td class="p-2 text-xs">${v.responsable||''}</td>
+                <td class="p-2 text-xs text-right font-bold text-emerald-700">S/ ${(v.monto||0).toFixed(2)}</td>
+                <td class="p-2 text-center"><button class="text-red-400 hover:text-red-600 text-xs font-bold" data-del-ing="${d.id}">X</button></td>
+            </tr>`;
+        }).join('');
+        if (totalEl) totalEl.textContent = 'S/ ' + total.toFixed(2);
+
+        tbody.querySelectorAll('[data-del-ing]').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                if (confirm('Eliminar este ingreso?')) {
+                    await deleteDoc(doc(db, 'ingresos', this.dataset.delIng));
+                    cargarIngresos();
+                }
+            });
+        });
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
     }
 }

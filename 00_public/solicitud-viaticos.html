@@ -132,6 +132,11 @@
 
             <!-- Botón enviar -->
             <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                <button type="button" id="btn-descargar"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-lg">
+                    <ion-icon name="download" class="mr-2 text-xl"></ion-icon>
+                    Descargar Plantilla (PDF)
+                </button>
                 <button type="submit" id="btn-enviar"
                     class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-lg">
                     <ion-icon name="paper-plane" class="mr-2 text-xl"></ion-icon>
@@ -269,6 +274,62 @@
                 });
             });
         }
+
+        // Descargar plantilla PDF
+        document.getElementById('btn-descargar').addEventListener('click', () => {
+            const nombre = obtenerNombre() || '(sin nombre)';
+            const fecha = document.getElementById('solic-fecha').value || '(sin fecha)';
+            const desc = obtenerDescripcion() || '(sin descripcion)';
+            const c = document.getElementById('solic-cantidad').value || '-';
+            const u = document.getElementById('solic-unidad').value || '-';
+            const p = document.getElementById('solic-pu').value || '0';
+            const t = document.getElementById('solic-total').value || '0';
+            const obs = document.getElementById('solic-observacion').value.trim().toUpperCase() || '-';
+            const sust = document.getElementById('solic-sustento').value.trim().toUpperCase() || '-';
+
+            const w = window.open('', '_blank', 'width=800,height=900');
+            w.document.write(`<!DOCTYPE html>
+            <html><head><meta charset="UTF-8"><title>Plantilla Viaticos - ${nombre}</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 750px; margin: 40px auto; padding: 20px; color: #1a1a1a; }
+                .header { text-align: center; border-bottom: 3px solid #059669; padding-bottom: 15px; margin-bottom: 30px; }
+                .header h1 { font-size: 20px; color: #065f46; margin: 0 0 5px 0; }
+                .header h2 { font-size: 14px; color: #6b7280; margin: 0; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th { background: #059669; color: white; padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; }
+                td { padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
+                td.label { font-weight: bold; background: #f9fafb; width: 30%; }
+                .firmas { margin-top: 60px; display: flex; justify-content: space-between; }
+                .firma { text-align: center; width: 45%; }
+                .firma .linea { border-top: 1px solid #000; margin: 50px 0 10px 0; }
+                .firma .nombre { font-weight: bold; font-size: 13px; }
+                .firma .cargo { font-size: 11px; color: #6b7280; }
+                .total-row td { font-size: 16px; font-weight: bold; background: #f0fdf4; }
+                @media print { body { margin: 0; padding: 0; } }
+</style></head><body>
+<div class="header">
+    <h1>SIUTCASJNJ - SOLICITUD DE VIATICOS</h1>
+    <h2>Sindicato Unico de Trabajadores CAS - Junta Nacional de Justicia</h2>
+</div>
+<table>
+    <tr><td class="label">Fecha del Gasto</td><td>${fecha}</td></tr>
+    <tr><td class="label">Solicitante</td><td>${nombre}</td></tr>
+    <tr><td class="label">Servicio / Bien</td><td>${desc}</td></tr>
+    <tr><td class="label">Cantidad</td><td>${c}</td></tr>
+    <tr><td class="label">Unidad</td><td>${u}</td></tr>
+    <tr><td class="label">Precio Unitario</td><td>S/ ${parseFloat(p).toFixed(2)}</td></tr>
+    <tr class="total-row"><td class="label">TOTAL</td><td>S/ ${parseFloat(t).toFixed(2)}</td></tr>
+    <tr><td class="label">Observacion</td><td>${obs}</td></tr>
+    <tr><td class="label">Sustento del Servicio</td><td>${sust}</td></tr>
+</table>
+<div class="firmas">
+    <div class="firma"><div class="linea"></div><div class="nombre">${nombre}</div><div class="cargo">Solicitante</div></div>
+    <div class="firma"><div class="linea"></div><div class="nombre">Ricardo Molleapaza Calderon</div><div class="cargo">Secretario de Economia y Finanzas</div></div>
+</div>
+<script>window.onload=function(){window.print();}</script>
+</body></html>`);
+            w.document.close();
+        });
 
         // Enviar formulario
         document.getElementById('form-viaticos').addEventListener('submit', async function (e) {
