@@ -149,6 +149,13 @@ function abrirModal(vid) {
     if (!doc) return;
     const v = doc.data();
     document.getElementById('edit-viatico-id').value = vid;
+    // Nombre
+    const selNom = document.getElementById('edit-nombre');
+    selNom.value = v.nombre || '';
+    // Tipo
+    const tipo = v.tipo || 'GASTO';
+    document.querySelector(`input[name="edit-tipo"][value="${tipo}"]`).checked = true;
+    // Fecha, desc
     document.getElementById('edit-fecha').value = v.fecha || '';
     document.getElementById('edit-descripcion').value = v.descripcion || '';
     document.getElementById('edit-cantidad').value = v.cantidad || 1;
@@ -157,6 +164,35 @@ function abrirModal(vid) {
     document.getElementById('edit-total').value = v.total || 0;
     document.getElementById('edit-observacion').value = v.observacion || '';
     document.getElementById('edit-sustento').value = v.sustento || '';
+
+    // Archivos actuales (con opcion de borrar)
+    const archDiv = document.getElementById('edit-archivos-actuales');
+    if (v.archivos && v.archivos.length) {
+        archDiv.innerHTML = '<label class="block text-xs font-bold text-gray-700 mb-1">Archivos Adjuntos</label>' +
+            v.archivos.map((a, i) => `<div class="flex items-center justify-between bg-gray-50 rounded px-3 py-1.5 mb-1 text-xs"><a href="${a.url}" target="_blank" class="text-blue-600 hover:underline">${a.nombre}</a><button class="text-red-400 hover:text-red-600 font-bold text-xs del-archivo" data-idx="${i}">X</button></div>`).join('');
+        archDiv.querySelectorAll('.del-archivo').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('Eliminar este archivo?')) return;
+                const idx = parseInt(btn.dataset.idx);
+                const archivos = [...(v.archivos || [])];
+                archivos.splice(idx, 1);
+                await updateDoc(doc(db, 'viaticos', vid), { archivos });
+                abrirModal(vid); // refrescar
+                cargarSolicitudes();
+            });
+        });
+    } else {
+        archDiv.innerHTML = '<p class="text-xs text-gray-400">Sin archivos adjuntos.</p>';
+    }
+
+    // Ficha firmada (solo lectura)
+    const firmDiv = document.getElementById('edit-firmada-info');
+    if (v.plantillaFirmadaURL) {
+        firmDiv.innerHTML = `<strong>Ficha del Solicitante:</strong> <a href="${v.plantillaFirmadaURL}" target="_blank" class="text-blue-600 hover:underline">${v.plantillaFirmadaNombre || 'Ver firmada'}</a> <span class="text-gray-400 text-xs">(no editable)</span>`;
+    } else {
+        firmDiv.innerHTML = '<span class="text-gray-400">Sin ficha firmada del solicitante.</span>';
+    }
+
     document.getElementById('modal-editar').classList.remove('hidden');
 
     const calcEd = () => {
@@ -174,7 +210,10 @@ function initModalButtons() {
     document.getElementById('btn-guardar-edicion')?.addEventListener('click', async () => {
         const vid = document.getElementById('edit-viatico-id').value;
         try {
+            const tipo = document.querySelector('input[name="edit-tipo"]:checked')?.value || 'GASTO';
             await updateDoc(doc(db, 'viaticos', vid), {
+                nombre: document.getElementById('edit-nombre').value,
+                tipo,
                 fecha: document.getElementById('edit-fecha').value,
                 descripcion: document.getElementById('edit-descripcion').value.trim().toUpperCase(),
                 cantidad: parseFloat(document.getElementById('edit-cantidad').value) || 0,
