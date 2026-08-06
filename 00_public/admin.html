@@ -7,6 +7,8 @@
     <title>Panel de Administración - SIUTCASJNJ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS - Lectura/Escritura Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
@@ -709,6 +711,130 @@
             } catch (error) {
                 console.error("Error cargando afiliados:", error);
                 listaSocios.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-red-500">Error al cargar afiliados.</td></tr>';
+            }
+        };
+
+        // === IMPORTAR AFILIADOS DESDE EXCEL ===
+        window.importarSociosExcel = async function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const btn = document.getElementById('btn-submit-socio');
+            try {
+                const data = await file.arrayBuffer();
+                const wb = XLSX.read(data, { type: 'array' });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+                // Buscar la fila de cabecera (contiene "APELLIDOS Y NOMBRES")
+                let headerRow = -1;
+                for (let i = 0; i < Math.min(rows.length, 5); i++) {
+                    const row = rows[i];
+                    if (!row) continue;
+                    const txt = row.join(' ').toUpperCase();
+                    if (txt.includes('APELLIDOS') || txt.includes('NOMBRES') || txt.includes('N°')) {
+                        headerRow = i;
+                        break;
+                    }
+                }
+                if (headerRow < 0) { alert('No se encontro la cabecera en el Excel. Debe contener: APELLIDOS Y NOMBRES'); return; }
+
+                // Mapear columnas
+                const headers = rows[headerRow].map(h => String(h || '').toUpperCase().trim());
+                let colNum = -1, colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1;
+                for (let i = 0; i < headers.length; i++) {
+                    const h = headers[i];
+                    if (h.includes('N°') && !h.includes('DNI')) colNum = i;
+                    if (h.includes('APELLIDOS') || h.includes('NOMBRES') || h.includes('NOMBRE')) colNombre = i;
+                    if (h.includes('UO') || h.includes('UNIDAD')) colUO = i;
+                    if (h.includes('CARGO')) colCargo = i;
+                    if (h.includes('DNI')) colDNI = i;
+                }
+
+                if (colNombre < 0) { alert('No se encontro columna de nombre. Buscando: APELLIDOS Y NOMBRES'); return; }
+
+                // Generar codigos unicos
+                const existingCodes = new Set();
+                const qSnap = await getDocs(collection(db, 'socios'));
+                qSnap.forEach(d => { if (d.data().codigo) existingCodes.add(d.data().codigo); });
+
+                function genCode() {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let c;
+                    do { c = ''; for (let i = 0; i < 6; i++) c += chars[Math.floor(Math.random() * chars.length)]; }
+                    while (existingCodes.has(c));
+                    existingCodes.add(c);
+                    return c;
+                }
+
+                let importados = 0, saltados = 0;
+                for (let i = headerRow + 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || !row[colNombre]) continue;
+                    const nombre = String(row[colNombre]).trim().toUpperCase();
+                    if (!nombre || nombre.length < 5) continue;
+
+                    const codigo = genCode();
+                    const socio = {
+                        nombre,
+                        dni: colDNI >= 0 && row[colDNI] ? String(row[colDNI]).trim() : '',
+                        codigo,
+                        fecha: '',
+                        email: '',
+                        telefono: '',
+                        uo: colUO >= 0 && row[colUO] ? String(row[colUO]).trim().toUpperCase() : '',
+                        cargo: colCargo >= 0 && row[colCargo] ? String(row[colCargo]).trim().toUpperCase() : '',
+                        activo: true,
+                        timestamp: Date.now()
+                    };
+
+                    // Verificar duplicados por nombre
+                    const dup = query(collection(db, 'socios'), where('nombre', '==', nombre));
+                    const dupSnap = await getDocs(dup);
+                    if (!dupSnap.empty) { saltados++; continue; }
+
+                    await addDoc(collection(db, 'socios'), socio);
+                    importados++;
+                }
+
+                alert(`Importacion completada: ${importados} afiliados nuevos, ${saltados} duplicados omitidos.`);
+                await window.cargarSocios();
+            } catch (err) {
+                alert('Error al importar Excel: ' + err.message);
+            }
+            event.target.value = '';
+        };
+
+        // === EXPORTAR AFILIADOS A EXCEL ===
+        window.exportarSociosExcel = async function () {
+            try {
+                const qSnap = await getDocs(collection(db, 'socios'));
+                const data = [];
+                qSnap.forEach(d => {
+                    const s = d.data();
+                    data.push({
+                        'Codigo': s.codigo || '',
+                        'Nombre': s.nombre || '',
+                        'DNI': s.dni || '',
+                        'UO': s.uo || '',
+                        'Cargo': s.cargo || '',
+                        'Cumpleanos': s.fecha || '',
+                        'Email': s.email || '',
+                        'Telefono': s.telefono || '',
+                        'Estado': s.activo !== false ? 'Activo' : 'Inactivo'
+                    });
+                });
+                data.sort((a, b) => a.Nombre.localeCompare(b.Nombre));
+
+                const ws = XLSX.utils.json_to_sheet(data);
+                ws['!cols'] = [
+                    { wch: 10 }, { wch: 45 }, { wch: 12 }, { wch: 40 },
+                    { wch: 25 }, { wch: 10 }, { wch: 35 }, { wch: 15 }, { wch: 10 }
+                ];
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Afiliados');
+                XLSX.writeFile(wb, 'Afiliados_SIUTCASJNJ.xlsx');
+            } catch (err) {
+                alert('Error al exportar: ' + err.message);
             }
         };
 
@@ -1789,17 +1915,25 @@
 
                         <!-- Tabla de Afiliados -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center flex-wrap gap-3">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                                     <ion-icon name="people" class="text-gray-500 mr-2 text-xl"></ion-icon>
                                     Afiliados (<span id="socio-count">0</span>)
                                 </h3>
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 flex-wrap">
                                     <input type="text" id="socio-search" placeholder="Buscar afiliado..."
                                         class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-pink-500">
                                     <button onclick="window.cargarSocios()"
                                         class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
                                         <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                    </button>
+                                    <label class="text-sm font-semibold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded flex items-center transition cursor-pointer">
+                                        <ion-icon name="cloud-upload" class="mr-1"></ion-icon> Subir Excel
+                                        <input type="file" id="socio-excel-input" accept=".xlsx,.xls" class="hidden" onchange="window.importarSociosExcel(event)">
+                                    </label>
+                                    <button onclick="window.exportarSociosExcel()"
+                                        class="text-sm font-semibold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded flex items-center transition">
+                                        <ion-icon name="download" class="mr-1"></ion-icon> Descargar Datos
                                     </button>
                                 </div>
                             </div>
