@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Viáticos - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body class="bg-gradient-to-br from-emerald-50 to-green-50 min-h-screen font-sans">
+    <div class="container max-w-6xl mx-auto px-4 py-10">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <img src="docs/img/logo_new.png" alt="Logo" class="w-20 h-20 rounded-full mx-auto shadow-lg mb-4 object-cover">
+            <h1 class="text-3xl font-black text-emerald-900">SIUTCASJNJ</h1>
+            <p class="text-gray-500 text-sm tracking-wider">Sindicato Único de Trabajadores CAS - JNJ</p>
+            <h2 class="text-xl font-bold text-gray-700 mt-4">Solicitudes de Viáticos</h2>
+            <p class="text-gray-400 text-sm">Estado de solicitudes registradas</p>
+        </div>
+
+        <!-- Filtro -->
+        <div class="flex flex-wrap gap-3 mb-6 justify-center">
+            <button class="filtro-btn bg-white shadow text-emerald-700 font-bold px-5 py-2.5 rounded-xl text-sm" data-filtro="todas">
+                <ion-icon name="list" class="mr-1 align-middle"></ion-icon> Todas
+            </button>
+            <button class="filtro-btn text-gray-500 hover:text-gray-700 font-bold px-5 py-2.5 rounded-xl text-sm" data-filtro="pendiente">
+                <ion-icon name="time" class="mr-1 align-middle"></ion-icon> Pendientes <span id="count-pendiente" class="ml-1 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs"></span>
+            </button>
+            <button class="filtro-btn text-gray-500 hover:text-gray-700 font-bold px-5 py-2.5 rounded-xl text-sm" data-filtro="anotado">
+                <ion-icon name="checkmark-circle" class="mr-1 align-middle"></ion-icon> Anotados <span id="count-anotado" class="ml-1 bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs"></span>
+            </button>
+            <input type="text" id="buscar-nombre" placeholder="Buscar por nombre..."
+                class="border-gray-300 rounded-xl p-2.5 border-2 focus:border-emerald-500 outline-none text-sm w-64">
+        </div>
+
+        <!-- Tabla -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-emerald-600 text-white text-xs uppercase tracking-wider">
+                        <th class="p-3 text-left">Fecha</th>
+                        <th class="p-3 text-left">Solicitante</th>
+                        <th class="p-3 text-left">Servicio</th>
+                        <th class="p-3 text-center">Cant</th>
+                        <th class="p-3 text-center">Unidad</th>
+                        <th class="p-3 text-right">P.U.</th>
+                        <th class="p-3 text-right">Total</th>
+                        <th class="p-3 text-left">Observación</th>
+                        <th class="p-3 text-center">Estado</th>
+                    </tr></thead>
+                    <tbody id="tbl-consulta">
+                        <tr><td colspan="9" class="text-center py-10 text-gray-400">
+                            <ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando solicitudes...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                <span class="text-sm text-gray-500" id="info-registros"></span>
+                <a href="solicitud-viaticos.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-5 rounded-lg transition text-sm flex items-center">
+                    <ion-icon name="add" class="mr-1"></ion-icon> Nueva Solicitud
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
+            authDomain: "sindicato-jnj.firebaseapp.com",
+            projectId: "sindicato-jnj",
+            storageBucket: "sindicato-jnj.firebasestorage.app",
+            messagingSenderId: "1036915309355",
+            appId: "1:1036915309355:web:fac53de65031a39597e36e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let todasLasSolicitudes = [];
+        let filtroActivo = 'todas';
+
+        async function cargar() {
+            const tbody = document.getElementById('tbl-consulta');
+            try {
+                const q = query(collection(db, 'viaticos'), orderBy('timestamp', 'desc'));
+                const snap = await getDocs(q);
+                todasLasSolicitudes = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(v => v.estado !== 'eliminado');
+
+                document.getElementById('count-pendiente').textContent = todasLasSolicitudes.filter(v => v.estado === 'pendiente').length;
+                document.getElementById('count-anotado').textContent = todasLasSolicitudes.filter(v => v.estado === 'anotado').length;
+
+                renderizar();
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-red-500">Error: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tbl-consulta');
+            const buscar = (document.getElementById('buscar-nombre').value || '').toUpperCase();
+
+            let lista = todasLasSolicitudes;
+            if (filtroActivo !== 'todas') lista = lista.filter(v => v.estado === filtroActivo);
+            if (buscar) lista = lista.filter(v => (v.nombre || '').includes(buscar));
+
+            document.getElementById('info-registros').textContent = `${lista.length} solicitud(es) encontrada(s)`;
+
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-10 text-gray-400">Sin solicitudes para mostrar.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = lista.map(v => {
+                const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : (v.fecha || '');
+                const badge = v.estado === 'anotado'
+                    ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Anotado</span>'
+                    : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pendiente</span>';
+                return `<tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 text-xs whitespace-nowrap">${f}</td>
+                    <td class="p-3 text-xs font-medium">${v.nombre || ''}</td>
+                    <td class="p-3 text-xs">${v.descripcion || ''}</td>
+                    <td class="p-3 text-xs text-center">${v.cantidad || ''}</td>
+                    <td class="p-3 text-xs text-center">${v.unidad || ''}</td>
+                    <td class="p-3 text-xs text-right">${(v.pu || 0).toFixed(2)}</td>
+                    <td class="p-3 text-xs text-right font-bold">${(v.total || 0).toFixed(2)}</td>
+                    <td class="p-3 text-xs max-w-[180px] truncate" title="${v.observacion || ''}">${v.observacion || ''}</td>
+                    <td class="p-3 text-center">${badge}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Filtros
+        document.querySelectorAll('.filtro-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filtro-btn').forEach(b =>
+                    b.className = 'filtro-btn text-gray-500 hover:text-gray-700 font-bold px-5 py-2.5 rounded-xl text-sm');
+                btn.className = 'filtro-btn bg-white shadow text-emerald-700 font-bold px-5 py-2.5 rounded-xl text-sm';
+                filtroActivo = btn.dataset.filtro;
+                renderizar();
+            });
+        });
+
+        document.getElementById('buscar-nombre').addEventListener('input', renderizar);
+
+        cargar();
+    </script>
+</body>
+</html>

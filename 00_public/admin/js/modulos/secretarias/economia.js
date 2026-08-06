@@ -1,7 +1,7 @@
 // ============================================================
 // SIUTCASJNJ - Modulo: Economia y Finanzas (v2)
 // ============================================================
-import { db, storage, collection, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, where } from '../../core.js';
+import { db, storage, collection, getDocs, query, orderBy, serverTimestamp, doc, updateDoc } from '../../core.js';
 import { ref, uploadBytes, getDownloadURL } from '../../core.js';
 
 let snapCache = null;
@@ -160,10 +160,11 @@ async function cargarLibroGastos() {
     const tbody = document.getElementById('tbl-libro');
     if (!tbody) return;
     try {
-        const q = query(collection(db, 'viaticos'), where('estado', '==', 'anotado'), orderBy('timestamp', 'desc'));
+        const q = query(collection(db, 'viaticos'), orderBy('timestamp', 'desc'));
         const snap = await getDocs(q);
+        const docs = snap.docs.filter(d => d.data().estado === 'anotado');
 
-        if (snap.empty) {
+        if (docs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No hay gastos anotados.</td></tr>';
             document.getElementById('total-libro').textContent = '0.00';
             document.getElementById('btn-descargar-libro').disabled = true;
@@ -172,9 +173,9 @@ async function cargarLibroGastos() {
         }
 
         let total = 0;
-        window._snapLibro = snap.docs;
+        window._snapLibro = docs;
 
-        tbody.innerHTML = snap.docs.map(d => {
+        tbody.innerHTML = docs.map(d => {
             const v = d.data();
             total += v.total || 0;
             const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : '';
@@ -281,11 +282,12 @@ async function cargarBalance() {
     const MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
     try {
-        const q = query(collection(db, 'viaticos'), where('estado','==','anotado'), orderBy('timestamp','desc'));
+        const q = query(collection(db, 'viaticos'), orderBy('timestamp','desc'));
         const snap = await getDocs(q);
+        const docs = snap.docs.filter(d => d.data().estado === 'anotado');
 
         const gastos = [];
-        snap.forEach(d => {
+        docs.forEach(d => {
             const v = d.data();
             if (!v.timestamp?.toDate) return;
             const date = v.timestamp.toDate();
