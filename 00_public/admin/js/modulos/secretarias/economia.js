@@ -52,6 +52,9 @@ async function cargarSolicitudes() {
             const btnAnotar = v.estado !== 'anotado'
                 ? `<button class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-xs font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
                 : '';
+            const btnDevolver = v.estado === 'anotado'
+                ? `<button class="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded text-xs font-bold" data-act="devolver" data-id="${id}">Devolver</button>`
+                : '';
 
             return `<tr class="border-b hover:bg-gray-50">
                 <td class="p-2 text-xs whitespace-nowrap">${f}</td>
@@ -68,6 +71,7 @@ async function cargarSolicitudes() {
                 <td class="p-2 whitespace-nowrap">
                     <div class="flex gap-1 justify-center">
                         ${btnAnotar}
+                        ${btnDevolver}
                         <button class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs" data-act="modificar" data-id="${id}">Editar</button>
                         <button class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs" data-act="eliminar" data-id="${id}">Eliminar</button>
                     </div>
@@ -83,6 +87,12 @@ async function cargarSolicitudes() {
                     await updateDoc(doc(db, 'viaticos', vid), { estado: 'anotado' });
                     cargarSolicitudes();
                     cargarLibroGastos();
+                } else if (act === 'devolver') {
+                    if (confirm('Devolver esta solicitud a pendiente?')) {
+                        await updateDoc(doc(db, 'viaticos', vid), { estado: 'pendiente' });
+                        cargarSolicitudes();
+                        cargarLibroGastos();
+                    }
                 } else if (act === 'eliminar') {
                     if (confirm('Eliminar esta solicitud?')) {
                         await updateDoc(doc(db, 'viaticos', vid), { estado: 'eliminado' });
