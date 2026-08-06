@@ -18,7 +18,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
         // Las reglas del índice pueden pedir configurar Firestore para Ordenar por fecha. Por ahora limitamos los problemas.
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -759,10 +759,15 @@
                     return;
                 }
 
-                // Generar codigos unicos
+                // Generar codigos unicos y cargar nombres existentes (una sola consulta)
                 const existingCodes = new Set();
+                const existingNames = new Set();
                 const qSnap = await getDocs(collection(db, 'socios'));
-                qSnap.forEach(d => { if (d.data().codigo) existingCodes.add(d.data().codigo); });
+                qSnap.forEach(d => {
+                    const data = d.data();
+                    if (data.codigo) existingCodes.add(data.codigo);
+                    if (data.nombre) existingNames.add(data.nombre.toUpperCase());
+                });
 
                 function genCode() {
                     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -794,10 +799,9 @@
                         timestamp: Date.now()
                     };
 
-                    // Verificar duplicados por nombre
-                    const dup = query(collection(db, 'socios'), where('nombre', '==', nombre));
-                    const dupSnap = await getDocs(dup);
-                    if (!dupSnap.empty) { saltados++; continue; }
+                    // Verificar duplicados en memoria (no consultar Firestore)
+                    if (existingNames.has(nombre)) { saltados++; continue; }
+                    existingNames.add(nombre);
 
                     await addDoc(collection(db, 'socios'), socio);
                     importados++;
