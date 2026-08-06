@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Viáticos - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        .file-upload-area { border: 2px dashed #d1d5db; transition: border-color 0.2s, background-color 0.2s; }
+        .file-upload-area:hover { border-color: #059669; background: #ecfdf5; }
+        .file-upload-area.dragover { border-color: #059669; background: #d1fae5; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-50 to-green-50 min-h-screen font-sans">
+    <div class="container max-w-3xl mx-auto px-4 py-10">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <img src="docs/img/logo_new.png" alt="Logo" class="w-20 h-20 rounded-full mx-auto shadow-lg mb-4 object-cover">
+            <h1 class="text-3xl font-black text-emerald-900">SIUTCASJNJ</h1>
+            <p class="text-gray-500 text-sm tracking-wider">Sindicato Único de Trabajadores CAS - JNJ</p>
+            <h2 class="text-xl font-bold text-gray-700 mt-4">Solicitud de Viáticos / Gastos</h2>
+            <p class="text-gray-400 text-sm">Complete el formulario para solicitar reembolso o viáticos</p>
+        </div>
+
+        <!-- Formulario -->
+        <form id="form-viaticos" class="bg-white rounded-2xl shadow-xl p-8 space-y-6" enctype="multipart/form-data">
+
+            <!-- Nombre del solicitante -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Nombre del Solicitante</label>
+                <input type="text" id="solic-nombre" required placeholder="NOMBRE COMPLETO"
+                    class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase">
+            </div>
+
+            <!-- Fecha y Descripción -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Fecha del Gasto</label>
+                    <input type="date" id="solic-fecha" required
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Bien o Servicio</label>
+                    <input type="text" id="solic-descripcion" required placeholder="Ej: SUSCRIPCION DE PAGINA WEB"
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase">
+                </div>
+            </div>
+
+            <!-- Cantidad, Unidad, P.U. -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Cantidad</label>
+                    <input type="number" id="solic-cantidad" required value="1" min="1" step="1"
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none text-center">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Unidad</label>
+                    <select id="solic-unidad" required
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none">
+                        <option value="UNIDAD">UNIDAD</option>
+                        <option value="SERVICIO">SERVICIO</option>
+                        <option value="MES">MES</option>
+                        <option value="AÑO">AÑO</option>
+                        <option value="PAQUETE">PAQUETE</option>
+                        <option value="HORA">HORA</option>
+                        <option value="DÍA">DÍA</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Precio Unitario S/</label>
+                    <input type="number" id="solic-pu" required placeholder="0.00" step="0.01" min="0"
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Total S/</label>
+                    <input type="number" id="solic-total" readonly placeholder="0.00" step="0.01"
+                        class="w-full border-gray-300 rounded-lg p-3 border-2 bg-gray-50 text-gray-700 font-bold outline-none text-center">
+                </div>
+            </div>
+
+            <!-- Observación -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Observación o Detalle</label>
+                <textarea id="solic-observacion" rows="3" placeholder="Describa el detalle del gasto realizado o por realizar..."
+                    class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase"></textarea>
+            </div>
+
+            <!-- Sustento del Servicio -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Sustento del Servicio</label>
+                <textarea id="solic-sustento" rows="3" placeholder="Detalle el sustento: ¿qué actividad justifica este gasto? Ej: Comisión de servicio a sede central para reunión de coordinación..."
+                    class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none uppercase"></textarea>
+            </div>
+
+            <!-- Adjuntar archivos -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Adjuntar Archivos (PDF, fotos, comprobantes)</label>
+                <div id="drop-zone" class="file-upload-area rounded-xl p-8 text-center cursor-pointer">
+                    <ion-icon name="cloud-upload" class="text-4xl text-gray-400 mb-2"></ion-icon>
+                    <p class="text-gray-500 font-medium">Arrastre archivos aquí o haga clic para seleccionar</p>
+                    <p class="text-gray-400 text-xs mt-1">PDF, JPG, PNG (máx. 5MB c/u)</p>
+                    <input type="file" id="solic-archivos" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+                </div>
+                <div id="file-list" class="mt-3 space-y-2"></div>
+            </div>
+
+            <!-- Botón enviar -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                <button type="submit" id="btn-enviar"
+                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-lg">
+                    <ion-icon name="paper-plane" class="mr-2 text-xl"></ion-icon>
+                    Enviar Solicitud
+                </button>
+                <button type="button" id="btn-whatsapp"
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-lg">
+                    <ion-icon name="logo-whatsapp" class="mr-2 text-xl"></ion-icon>
+                    Enviar por WhatsApp
+                </button>
+            </div>
+        </form>
+
+        <!-- Confirmación -->
+        <div id="confirmacion" class="hidden bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div class="text-6xl mb-4">&#10004;</div>
+            <h3 class="text-2xl font-bold text-emerald-700 mb-2">Solicitud Enviada</h3>
+            <p class="text-gray-600 mb-6">Su solicitud de viáticos ha sido registrada. La Secretaría de Economía revisará su caso.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="nuevaSolicitud()"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                    Nueva Solicitud
+                </button>
+                <a id="wa-link-confirm" target="_blank"
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition inline-flex items-center justify-center">
+                    <ion-icon name="logo-whatsapp" class="mr-2"></ion-icon> Notificar por WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0",
+            authDomain: "sindicato-jnj.firebaseapp.com",
+            projectId: "sindicato-jnj",
+            storageBucket: "sindicato-jnj.firebasestorage.app",
+            messagingSenderId: "1036915309355",
+            appId: "1:1036915309355:web:fac53de65031a39597e36e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Cálculo automático del total
+        document.getElementById('solic-cantidad').addEventListener('input', calcularTotal);
+        document.getElementById('solic-pu').addEventListener('input', calcularTotal);
+        function calcularTotal() {
+            const c = parseFloat(document.getElementById('solic-cantidad').value) || 0;
+            const p = parseFloat(document.getElementById('solic-pu').value) || 0;
+            document.getElementById('solic-total').value = (c * p).toFixed(2);
+        }
+
+        // Drop zone
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('solic-archivos');
+        const fileList = document.getElementById('file-list');
+        let archivosSeleccionados = [];
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            archivosSeleccionados = Array.from(e.dataTransfer.files);
+            mostrarArchivos();
+        });
+        fileInput.addEventListener('change', () => {
+            archivosSeleccionados = Array.from(fileInput.files);
+            mostrarArchivos();
+        });
+
+        function mostrarArchivos() {
+            if (archivosSeleccionados.length === 0) { fileList.innerHTML = ''; return; }
+            fileList.innerHTML = archivosSeleccionados.map((f, i) => `
+                <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2 border">
+                    <span class="text-sm text-gray-700 flex items-center">
+                        <ion-icon name="document" class="mr-2 text-emerald-600"></ion-icon>
+                        ${f.name} <span class="text-gray-400 ml-2">(${(f.size/1024).toFixed(1)} KB)</span>
+                    </span>
+                    <button type="button" data-idx="${i}" class="text-red-400 hover:text-red-600 font-bold">X</button>
+                </div>
+            `).join('');
+
+            fileList.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(this.dataset.idx);
+                    archivosSeleccionados.splice(idx, 1);
+                    mostrarArchivos();
+                });
+            });
+        }
+
+        // Enviar formulario
+        document.getElementById('form-viaticos').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-enviar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin mr-2">&#9696;</span> Enviando...';
+
+            try {
+                const data = {
+                    nombre: document.getElementById('solic-nombre').value.trim().toUpperCase(),
+                    fecha: document.getElementById('solic-fecha').value,
+                    descripcion: document.getElementById('solic-descripcion').value.trim().toUpperCase(),
+                    cantidad: parseFloat(document.getElementById('solic-cantidad').value) || 0,
+                    unidad: document.getElementById('solic-unidad').value,
+                    pu: parseFloat(document.getElementById('solic-pu').value) || 0,
+                    total: parseFloat(document.getElementById('solic-total').value) || 0,
+                    observacion: document.getElementById('solic-observacion').value.trim().toUpperCase(),
+                    sustento: document.getElementById('solic-sustento').value.trim().toUpperCase(),
+                    archivos: [],
+                    estado: 'pendiente',
+                    timestamp: serverTimestamp()
+                };
+
+                // Subir archivos
+                if (archivosSeleccionados.length > 0) {
+                    const stamp = Date.now();
+                    for (const f of archivosSeleccionados) {
+                        if (f.size > 5 * 1024 * 1024) { alert(f.name + ' excede 5MB. Saltado.'); continue; }
+                        const safeName = f.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+                        const r = ref(storage, `viaticos/${stamp}_${safeName}`);
+                        await uploadBytes(r, f);
+                        const url = await getDownloadURL(r);
+                        data.archivos.push({ nombre: f.name, url });
+                    }
+                }
+
+                await addDoc(collection(db, 'viaticos'), data);
+
+                // Mostrar confirmación
+                document.getElementById('form-viaticos').classList.add('hidden');
+                document.getElementById('confirmacion').classList.remove('hidden');
+
+                const waMsg = encodeURIComponent(`*SOLICITUD DE VIATICOS - SIUTCASJNJ*\n\nNombre: ${data.nombre}\nFecha: ${data.fecha}\nDescripcion: ${data.descripcion}\nCantidad: ${data.cantidad}\nUnidad: ${data.unidad}\nP.U.: S/ ${data.pu.toFixed(2)}\nTotal: S/ ${data.total.toFixed(2)}\nObservacion: ${data.observacion}\nSustento: ${data.sustento}`);
+                const waLink = `https://wa.me/51955153250?text=${waMsg}`;
+                document.getElementById('wa-link-confirm').href = waLink;
+
+            } catch (err) {
+                alert('Error al enviar: ' + err.message);
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<ion-icon name="paper-plane" class="mr-2 text-xl"></ion-icon> Enviar Solicitud';
+        });
+
+        // WhatsApp directo (sin guardar en Firestore)
+        document.getElementById('btn-whatsapp').addEventListener('click', function () {
+            const nombre = document.getElementById('solic-nombre').value.trim().toUpperCase() || '(sin nombre)';
+            const fecha = document.getElementById('solic-fecha').value || '(sin fecha)';
+            const desc = document.getElementById('solic-descripcion').value.trim().toUpperCase() || '(sin desc)';
+            const c = document.getElementById('solic-cantidad').value;
+            const u = document.getElementById('solic-unidad').value;
+            const p = document.getElementById('solic-pu').value;
+            const t = document.getElementById('solic-total').value;
+            const obs = document.getElementById('solic-observacion').value.trim().toUpperCase() || '(sin obs)';
+            const sust = document.getElementById('solic-sustento').value.trim().toUpperCase() || '(sin sustento)';
+            const waMsg = encodeURIComponent(`*SOLICITUD DE VIATICOS - SIUTCASJNJ*\n\nNombre: ${nombre}\nFecha: ${fecha}\nDescripcion: ${desc}\nCantidad: ${c}\nUnidad: ${u}\nP.U.: S/ ${p}\nTotal: S/ ${t}\nObservacion: ${obs}\nSustento: ${sust}`);
+            window.open(`https://wa.me/51955153250?text=${waMsg}`, '_blank');
+        });
+
+        window.nuevaSolicitud = function () {
+            document.getElementById('confirmacion').classList.add('hidden');
+            document.getElementById('form-viaticos').classList.remove('hidden');
+            document.getElementById('form-viaticos').reset();
+            document.getElementById('solic-total').value = '';
+            archivosSeleccionados = [];
+            fileList.innerHTML = '';
+            document.getElementById('solic-unidad').value = 'UNIDAD';
+            document.getElementById('solic-cantidad').value = '1';
+        };
+    </script>
+</body>
+</html>
