@@ -246,7 +246,7 @@ async function cargarLibroGastos() {
         if (filtroTipo !== 'todas') docs = docs.filter(d => d.data().tipo === filtroTipo);
 
         if (docs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-gray-400">No hay registros anotados.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-gray-400">No hay registros anotados.</td></tr>';
             document.getElementById('total-libro').textContent = '0.00';
             document.getElementById('btn-descargar-libro').disabled = true;
             window._snapLibro = [];
@@ -263,6 +263,18 @@ async function cargarLibroGastos() {
             const tipoBadge = v.tipo === 'INGRESO'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Ingreso</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Gasto</span>';
+            const fichaCont = v.firmadoURL
+                ? `<a href="${v.firmadoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs font-bold">Aprobado</a>`
+                : `<a href="${v.plantillaFirmadaURL||'#'}" target="_blank" class="text-blue-600 hover:underline text-xs">Solicitante</a>`;
+            // Consolidar todos los archivos en links
+            const todosDocs = [];
+            if (v.plantillaFirmadaURL) todosDocs.push(`<a href="${v.plantillaFirmadaURL}" target="_blank" class="text-blue-600 hover:underline text-xs block">Ficha Solicitante</a>`);
+            if (v.firmadoURL) todosDocs.push(`<a href="${v.firmadoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs block">Ficha Contador</a>`);
+            if (v.archivos && v.archivos.length) {
+                v.archivos.forEach((a,i) => { todosDocs.push(`<a href="${a.url}" target="_blank" class="text-gray-600 hover:underline text-xs block">${i+1}. ${a.nombre}</a>`); });
+            }
+            const docsHTML = todosDocs.length ? todosDocs.join('') : '<span class="text-gray-400 text-xs">-</span>';
+
             return `<tr class="border-b hover:bg-gray-50">
                 <td class="p-2 text-xs whitespace-nowrap">${f}</td>
                 <td class="p-2 text-xs">${v.nombre||''}</td>
@@ -273,6 +285,8 @@ async function cargarLibroGastos() {
                 <td class="p-2 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
                 <td class="p-2 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
                 <td class="p-2 text-xs">${v.observacion||''}</td>
+                <td class="p-2 text-xs text-center">${fichaCont}</td>
+                <td class="p-2 text-xs">${docsHTML}</td>
                 <td class="p-2 text-center"><button class="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded text-xs font-bold" data-act="devolver" data-id="${d.id}">Devolver</button></td>
             </tr>`;
         }).join('');
@@ -291,7 +305,7 @@ async function cargarLibroGastos() {
             });
         });
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
     }
 }
 
