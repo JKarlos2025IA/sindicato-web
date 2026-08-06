@@ -273,15 +273,22 @@ async function cargarLibroGastos() {
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Gasto</span>';
             const fichaCont = v.firmadoURL
                 ? `<a href="${v.firmadoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs font-bold">Aprobado</a>`
-                : `<a href="${v.plantillaFirmadaURL||'#'}" target="_blank" class="text-blue-600 hover:underline text-xs">Solicitante</a>`;
+                : (v.plantillaFirmadaURL
+                    ? `<a href="${v.plantillaFirmadaURL}" target="_blank" class="text-blue-600 hover:underline text-xs">Descargar</a>`
+                    : '<span class="text-red-400 text-xs">No subida</span>');
             // Consolidar todos los archivos en links
             const todosDocs = [];
-            if (v.plantillaFirmadaURL) todosDocs.push(`<a href="${v.plantillaFirmadaURL}" target="_blank" class="text-blue-600 hover:underline text-xs block">Ficha Solicitante</a>`);
-            if (v.firmadoURL) todosDocs.push(`<a href="${v.firmadoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs block">Ficha Contador</a>`);
+            if (v.plantillaFirmadaURL) todosDocs.push(`<a href="${v.plantillaFirmadaURL}" target="_blank" class="text-blue-600 hover:underline text-xs block"><ion-icon name="document-text"></ion-icon> Ficha Solicitante</a>`);
+            else todosDocs.push('<span class="text-gray-400 text-xs block">Ficha Solicitante: no adjuntada</span>');
+            if (v.firmadoURL) todosDocs.push(`<a href="${v.firmadoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs block"><ion-icon name="checkmark-circle"></ion-icon> Ficha Contador</a>`);
+            else todosDocs.push('<span class="text-gray-400 text-xs block">Ficha Contador: pendiente</span>');
             if (v.archivos && v.archivos.length) {
-                v.archivos.forEach((a,i) => { todosDocs.push(`<a href="${a.url}" target="_blank" class="text-gray-600 hover:underline text-xs block">${i+1}. ${a.nombre}</a>`); });
+                todosDocs.push(`<span class="text-xs font-bold text-gray-500 block mt-1">${v.archivos.length} comprobante(s):</span>`);
+                v.archivos.forEach((a,i) => { todosDocs.push(`<a href="${a.url}" target="_blank" class="text-gray-600 hover:underline text-xs block ml-2">${i+1}. ${a.nombre}</a>`); });
+            } else {
+                todosDocs.push('<span class="text-gray-400 text-xs block">Comprobantes: 0 archivos</span>');
             }
-            const docsHTML = todosDocs.length ? todosDocs.join('') : '<span class="text-gray-400 text-xs">-</span>';
+            const docsHTML = todosDocs.join('');
 
             return `<tr class="border-b hover:bg-gray-50">
                 <td class="p-2 text-xs whitespace-nowrap">${f}</td>
