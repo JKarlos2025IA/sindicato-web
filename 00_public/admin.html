@@ -2158,11 +2158,11 @@
                             <button id="subtab-libro" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
                                 <ion-icon name="book-outline" class="mr-1 align-middle"></ion-icon> Libro de Gastos
                             </button>
-                            <button id="subtab-balance" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
-                                <ion-icon name="stats-chart-outline" class="mr-1 align-middle"></ion-icon> Balance
-                            </button>
                             <button id="subtab-ingresos" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
                                 <ion-icon name="trending-up-outline" class="mr-1 align-middle"></ion-icon> Ingresos
+                            </button>
+                            <button id="subtab-balance" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
+                                <ion-icon name="stats-chart-outline" class="mr-1 align-middle"></ion-icon> Balance
                             </button>
                         </div>
 
@@ -2177,10 +2177,10 @@
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead><tr class="bg-gray-100 text-left text-xs font-bold text-gray-600 uppercase">
-                                        <th class="px-2 py-2.5 whitespace-nowrap">Fecha</th><th class="px-2 py-2.5 whitespace-nowrap">Solicitante</th><th class="px-2 py-2.5 whitespace-nowrap">Descripcion</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Cant</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Unid</th><th class="px-2 py-2.5 text-right whitespace-nowrap">P.U.</th><th class="px-2 py-2.5 text-right whitespace-nowrap">Total</th><th class="px-2 py-2.5 whitespace-nowrap">Observacion</th><th class="px-2 py-2.5 whitespace-nowrap">Sustento</th><th class="px-2 py-2.5 whitespace-nowrap">Archivos</th><th class="px-2 py-2.5 whitespace-nowrap">Firmada</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Estado</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Opciones</th>
+                                        <th class="px-2 py-2.5 whitespace-nowrap">Fecha</th><th class="px-2 py-2.5 whitespace-nowrap">Solicitante</th><th class="px-2 py-2.5 whitespace-nowrap">Tipo</th><th class="px-2 py-2.5 whitespace-nowrap">Descripcion</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Cant</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Unid</th><th class="px-2 py-2.5 text-right whitespace-nowrap">P.U.</th><th class="px-2 py-2.5 text-right whitespace-nowrap">Total</th><th class="px-2 py-2.5 whitespace-nowrap">Observacion</th><th class="px-2 py-2.5 whitespace-nowrap">Sustento</th><th class="px-2 py-2.5 whitespace-nowrap">Archivos</th><th class="px-2 py-2.5 whitespace-nowrap">Firmada</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Estado</th><th class="px-2 py-2.5 text-center whitespace-nowrap">Opciones</th>
                                     </tr></thead>
                                     <tbody id="tbl-solicitudes">
-                                        <tr><td colspan="13" class="text-center py-10 text-gray-400 text-sm"><ion-icon name="sync" class="animate-spin text-2xl"></ion-icon><br>Cargando solicitudes...</td></tr>
+                                            <tr><td colspan="14" class="text-center py-10 text-gray-400 text-sm"><ion-icon name="sync" class="animate-spin text-2xl"></ion-icon><br>Cargando solicitudes...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -2204,10 +2204,10 @@
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-sm">
                                         <thead><tr class="bg-gray-50 text-left text-xs font-bold text-gray-600 uppercase">
-                                            <th class="p-2">Fecha</th><th class="p-2">Solicitante</th><th class="p-2">Descripción</th><th class="p-2 text-center">Cant</th><th class="p-2 text-center">Unidad</th><th class="p-2 text-right">P.U.</th><th class="p-2 text-right">Total</th><th class="p-2">Observación</th><th class="p-2">Formulario</th>
+                                            <th class="p-2">Fecha</th><th class="p-2">Solicitante</th><th class="p-2">Tipo</th><th class="p-2">Descripción</th><th class="p-2 text-center">Cant</th><th class="p-2 text-center">Unidad</th><th class="p-2 text-right">P.U.</th><th class="p-2 text-right">Total</th><th class="p-2">Observación</th><th class="p-2 text-center">Devolver</th>
                                         </tr></thead>
                                         <tbody id="tbl-libro">
-                                            <tr><td colspan="9" class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-2xl"></ion-icon><br>Cargando libro...</td></tr>
+                                            <tr><td colspan="10" class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-2xl"></ion-icon><br>Cargando libro...</td></tr>
                                         </tbody>
                                     </table>
                                 </div>

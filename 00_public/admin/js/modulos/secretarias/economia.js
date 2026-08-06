@@ -37,7 +37,7 @@ async function cargarSolicitudes() {
 
         const docs = snap.docs.filter(d => d.data().estado !== 'eliminado');
         if (docs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="13" class="text-center py-8 text-gray-400">No hay solicitudes.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-gray-400">No hay solicitudes.</td></tr>';
             return;
         }
 
@@ -54,8 +54,14 @@ async function cargarSolicitudes() {
             const badge = v.estado === 'anotado'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Anotado</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pendiente</span>';
+            const tipoBadge = v.tipo === 'INGRESO'
+                ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Ingreso</span>'
+                : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Gasto</span>';
+            const tieneFirmada = v.plantillaFirmadaURL ? true : false;
             const btnAnotar = v.estado !== 'anotado'
-                ? `<button class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-xs font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
+                ? (tieneFirmada
+                    ? `<button class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded text-xs font-bold" data-act="anotar" data-id="${id}">Anotar</button>`
+                    : `<span class="text-gray-400 text-xs" title="Falta plantilla firmada">Sin firmada</span>`)
                 : '';
             const btnDevolver = v.estado === 'anotado'
                 ? `<button class="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded text-xs font-bold" data-act="devolver" data-id="${id}">Devolver</button>`
@@ -64,6 +70,7 @@ async function cargarSolicitudes() {
             return `<tr class="border-b hover:bg-gray-50">
                 <td class="px-2 py-2.5 text-sm whitespace-nowrap">${f}</td>
                 <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.nombre||''}</td>
+                <td class="px-2 py-2.5 text-sm">${tipoBadge}</td>
                 <td class="px-2 py-2.5 text-sm whitespace-nowrap">${v.descripcion||''}</td>
                 <td class="px-2 py-2.5 text-sm text-center">${v.cantidad||''}</td>
                 <td class="px-2 py-2.5 text-sm text-center">${v.unidad||''}</td>
@@ -113,7 +120,7 @@ async function cargarSolicitudes() {
             });
         });
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="13" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="14" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
     }
 }
 
@@ -183,7 +190,7 @@ async function cargarLibroGastos() {
         const docs = snap.docs.filter(d => d.data().estado === 'anotado');
 
         if (docs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No hay gastos anotados.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-gray-400">No hay registros anotados.</td></tr>';
             document.getElementById('total-libro').textContent = '0.00';
             document.getElementById('btn-descargar-libro').disabled = true;
             window._snapLibro = [];
@@ -197,27 +204,38 @@ async function cargarLibroGastos() {
             const v = d.data();
             total += v.total || 0;
             const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : '';
-            const firmado = v.firmadoURL
-                ? `<a href="${v.firmadoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs font-bold">Firmado</a>`
-                : '<span class="text-gray-400 text-xs">Sin firmar</span>';
+            const tipoBadge = v.tipo === 'INGRESO'
+                ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Ingreso</span>'
+                : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Gasto</span>';
             return `<tr class="border-b hover:bg-gray-50">
                 <td class="p-2 text-xs whitespace-nowrap">${f}</td>
                 <td class="p-2 text-xs">${v.nombre||''}</td>
-                <td class="p-2 text-xs max-w-[380px] truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
+                <td class="p-2 text-xs">${tipoBadge}</td>
+                <td class="p-2 text-xs">${v.descripcion||''}</td>
                 <td class="p-2 text-xs text-center">${v.cantidad||''}</td>
                 <td class="p-2 text-xs text-center">${v.unidad||''}</td>
                 <td class="p-2 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
                 <td class="p-2 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
-                <td class="p-2 text-xs max-w-[200px] truncate" title="${v.observacion||''}">${v.observacion||''}</td>
-                <td class="p-2 text-xs">${firmado}</td>
+                <td class="p-2 text-xs">${v.observacion||''}</td>
+                <td class="p-2 text-center"><button class="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded text-xs font-bold" data-act="devolver" data-id="${d.id}">Devolver</button></td>
             </tr>`;
         }).join('');
 
         document.getElementById('total-libro').textContent = total.toFixed(2);
         document.getElementById('btn-descargar-libro').disabled = false;
         actualizarSelectFirmado();
+
+        tbody.querySelectorAll('[data-act="devolver"]').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                if (confirm('Devolver este registro a solicitudes?')) {
+                    await updateDoc(doc(db, 'viaticos', this.dataset.id), { estado: 'pendiente' });
+                    cargarSolicitudes();
+                    cargarLibroGastos();
+                }
+            });
+        });
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-500">${e.message}</td></tr>`;
     }
 }
 
