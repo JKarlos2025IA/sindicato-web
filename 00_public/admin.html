@@ -804,11 +804,10 @@
                 let codigosPre = [];
                 try { const r = await fetch('admin/afiliados_codigos.json'); codigosPre = await r.json(); } catch (e) {}
 
-                // Cargar nombres y codigos existentes
-                const existingNames = new Set();
+                // Cargar nombres y codigos existentes (solo codigos para evitar colision)
                 const existingCodes = new Set();
                 const qSnap = await getDocs(collection(db, 'socios'));
-                qSnap.forEach(d => { const dt = d.data(); if (dt.codigo) existingCodes.add(dt.codigo); if (dt.nombre) existingNames.add(dt.nombre.toUpperCase()); });
+                qSnap.forEach(d => { const dt = d.data(); if (dt.codigo) existingCodes.add(dt.codigo); });
 
                 // Construir lista de afiliados a importar
                 const nuevos = [];
@@ -817,7 +816,7 @@
                     const row = rows[i];
                     if (!row || !row[colNombre]) continue;
                     const nombre = String(row[colNombre]).trim().toUpperCase();
-                    if (!nombre || nombre.length < 5 || existingNames.has(nombre)) continue;
+                    if (!nombre || nombre.length < 5) continue;
 
                     let codigo = '';
                     if (colCodigo >= 0 && row[colCodigo]) codigo = String(row[colCodigo]).trim().toUpperCase();
@@ -828,7 +827,6 @@
                         while (existingCodes.has(codigo));
                     }
                     existingCodes.add(codigo);
-                    existingNames.add(nombre);
                     idx++;
 
                     nuevos.push({
@@ -841,6 +839,18 @@
                 }
 
                 if (nuevos.length === 0) { alert('No hay afiliados nuevos para importar (todos ya existen).'); event.target.value = ''; return; }
+
+                // Limpiar TODOS los existentes antes de importar (evita duplicados/residuos)
+                const snapOld = await getDocs(collection(db, 'socios'));
+                if (!snapOld.empty) {
+                    const oldDocs = [];
+                    snapOld.forEach(d => oldDocs.push(d));
+                    for (let i = 0; i < oldDocs.length; i += 400) {
+                        const batchDel = writeBatch(db);
+                        oldDocs.slice(i, i + 400).forEach(d => batchDel.delete(d.ref));
+                        await batchDel.commit();
+                    }
+                }
 
                 // Escritura por lotes (500 docs max por batch)
                 const BATCH_SIZE = 400;
