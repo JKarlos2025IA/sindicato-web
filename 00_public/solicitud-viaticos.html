@@ -326,8 +326,18 @@
         dropZone.addEventListener('click', ()=>fileInput.click());
         dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', e=>{ e.preventDefault(); dropZone.classList.remove('dragover'); archivosSeleccionados=Array.from(e.dataTransfer.files); mostrarArchivos(); });
-        fileInput.addEventListener('change', ()=>{ archivosSeleccionados=Array.from(fileInput.files); mostrarArchivos(); });
+        dropZone.addEventListener('drop', e=>{ e.preventDefault(); dropZone.classList.remove('dragover'); rawFiles(Array.from(e.dataTransfer.files)); });
+        fileInput.addEventListener('change', ()=>{ rawFiles(Array.from(fileInput.files)); });
+
+        function rawFiles(files){
+            const oversized = files.filter(f => f.size > 5*1024*1024);
+            if(oversized.length){
+                alert('Los siguientes archivos superan 5MB y no se cargaran:\n' + oversized.map(f => f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)').join('\n'));
+                files = files.filter(f => f.size <= 5*1024*1024);
+            }
+            archivosSeleccionados = files;
+            mostrarArchivos();
+        }
         function mostrarArchivos(){
             if(!archivosSeleccionados.length){ fileList.innerHTML=''; return; }
             fileList.innerHTML = archivosSeleccionados.map((f,i)=>`<div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2 border"><span class="text-sm text-gray-700"><ion-icon name="document" class="mr-2 text-emerald-600 align-middle"></ion-icon>${f.name} <span class="text-gray-400 ml-2">(${(f.size/1024).toFixed(1)} KB)</span></span><button type="button" data-idx="${i}" class="text-red-400 hover:text-red-600 font-bold">X</button></div>`).join('');
@@ -486,11 +496,11 @@ ${archivosList}
                     }
                 }
                 await addDoc(collection(db,'viaticos'), dataPendiente);
-                cerrarVerificar();
                 form.classList.add('hidden');
                 document.getElementById('confirmacion').classList.remove('hidden');
                 const waMsg = encodeURIComponent(`*SOLICITUD*\nNombre: ${dataPendiente.nombre}\nTipo: ${dataPendiente.tipo}\nDesc: ${dataPendiente.descripcion}\nTotal: S/ ${dataPendiente.total.toFixed(2)}`);
                 document.getElementById('wa-link-confirm').href = `https://wa.me/51955153250?text=${waMsg}`;
+                cerrarVerificar();
                 dataPendiente=null;
             } catch(err){ alert('Error: '+err.message); }
             btn.disabled = false; btn.innerHTML = '<ion-icon name="checkmark" class="mr-1 align-middle"></ion-icon> Confirmar y Enviar';
