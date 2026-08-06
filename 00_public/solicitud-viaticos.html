@@ -464,12 +464,14 @@ ${archivosList}
             const btn = document.getElementById('btn-confirmar-envio');
             btn.disabled = true; btn.innerHTML = '<span class="animate-spin mr-2">&#9696;</span> Enviando...';
             try {
-                // Calcular N-REG del dia
+                // Calcular N-REG del dia (filtro en cliente para evitar indice)
                 const fechaHoy = new Date().toISOString().slice(0,10).replace(/-/g,'.');
                 const tipo = dataPendiente.tipo;
-                const qReg = query(collection(db,'viaticos'), where('fechaReg','>=',fechaHoy), where('tipo','==',tipo));
+                const qReg = query(collection(db,'viaticos'), orderBy('timestamp','desc'));
                 const snapReg = await getDocs(qReg);
-                const nroRegistro = snapReg.size + 1;
+                const hoyRegex = new RegExp('^' + fechaHoy);
+                const docsHoy = snapReg.docs.filter(d => d.data().tipo === tipo && (d.data().fechaReg || '').startsWith(fechaHoy));
+                const nroRegistro = docsHoy.length + 1;
                 const prefijo = `${fechaHoy}-${tipo}`;
                 dataPendiente.nroRegistro = nroRegistro;
                 dataPendiente.fechaReg = fechaHoy;
