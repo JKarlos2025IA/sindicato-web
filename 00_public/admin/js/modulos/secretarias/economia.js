@@ -21,6 +21,7 @@ export function initEconomia() {
     initUploadSigned();
     initModalButtons();
     initIngresos();
+    document.getElementById('filtro-libro-tipo')?.addEventListener('change', cargarLibroGastos);
 }
 
 // ============================================================
@@ -242,7 +243,10 @@ async function cargarLibroGastos() {
     try {
         const q = query(collection(db, 'viaticos'), orderBy('timestamp', 'desc'));
         const snap = await getDocs(q);
-        const docs = snap.docs.filter(d => d.data().estado === 'anotado');
+        let docs = snap.docs.filter(d => d.data().estado === 'anotado');
+        // Filtro por tipo
+        const filtroTipo = document.getElementById('filtro-libro-tipo')?.value || 'todas';
+        if (filtroTipo !== 'todas') docs = docs.filter(d => d.data().tipo === filtroTipo);
 
         if (docs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-gray-400">No hay registros anotados.</td></tr>';
