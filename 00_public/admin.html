@@ -789,11 +789,12 @@
                 if (headerRow < 0) { alert('No se encontro cabecera con APELLIDOS Y NOMBRES.'); event.target.value = ''; return; }
 
                 const headers = rows[headerRow].map(h => String(h || '').toUpperCase().trim());
-                let colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1, colCodigo = -1;
+                let colNombre = -1, colUO = -1, colCargo = -1, colDNI = -1, colCodigo = -1, colCumple = -1;
                 for (let i = 0; i < headers.length; i++) {
                     const h = headers[i]; if (!h) continue;
                     if (h.includes('APELLIDOS') || h.includes('NOMBRES') || h === 'NOMBRE') colNombre = i;
                     else if (h.includes('CODIGO')) colCodigo = i;
+                    else if (h.includes('CUMPLE')) colCumple = i;
                     else if (h.includes('DNI')) colDNI = i;
                     else if (h.includes('UO') || h.includes('UNIDAD') || h.includes('OFICINA')) colUO = i;
                     else if (h.includes('CARGO')) colCargo = i;
@@ -828,6 +829,7 @@
                     const dniExcel = colDNI >= 0 && row[colDNI] ? String(row[colDNI]).trim() : '';
                     const uoExcel = colUO >= 0 && row[colUO] ? String(row[colUO]).trim().toUpperCase() : '';
                     const cargoExcel = colCargo >= 0 && row[colCargo] ? String(row[colCargo]).trim().toUpperCase() : '';
+                    const cumpleExcel = colCumple >= 0 && row[colCumple] ? String(row[colCumple]).trim() : '';
 
                     if (existente) {
                         // Actualizar solo campos del Excel, preservar manuales
@@ -837,6 +839,7 @@
                             cargo: cargoExcel || existente.data.cargo || '',
                             timestamp: Date.now()
                         };
+                        if (cumpleExcel) upd.fecha = cumpleExcel;
                         if (colCodigo >= 0 && row[colCodigo] && !existente.data.codigo) {
                             upd.codigo = String(row[colCodigo]).trim().toUpperCase();
                         }
@@ -858,7 +861,8 @@
                             dni: dniExcel,
                             uo: uoExcel,
                             cargo: cargoExcel,
-                            fecha: '', email: '', telefono: '', activo: true, timestamp: Date.now()
+                            fecha: cumpleExcel,
+                            email: '', telefono: '', activo: true, timestamp: Date.now()
                         });
                         nuevos++;
                     }
