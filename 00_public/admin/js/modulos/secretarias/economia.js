@@ -46,7 +46,7 @@ async function cargarSolicitudes() {
             const id = d.id;
             const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : '';
             const archivos = (v.archivos || []).map(a =>
-                `<a href="${a.url}" target="_blank" class="text-blue-600 hover:underline text-xs block truncate max-w-[120px]">${a.nombre}</a>`
+                `<a href="${a.url}" target="_blank" class="text-blue-600 hover:underline text-xs block truncate max-w-[200px]">${a.nombre}</a>`
             ).join('');
             const badge = v.estado === 'anotado'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Anotado</span>'
@@ -61,13 +61,13 @@ async function cargarSolicitudes() {
             return `<tr class="border-b hover:bg-gray-50">
                 <td class="p-2 text-xs whitespace-nowrap">${f}</td>
                 <td class="p-2 text-xs">${v.nombre||''}</td>
-                <td class="p-2 text-xs max-w-[160px] truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
+                <td class="p-2 text-xs max-w-[280px] truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
                 <td class="p-2 text-xs text-center">${v.cantidad||''}</td>
                 <td class="p-2 text-xs text-center">${v.unidad||''}</td>
                 <td class="p-2 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
                 <td class="p-2 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
-                <td class="p-2 text-xs max-w-[120px] truncate" title="${v.observacion||''}">${v.observacion||''}</td>
-                <td class="p-2 text-xs max-w-[120px] truncate" title="${v.sustento||''}">${v.sustento||''}</td>
+                <td class="p-2 text-xs max-w-[200px] truncate" title="${v.observacion||''}">${v.observacion||''}</td>
+                <td class="p-2 text-xs max-w-[200px] truncate" title="${v.sustento||''}">${v.sustento||''}</td>
                 <td class="p-2 text-xs">${archivos||'<span class="text-gray-300">-</span>'}</td>
                 <td class="p-2 text-center">${badge}</td>
                 <td class="p-2 whitespace-nowrap">
@@ -199,12 +199,12 @@ async function cargarLibroGastos() {
             return `<tr class="border-b hover:bg-gray-50">
                 <td class="p-2 text-xs whitespace-nowrap">${f}</td>
                 <td class="p-2 text-xs">${v.nombre||''}</td>
-                <td class="p-2 text-xs max-w-[160px] truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
+                <td class="p-2 text-xs max-w-[280px] truncate" title="${v.descripcion||''}">${v.descripcion||''}</td>
                 <td class="p-2 text-xs text-center">${v.cantidad||''}</td>
                 <td class="p-2 text-xs text-center">${v.unidad||''}</td>
                 <td class="p-2 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
                 <td class="p-2 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
-                <td class="p-2 text-xs max-w-[120px] truncate" title="${v.observacion||''}">${v.observacion||''}</td>
+                <td class="p-2 text-xs max-w-[200px] truncate" title="${v.observacion||''}">${v.observacion||''}</td>
                 <td class="p-2 text-xs">${firmado}</td>
             </tr>`;
         }).join('');
