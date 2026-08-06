@@ -323,7 +323,9 @@
         // Cargar lista desde Firebase
         window.cargarDocumentos = async function () {
             try {
-                listaDocumentos.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">Buscando documentos...</td></tr>';
+                const cont = document.getElementById('lista-documentos');
+                if (!cont) return;
+                cont.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">Buscando documentos...</td></tr>';
 
                 // Pedimos todos, ordenamos localmente por timestamp (para evitar problemas de indexado puro en firebase test)
                 const querySnapshot = await getDocs(collection(db, "documentos_cultura"));
@@ -334,9 +336,9 @@
 
                 docsData.sort((a, b) => b.timestamp - a.timestamp); // Mas recientes primero
 
-                listaDocumentos.innerHTML = '';
+                cont.innerHTML = '';
                 if (docsData.length === 0) {
-                    listaDocumentos.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No hay documentos publicados aún.</td></tr>';
+                    cont.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No hay documentos publicados aún.</td></tr>';
                     return;
                 }
 
@@ -363,7 +365,7 @@
                             <button class="text-red-500 hover:text-red-700 bg-red-50 px-3 py-1 rounded transition btn-eliminar" data-id="${data.id}" data-path="${data.storagePath}">Eliminar</button>
                         </td>
                     `;
-                    listaDocumentos.appendChild(tr);
+                    cont.appendChild(tr);
                 });
 
                 // Registrar eventos de Eliminar

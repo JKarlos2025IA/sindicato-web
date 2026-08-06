@@ -150,25 +150,45 @@
 
             <!-- Adjuntar archivos -->
             <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Adjuntar Archivos (PDF, fotos, comprobantes)</label>
-                <div id="drop-zone" class="file-upload-area rounded-xl p-8 text-center cursor-pointer">
-                    <ion-icon name="cloud-upload" class="text-4xl text-gray-400 mb-2"></ion-icon>
-                    <p class="text-gray-500 font-medium">Arrastre archivos aquí o haga clic para seleccionar</p>
-                    <p class="text-gray-400 text-xs mt-1">PDF, JPG, PNG (máx. 5MB c/u)</p>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Comprobantes / Evidencias (opcional)</label>
+                <div id="drop-zone" class="file-upload-area rounded-xl p-6 text-center cursor-pointer">
+                    <ion-icon name="cloud-upload" class="text-3xl text-gray-400 mb-1"></ion-icon>
+                    <p class="text-gray-500 font-medium text-sm">Arrastre archivos aquí o haga clic para seleccionar</p>
+                    <p class="text-gray-400 text-xs mt-1">PDF, JPG, PNG (máx. 5MB c/u) — No es obligatorio</p>
                     <input type="file" id="solic-archivos" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden">
                 </div>
                 <div id="file-list" class="mt-3 space-y-2"></div>
             </div>
 
-            <!-- Botón enviar -->
-            <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                <button type="button" id="btn-descargar"
-                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-lg">
-                    <ion-icon name="download" class="mr-2 text-xl"></ion-icon>
-                    Descargar Plantilla (PDF)
-                </button>
+            <!-- Plantilla Firmada (OBLIGATORIA) -->
+            <div class="bg-blue-50 rounded-2xl p-6 border-2 border-blue-200">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h4 class="font-bold text-blue-900 text-sm flex items-center">
+                            <ion-icon name="document-lock" class="mr-2 text-blue-600"></ion-icon>
+                            Plantilla Firmada (obligatorio)
+                        </h4>
+                        <p class="text-xs text-blue-600 mt-1" id="plantilla-estado">
+                            1. Descargue la plantilla → 2. Fírmela digitalmente → 3. Súbala aquí
+                        </p>
+                    </div>
+                    <button type="button" id="btn-descargar"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg transition text-sm flex items-center shadow shrink-0">
+                        <ion-icon name="download" class="mr-1"></ion-icon> Descargar Plantilla
+                    </button>
+                </div>
+                <div class="mt-3 flex gap-3 items-center">
+                    <input type="file" id="solic-firmado" accept=".pdf"
+                        class="flex-1 border-gray-300 rounded-lg p-2 border-2 focus:border-blue-500 outline-none text-sm file:mr-3 file:py-1.5 file:px-4 file:rounded file:border-0 file:font-bold file:bg-blue-600 file:text-white">
+                    <span id="firmado-nombre" class="text-sm text-gray-500 hidden"></span>
+                    <button type="button" id="btn-quitar-firmado" class="hidden text-red-400 hover:text-red-600 text-sm font-bold">Quitar</button>
+                </div>
+            </div>
+
+            <!-- Botones finales -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
                 <button type="submit" id="btn-enviar"
-                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-lg">
+                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-lg disabled:opacity-50 disabled:cursor-not-allowed">
                     <ion-icon name="paper-plane" class="mr-2 text-xl"></ion-icon>
                     Enviar Solicitud
                 </button>
@@ -221,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Firebase + Lógica -->
+    <!-- Firebase + Logica -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -248,94 +268,105 @@
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('solic-archivos');
         const fileList = document.getElementById('file-list');
+        const firmadoInput = document.getElementById('solic-firmado');
+        const firmadoNombre = document.getElementById('firmado-nombre');
+        const btnQuitarFirmado = document.getElementById('btn-quitar-firmado');
         let archivosSeleccionados = [];
+        let archivoFirmado = null;
 
-        // --- Opciones de servicio según tipo ---
+        // --- Opciones de servicio segun tipo ---
         const OPCIONES_GASTO = [
-            ['COMISION DE REPRESENTACION', 'COMISION DE REPRESENTACION'],
-            ['SERVICIO DE PAGINA WEB', 'SERVICIO DE PAGINA WEB'],
-            ['SERVICIO DE TELEFONIA CELULAR', 'SERVICIO DE TELEFONIA CELULAR'],
-            ['SERVICIO DE DATOS Y ALMACENAMIENTO', 'SERVICIO DE DATOS Y ALMACENAMIENTO'],
-            ['OTROS', 'OTROS (ESPECIFICAR)']
+            ['COMISION DE REPRESENTACION','COMISION DE REPRESENTACION'],
+            ['SERVICIO DE PAGINA WEB','SERVICIO DE PAGINA WEB'],
+            ['SERVICIO DE TELEFONIA CELULAR','SERVICIO DE TELEFONIA CELULAR'],
+            ['SERVICIO DE DATOS Y ALMACENAMIENTO','SERVICIO DE DATOS Y ALMACENAMIENTO'],
+            ['OTROS','OTROS (ESPECIFICAR)']
         ];
         const OPCIONES_INGRESO = [
-            ['APORTE MENSUAL', 'APORTE MENSUAL'],
-            ['ACTIVIDAD DE RECAUDACION', 'ACTIVIDAD DE RECAUDACION'],
-            ['DONACION', 'DONACION'],
-            ['OTROS INGRESOS', 'OTROS INGRESOS'],
-            ['OTROS', 'OTROS (ESPECIFICAR)']
+            ['APORTE MENSUAL','APORTE MENSUAL'],
+            ['ACTIVIDAD DE RECAUDACION','ACTIVIDAD DE RECAUDACION'],
+            ['DONACION','DONACION'],
+            ['OTROS INGRESOS','OTROS INGRESOS'],
+            ['OTROS','OTROS (ESPECIFICAR)']
         ];
 
         // --- Cambiar tipo Gasto/Ingreso ---
-        window.cambiarTipo = function () {
+        window.cambiarTipo = function(){
             const tipo = document.querySelector('input[name="solic-tipo"]:checked').value;
             const isGasto = tipo === 'GASTO';
             rowCant.classList.toggle('hidden', !isGasto);
             rowMonto.classList.toggle('hidden', isGasto);
             lblDesc.textContent = isGasto ? 'Tipo de Servicio / Bien' : 'Tipo de Ingreso';
-            selDesc.innerHTML = '<option value="">Seleccione una opción...</option>' +
-                (isGasto ? OPCIONES_GASTO : OPCIONES_INGRESO).map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
+            selDesc.innerHTML = '<option value="">Seleccione una opcion...</option>' + (isGasto ? OPCIONES_GASTO : OPCIONES_INGRESO).map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
             otroInput.classList.add('hidden'); otroInput.required = false; otroInput.value = '';
             if (isGasto) { inpMonto.removeAttribute('required'); inpCant.setAttribute('required',''); inpPU.setAttribute('required',''); }
             else { inpCant.removeAttribute('required'); inpPU.removeAttribute('required'); inpMonto.setAttribute('required',''); }
         };
 
-        // --- Total automático (gasto) ---
+        // --- Total automatico ---
         inpCant.addEventListener('input', calcTotal);
         inpPU.addEventListener('input', calcTotal);
-        function calcTotal() {
-            const c = parseFloat(inpCant.value) || 0;
-            const p = parseFloat(inpPU.value) || 0;
-            inpTotal.value = (c * p).toFixed(2);
-        }
+        function calcTotal(){ const c=parseFloat(inpCant.value)||0, p=parseFloat(inpPU.value)||0; inpTotal.value=(c*p).toFixed(2); }
 
         // --- Toggle "Otros" nombre ---
-        selNombre.addEventListener('change', () => {
-            if (selNombre.value === 'OTROS') { otroNombre.classList.remove('hidden'); otroNombre.required = true; }
-            else { otroNombre.classList.add('hidden'); otroNombre.required = false; otroNombre.value = ''; }
+        selNombre.addEventListener('change', ()=>{
+            if(selNombre.value==='OTROS'){ otroNombre.classList.remove('hidden'); otroNombre.required=true; }
+            else { otroNombre.classList.add('hidden'); otroNombre.required=false; otroNombre.value=''; }
         });
-        function obtenerNombre() { return selNombre.value === 'OTROS' ? otroNombre.value.trim().toUpperCase() : selNombre.value; }
+        function obtenerNombre(){ return selNombre.value==='OTROS' ? otroNombre.value.trim().toUpperCase() : selNombre.value; }
 
-        // --- Toggle "Otros" descripción ---
-        selDesc.addEventListener('change', () => {
-            if (selDesc.value === 'OTROS') { otroInput.classList.remove('hidden'); otroInput.required = true; }
-            else { otroInput.classList.add('hidden'); otroInput.required = false; otroInput.value = ''; }
+        // --- Toggle "Otros" descripcion ---
+        selDesc.addEventListener('change', ()=>{
+            if(selDesc.value==='OTROS'){ otroInput.classList.remove('hidden'); otroInput.required=true; }
+            else { otroInput.classList.add('hidden'); otroInput.required=false; otroInput.value=''; }
         });
-        function obtenerDescripcion() { return selDesc.value === 'OTROS' ? otroInput.value.trim().toUpperCase() : selDesc.value; }
+        function obtenerDescripcion(){ return selDesc.value==='OTROS' ? otroInput.value.trim().toUpperCase() : selDesc.value; }
 
-        // --- Drop zone ---
-        dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); archivosSeleccionados = Array.from(e.dataTransfer.files); mostrarArchivos(); });
-        fileInput.addEventListener('change', () => { archivosSeleccionados = Array.from(fileInput.files); mostrarArchivos(); });
-
-        function mostrarArchivos() {
-            if (archivosSeleccionados.length === 0) { fileList.innerHTML = ''; return; }
-            fileList.innerHTML = archivosSeleccionados.map((f, i) => `
-                <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2 border">
-                    <span class="text-sm text-gray-700"><ion-icon name="document" class="mr-2 text-emerald-600 align-middle"></ion-icon>${f.name} <span class="text-gray-400 ml-2">(${(f.size/1024).toFixed(1)} KB)</span></span>
-                    <button type="button" data-idx="${i}" class="text-red-400 hover:text-red-600 font-bold">X</button>
-                </div>`).join('');
-            fileList.querySelectorAll('button').forEach(btn => { btn.addEventListener('click', function(){ archivosSeleccionados.splice(parseInt(this.dataset.idx),1); mostrarArchivos(); }); });
+        // --- Drop zone (comprobantes opcionales) ---
+        dropZone.addEventListener('click', ()=>fileInput.click());
+        dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', e=>{ e.preventDefault(); dropZone.classList.remove('dragover'); archivosSeleccionados=Array.from(e.dataTransfer.files); mostrarArchivos(); });
+        fileInput.addEventListener('change', ()=>{ archivosSeleccionados=Array.from(fileInput.files); mostrarArchivos(); });
+        function mostrarArchivos(){
+            if(!archivosSeleccionados.length){ fileList.innerHTML=''; return; }
+            fileList.innerHTML = archivosSeleccionados.map((f,i)=>`<div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2 border"><span class="text-sm text-gray-700"><ion-icon name="document" class="mr-2 text-emerald-600 align-middle"></ion-icon>${f.name} <span class="text-gray-400 ml-2">(${(f.size/1024).toFixed(1)} KB)</span></span><button type="button" data-idx="${i}" class="text-red-400 hover:text-red-600 font-bold">X</button></div>`).join('');
+            fileList.querySelectorAll('button').forEach(btn=>{ btn.addEventListener('click', function(){ archivosSeleccionados.splice(parseInt(this.dataset.idx),1); mostrarArchivos(); }); });
         }
 
-        // --- PDF: Vista previa en página aparte ---
-        document.getElementById('btn-descargar').addEventListener('click', () => {
+        // --- Plantilla Firmada ---
+        firmadoInput.addEventListener('change', ()=>{
+            if(firmadoInput.files.length){
+                archivoFirmado = firmadoInput.files[0];
+                firmadoNombre.textContent = archivoFirmado.name + ' (' + (archivoFirmado.size/1024).toFixed(1) + ' KB)';
+                firmadoNombre.classList.remove('hidden');
+                btnQuitarFirmado.classList.remove('hidden');
+                document.getElementById('plantilla-estado').innerHTML = '<span class="text-emerald-700 font-bold">Plantilla firmada adjuntada</span>';
+            }
+        });
+        btnQuitarFirmado.addEventListener('click', ()=>{
+            archivoFirmado = null;
+            firmadoInput.value = '';
+            firmadoNombre.classList.add('hidden');
+            btnQuitarFirmado.classList.add('hidden');
+            document.getElementById('plantilla-estado').innerHTML = '1. Descargue la plantilla → 2. Firmela digitalmente → 3. Subala aqui';
+        });
+
+        // --- PDF: Vista previa ---
+        document.getElementById('btn-descargar').addEventListener('click', ()=>{
             const tipo = document.querySelector('input[name="solic-tipo"]:checked').value;
             const nombre = obtenerNombre() || '(sin nombre)';
             const fecha = document.getElementById('solic-fecha').value || '(sin fecha)';
             const desc = obtenerDescripcion() || '(sin descripcion)';
-            const total = tipo === 'GASTO' ? (inpTotal.value || '0') : (inpMonto.value || '0');
+            const total = tipo==='GASTO' ? (inpTotal.value||'0') : (inpMonto.value||'0');
             const obs = document.getElementById('solic-observacion').value.trim().toUpperCase() || '-';
             const sust = document.getElementById('solic-sustento').value.trim().toUpperCase() || '-';
-            const tipoLabel = tipo === 'GASTO' ? 'GASTO / EGRESO' : 'INGRESO';
-            const c = inpCant.value || '-';
-            const u = document.getElementById('solic-unidad').value || '-';
-            const p = inpPU.value || '0';
-
-            const detalleExtra = tipo === 'GASTO'
-                ? `<tr><td class="label">Cantidad</td><td>${c}</td></tr><tr><td class="label">Unidad</td><td>${u}</td></tr><tr><td class="label">Precio Unitario</td><td>S/ ${parseFloat(p).toFixed(2)}</td></tr>`
+            const tipoLabel = tipo==='GASTO' ? 'GASTO / EGRESO' : 'INGRESO';
+            const detalleExtra = tipo==='GASTO'
+                ? `<tr><td class="label">Cantidad</td><td>${inpCant.value||'-'}</td></tr><tr><td class="label">Unidad</td><td>${document.getElementById('solic-unidad').value||'-'}</td></tr><tr><td class="label">Precio Unitario</td><td>S/ ${(parseFloat(inpPU.value)||0).toFixed(2)}</td></tr>`
+                : '';
+            const archivosList = archivosSeleccionados.length > 0
+                ? `<tr><td class="label">Documentos Adjuntos</td><td>${archivosSeleccionados.map(f=>f.name+' ('+(f.size/1024).toFixed(1)+' KB)').join('<br>')}</td></tr>`
                 : '';
 
             const w = window.open('', '_blank', 'width=800,height=900');
@@ -366,124 +397,128 @@ ${detalleExtra}
 <tr class="total-row"><td class="label">TOTAL</td><td>S/ ${parseFloat(total).toFixed(2)}</td></tr>
 <tr><td class="label">Observacion</td><td>${obs}</td></tr>
 <tr><td class="label">Sustento</td><td>${sust}</td></tr>
+${archivosList}
 </table>
 <div class="firmas">
 <div class="firma"><div class="linea"></div><div class="nombre">${nombre}</div><div class="cargo">Solicitante</div></div>
 <div class="firma"><div class="linea"></div><div class="nombre">Ricardo Molleapaza Calderon</div><div class="cargo">Secretario de Economia y Finanzas</div></div>
 </div>
-<div class="no-print">
-<button onclick="window.print()" style="background:#059669;color:white;border:none;padding:12px 30px;font-size:16px;border-radius:10px;cursor:pointer;margin-right:10px">Imprimir / Guardar PDF</button>
-<button onclick="window.close()" style="background:#6b7280;color:white;border:none;padding:12px 30px;font-size:16px;border-radius:10px;cursor:pointer">Cerrar</button>
-</div>
+<div class="no-print"><button onclick="window.print()" style="background:#059669;color:white;border:none;padding:12px 30px;font-size:16px;border-radius:10px;cursor:pointer;margin-right:10px">Imprimir / Guardar PDF</button><button onclick="window.close()" style="background:#6b7280;color:white;border:none;padding:12px 30px;font-size:16px;border-radius:10px;cursor:pointer">Cerrar</button></div>
 </body></html>`);
             w.document.close();
         });
 
         // --- Construir datos ---
-        function buildData() {
+        function buildData(){
             const tipo = document.querySelector('input[name="solic-tipo"]:checked').value;
-            const isGasto = tipo === 'GASTO';
+            const isGasto = tipo==='GASTO';
             return {
-                tipo,
-                nombre: obtenerNombre(),
+                tipo, nombre: obtenerNombre(),
                 fecha: document.getElementById('solic-fecha').value,
                 descripcion: obtenerDescripcion(),
-                cantidad: isGasto ? (parseFloat(inpCant.value) || 0) : 0,
+                cantidad: isGasto ? (parseFloat(inpCant.value)||0) : 0,
                 unidad: isGasto ? document.getElementById('solic-unidad').value : '',
-                pu: isGasto ? (parseFloat(inpPU.value) || 0) : 0,
-                total: isGasto ? (parseFloat(inpTotal.value) || 0) : (parseFloat(inpMonto.value) || 0),
+                pu: isGasto ? (parseFloat(inpPU.value)||0) : 0,
+                total: isGasto ? (parseFloat(inpTotal.value)||0) : (parseFloat(inpMonto.value)||0),
                 observacion: document.getElementById('solic-observacion').value.trim().toUpperCase(),
                 sustento: document.getElementById('solic-sustento').value.trim().toUpperCase(),
-                archivos: [],
-                estado: 'pendiente',
-                timestamp: serverTimestamp()
+                archivos: [], plantillaFirmadaURL: '', plantillaFirmadaNombre: '',
+                estado: 'pendiente', timestamp: serverTimestamp()
             };
         }
 
-        // --- Verificación pre-envio ---
+        // --- Verificacion pre-envio ---
         let dataPendiente = null;
-
-        form.addEventListener('submit', function (e) {
+        form.addEventListener('submit', function(e){
             e.preventDefault();
             const tipo = document.querySelector('input[name="solic-tipo"]:checked').value;
             const nombre = obtenerNombre();
             const fecha = document.getElementById('solic-fecha').value;
             const desc = obtenerDescripcion();
-            const total = tipo === 'GASTO' ? inpTotal.value : inpMonto.value;
+            const total = tipo==='GASTO' ? inpTotal.value : inpMonto.value;
 
-            if (!nombre || !fecha || !desc || !total || parseFloat(total) <= 0) {
-                alert('Complete todos los campos obligatorios (nombre, fecha, descripción, monto).');
-                return;
-            }
+            if(!nombre){ alert('Seleccione su nombre.'); return; }
+            if(!fecha){ alert('Ingrese la fecha.'); return; }
+            if(!desc){ alert('Seleccione el tipo de servicio/ingreso.'); return; }
+            if(!total || parseFloat(total)<=0){ alert('Ingrese un monto valido.'); return; }
+            if(!archivoFirmado){ alert('Adjunte la plantilla firmada antes de enviar.'); return; }
 
             dataPendiente = buildData();
-            const tipoLabel = tipo === 'GASTO' ? 'GASTO / EGRESO' : 'INGRESO';
-            let detalleHTML = `<p><strong>Nombre:</strong> ${dataPendiente.nombre}</p><p><strong>Tipo:</strong> ${tipoLabel}</p><p><strong>Fecha:</strong> ${dataPendiente.fecha}</p><p><strong>Descripción:</strong> ${dataPendiente.descripcion}</p>`;
-            if (tipo === 'GASTO') detalleHTML += `<p><strong>Cantidad:</strong> ${dataPendiente.cantidad} | <strong>Unidad:</strong> ${dataPendiente.unidad} | <strong>P.U.:</strong> S/ ${dataPendiente.pu.toFixed(2)}</p>`;
-            detalleHTML += `<p><strong>Total:</strong> <span class="text-lg font-bold text-emerald-700">S/ ${dataPendiente.total.toFixed(2)}</span></p>`;
-            if (dataPendiente.observacion) detalleHTML += `<p><strong>Observación:</strong> ${dataPendiente.observacion}</p>`;
-            if (dataPendiente.sustento) detalleHTML += `<p><strong>Sustento:</strong> ${dataPendiente.sustento}</p>`;
+            const tipoLabel = tipo==='GASTO' ? 'GASTO / EGRESO' : 'INGRESO';
+            let html = `<p><strong>Nombre:</strong> ${dataPendiente.nombre}</p><p><strong>Tipo:</strong> ${tipoLabel}</p><p><strong>Fecha:</strong> ${dataPendiente.fecha}</p><p><strong>Descripcion:</strong> ${dataPendiente.descripcion}</p>`;
+            if(tipo==='GASTO') html += `<p><strong>Cant:</strong> ${dataPendiente.cantidad} | <strong>Unidad:</strong> ${dataPendiente.unidad} | <strong>P.U.:</strong> S/ ${dataPendiente.pu.toFixed(2)}</p>`;
+            html += `<p><strong>Total:</strong> <span class="text-lg font-bold text-emerald-700">S/ ${dataPendiente.total.toFixed(2)}</span></p>`;
+            if(dataPendiente.observacion) html += `<p><strong>Observacion:</strong> ${dataPendiente.observacion}</p>`;
+            if(dataPendiente.sustento) html += `<p><strong>Sustento:</strong> ${dataPendiente.sustento}</p>`;
+            document.getElementById('resumen-datos').innerHTML = html;
 
-            document.getElementById('resumen-datos').innerHTML = detalleHTML;
-            document.getElementById('resumen-archivos').innerHTML = archivosSeleccionados.length > 0
-                ? `<p class="font-bold text-emerald-700">${archivosSeleccionados.length} archivo(s) para adjuntar:</p>` + archivosSeleccionados.map(f => `<p class="text-gray-600">- ${f.name} (${(f.size/1024).toFixed(1)} KB)</p>`).join('')
-                : '<p class="text-gray-400 italic">Sin archivos adjuntos</p>';
+            let archHtml = '';
+            if(archivoFirmado) archHtml += `<p class="text-blue-700 font-bold"><ion-icon name="document-lock" class="mr-1 align-middle"></ion-icon> Plantilla Firmada: ${archivoFirmado.name} (${(archivoFirmado.size/1024).toFixed(1)} KB)</p>`;
+            if(archivosSeleccionados.length) archHtml += `<p class="font-bold text-emerald-700 mt-2">${archivosSeleccionados.length} comprobante(s):</p>` + archivosSeleccionados.map(f=>`<p class="text-gray-600 text-sm">- ${f.name} (${(f.size/1024).toFixed(1)} KB)</p>`).join('');
+            if(!archHtml) archHtml = '<p class="text-gray-400 italic">Sin archivos adjuntos.</p>';
+            document.getElementById('resumen-archivos').innerHTML = archHtml;
 
             document.getElementById('modal-verificar').classList.remove('hidden');
         });
 
-        window.cerrarVerificar = function () { document.getElementById('modal-verificar').classList.add('hidden'); dataPendiente = null; };
+        window.cerrarVerificar = function(){ document.getElementById('modal-verificar').classList.add('hidden'); dataPendiente=null; };
 
-        document.getElementById('btn-confirmar-envio').addEventListener('click', async () => {
-            if (!dataPendiente) return;
+        document.getElementById('btn-confirmar-envio').addEventListener('click', async ()=>{
+            if(!dataPendiente) return;
             const btn = document.getElementById('btn-confirmar-envio');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="animate-spin mr-2">&#9696;</span> Enviando...';
+            btn.disabled = true; btn.innerHTML = '<span class="animate-spin mr-2">&#9696;</span> Enviando...';
             try {
-                if (archivosSeleccionados.length > 0) {
+                // Subir plantilla firmada
+                if(archivoFirmado){
+                    const r = ref(storage, `viaticos/firmado_${Date.now()}_${archivoFirmado.name.replace(/[^a-zA-Z0-9.\-]/g,'_')}`);
+                    await uploadBytes(r, archivoFirmado);
+                    dataPendiente.plantillaFirmadaURL = await getDownloadURL(r);
+                    dataPendiente.plantillaFirmadaNombre = archivoFirmado.name;
+                }
+                // Subir comprobantes
+                if(archivosSeleccionados.length){
                     const stamp = Date.now();
-                    for (const f of archivosSeleccionados) {
-                        if (f.size > 5*1024*1024) { alert(f.name + ' excede 5MB. Saltado.'); continue; }
+                    for(const f of archivosSeleccionados){
+                        if(f.size>5*1024*1024){ alert(f.name+' excede 5MB.'); continue; }
                         const r = ref(storage, `viaticos/${stamp}_${f.name.replace(/[^a-zA-Z0-9.\-]/g,'_')}`);
                         await uploadBytes(r, f);
                         dataPendiente.archivos.push({ nombre: f.name, url: await getDownloadURL(r) });
                     }
                 }
-                await addDoc(collection(db, 'viaticos'), dataPendiente);
+                await addDoc(collection(db,'viaticos'), dataPendiente);
                 cerrarVerificar();
                 form.classList.add('hidden');
                 document.getElementById('confirmacion').classList.remove('hidden');
-                const waMsg = encodeURIComponent(`*SOLICITUD DE VIATICOS*\n\nNombre: ${dataPendiente.nombre}\nTipo: ${dataPendiente.tipo}\nFecha: ${dataPendiente.fecha}\nDesc: ${dataPendiente.descripcion}\nTotal: S/ ${dataPendiente.total.toFixed(2)}`);
+                const waMsg = encodeURIComponent(`*SOLICITUD*\nNombre: ${dataPendiente.nombre}\nTipo: ${dataPendiente.tipo}\nDesc: ${dataPendiente.descripcion}\nTotal: S/ ${dataPendiente.total.toFixed(2)}`);
                 document.getElementById('wa-link-confirm').href = `https://wa.me/51955153250?text=${waMsg}`;
-                dataPendiente = null;
-            } catch (err) { alert('Error: ' + err.message); }
-            btn.disabled = false;
-            btn.innerHTML = '<ion-icon name="checkmark" class="mr-1 align-middle"></ion-icon> Confirmar y Enviar';
+                dataPendiente=null;
+            } catch(err){ alert('Error: '+err.message); }
+            btn.disabled = false; btn.innerHTML = '<ion-icon name="checkmark" class="mr-1 align-middle"></ion-icon> Confirmar y Enviar';
         });
 
         // --- WhatsApp directo ---
-        document.getElementById('btn-whatsapp').addEventListener('click', () => {
+        document.getElementById('btn-whatsapp').addEventListener('click', ()=>{
             const tipo = document.querySelector('input[name="solic-tipo"]:checked').value;
-            const nombre = obtenerNombre() || '(sin nombre)';
-            const fecha = document.getElementById('solic-fecha').value || '(sin fecha)';
-            const desc = obtenerDescripcion() || '(sin desc)';
-            const total = tipo === 'GASTO' ? (inpTotal.value || '0') : (inpMonto.value || '0');
-            window.open(`https://wa.me/51955153250?text=${encodeURIComponent(`*SOLICITUD*\nNombre: ${nombre}\nTipo: ${tipo}\nFecha: ${fecha}\nDesc: ${desc}\nTotal: S/ ${total}`)}`, '_blank');
+            const nombre = obtenerNombre()||'(sin nombre)';
+            const fecha = document.getElementById('solic-fecha').value||'(sin fecha)';
+            const desc = obtenerDescripcion()||'(sin desc)';
+            const total = tipo==='GASTO' ? (inpTotal.value||'0') : (inpMonto.value||'0');
+            window.open(`https://wa.me/51955153250?text=${encodeURIComponent(`*SOLICITUD*\nNombre: ${nombre}\nTipo: ${tipo}\nFecha: ${fecha}\nDesc: ${desc}\nTotal: S/ ${total}`)}`,'_blank');
         });
 
         // --- Nueva solicitud ---
-        window.nuevaSolicitud = function () {
+        window.nuevaSolicitud = function(){
             document.getElementById('confirmacion').classList.add('hidden');
             form.classList.remove('hidden');
             form.reset();
-            inpTotal.value = '';
-            inpMonto.value = '';
-            archivosSeleccionados = [];
-            fileList.innerHTML = '';
-            otroInput.classList.add('hidden'); otroInput.required = false; otroInput.value = '';
-            otroNombre.classList.add('hidden'); otroNombre.required = false; otroNombre.value = '';
-            selDesc.innerHTML = '<option value="">Seleccione una opción...</option>' + OPCIONES_GASTO.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
-            document.querySelector('input[name="solic-tipo"][value="GASTO"]').checked = true;
+            inpTotal.value=''; inpMonto.value='';
+            archivosSeleccionados=[]; fileList.innerHTML='';
+            archivoFirmado=null; firmadoInput.value=''; firmadoNombre.classList.add('hidden'); btnQuitarFirmado.classList.add('hidden');
+            document.getElementById('plantilla-estado').innerHTML='1. Descargue la plantilla → 2. Firmela digitalmente → 3. Subala aqui';
+            otroInput.classList.add('hidden'); otroInput.required=false; otroInput.value='';
+            otroNombre.classList.add('hidden'); otroNombre.required=false; otroNombre.value='';
+            selDesc.innerHTML='<option value="">Seleccione una opcion...</option>'+OPCIONES_GASTO.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+            document.querySelector('input[name="solic-tipo"][value="GASTO"]').checked=true;
             cambiarTipo();
         };
     </script>
