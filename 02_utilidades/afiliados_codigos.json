@@ -1,0 +1,492 @@
+[
+  {
+    "numero": 1,
+    "nombre": "ALAYZA VARGAS JUAN REYNALDO SALVADOR",
+    "uo": "OFICINA DE ADMINISTRACIÓN Y FINANZAS",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "7WKRH4"
+  },
+  {
+    "numero": 2,
+    "nombre": "ALVAREZ FERRANDO JOSE FERNANDO",
+    "uo": "SECRETARIA GENERAL",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "EWJBL1"
+  },
+  {
+    "numero": 3,
+    "nombre": "ALVAREZ HERRERA LUCY",
+    "uo": "OFICINA DE ASESORIA JURIDICA",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "TJGJGL"
+  },
+  {
+    "numero": 4,
+    "nombre": "APAZA JALLO  NIELS JYEYSON",
+    "uo": "DESPACHO MIEMBRO 5",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "JWKWY4"
+  },
+  {
+    "numero": 5,
+    "nombre": "BARZOLA BENITES CHRISTOPER FERNANDO",
+    "uo": "TRAMITE DOCUMENTARIO",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "VQNDXR"
+  },
+  {
+    "numero": 6,
+    "nombre": "BASURTO BALLARTA ANSELMA NOEMI",
+    "uo": "UNIDAD DE TESORERIA",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "72C0B8"
+  },
+  {
+    "numero": 7,
+    "nombre": "BENITES VELA LUIS",
+    "uo": "OFICINA DE PLANIFICACIÓN Y COOPERACIÓN TÉCNICA",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "A3L6TK"
+  },
+  {
+    "numero": 8,
+    "nombre": "CARBAJAL CARRASCO MARTHA BERTHA",
+    "uo": "UNIDAD DE TESORERIA",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "3VDJXJ"
+  },
+  {
+    "numero": 9,
+    "nombre": "CARBAJAL SANCHEZ SERGIO ANTONIO",
+    "uo": "UNIDAD DE ABASTECIMIENTO Y SERVICIOS GENERALES",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "E7VMG4"
+  },
+  {
+    "numero": 10,
+    "nombre": "CAURACURI PINO JENNIFER EDITH",
+    "uo": "AREA DE ATENCION AL USUARIO Y TRAMITE DOCUMENTARIO",
+    "cargo": "ÁPOYO PROFESIONAL",
+    "codigo": "VT68ZA"
+  },
+  {
+    "numero": 11,
+    "nombre": "CHALCO BUSTINZA JIMMY GERALDO",
+    "uo": "DIRECCION DE SELECCIÓN Y NOMBRAMIENTO",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "C39QN1"
+  },
+  {
+    "numero": 12,
+    "nombre": "CHAVEZ HILARIO CESAR ANTONIO",
+    "uo": "OFICINA DE TECNOLOGIAS DE LA INFORMACION Y GOBIERNO DIGITAL",
+    "cargo": "ANALISTA 1",
+    "codigo": "DUFIP3"
+  },
+  {
+    "numero": 13,
+    "nombre": "CHOQUE ÁVALOS ROSSY MARGARITA",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "AUXILIAR",
+    "codigo": "HFD6CH"
+  },
+  {
+    "numero": 14,
+    "nombre": "COLINA OSORIO LUISA MERCEDES",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "AUXILIAR",
+    "codigo": "PH0DHT"
+  },
+  {
+    "numero": 15,
+    "nombre": "COLLANTES CARMONA LUIS ALEJANDRO",
+    "uo": "DIRECCION DE SELECCIÓN Y NOMBRAMIENTO",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "BQ7V31"
+  },
+  {
+    "numero": 16,
+    "nombre": "CONDE BEDON JOSSY JASQUELINE",
+    "uo": "AREA DE COMUNICACIÓN E IMAGEN",
+    "cargo": "ANALISTA 1",
+    "codigo": "W4CI41"
+  },
+  {
+    "numero": 17,
+    "nombre": "CRUZ MANCHEGO MARSHA JIMENA",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "ANALISTA 2",
+    "codigo": "3F45RS"
+  },
+  {
+    "numero": 18,
+    "nombre": "DE FREITAS  VILLANUEVA ELIZABETH JANE",
+    "uo": "UNIDAD DE ABASTECIMIENTO Y SERVICIOS GENERALES",
+    "cargo": "ANALISTA 2",
+    "codigo": "EJR8UA"
+  },
+  {
+    "numero": 19,
+    "nombre": "DELGADO VASQUEZ SILVIA NOHEMY",
+    "uo": "SECRETARIA GENERAL",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "YO4HYI"
+  },
+  {
+    "numero": 20,
+    "nombre": "DURAND DIAZ AUGUSTO LUIS",
+    "uo": "DESPACHO MIEMBRO 4",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "YW8PNY"
+  },
+  {
+    "numero": 21,
+    "nombre": "ESPINOZA OCHOA DIEGO ALEXANDR",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "ANALISTA 1",
+    "codigo": "V2JSQN"
+  },
+  {
+    "numero": 22,
+    "nombre": "ESPINOZA VICENTE CRISTIAN YERAL COSME",
+    "uo": "AREA DE COMUNICACIÓN E IMAGEN",
+    "cargo": "ANALISTA 1",
+    "codigo": "MNS20E"
+  },
+  {
+    "numero": 23,
+    "nombre": "FALCONI PEÑA ANDREA PATRICIA",
+    "uo": "DIRECCION DE EVALUACION Y RATIFICACION",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "IJJYGB"
+  },
+  {
+    "numero": 24,
+    "nombre": "FERNANDEZ LOPEZ KAREN ESTEFANY",
+    "uo": "UNIDAD DE CONTABILIDAD",
+    "cargo": "ANALISTA 1",
+    "codigo": "E7KP2D"
+  },
+  {
+    "numero": 25,
+    "nombre": "FLORES  MARQUEZ PRISCILA RAYZA",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "ANALISTA 2",
+    "codigo": "XT258J"
+  },
+  {
+    "numero": 26,
+    "nombre": "FLORES BELLIDO GRETA MIREYA",
+    "uo": "UNIDAD DE RECURSOS HUMANOS",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "EICAV2"
+  },
+  {
+    "numero": 27,
+    "nombre": "FLORES HUAMBO GRECIA LUCIA",
+    "uo": "DIRECCION DE SELECCIÓN Y NOMBRAMIENTO",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "YDDVDW"
+  },
+  {
+    "numero": 28,
+    "nombre": "GARCES ORTIZ CARLOS ALBERTO",
+    "uo": "UNIDAD DE ABASTECIMIENTO Y SERVICIOS GENERALES",
+    "cargo": "CHOFER",
+    "codigo": "BZGOUG"
+  },
+  {
+    "numero": 29,
+    "nombre": "GARRO VERGARA LUIS DIOFANTO",
+    "uo": "DIRECCION DE SELECCIÓN Y NOMBRAMIENTO",
+    "cargo": "ANALISTA 2",
+    "codigo": "V54BPM"
+  },
+  {
+    "numero": 30,
+    "nombre": "HINOSTROZA MARINGO CARLOS GABRIEL",
+    "uo": "OFICINA DE ADMINISTRACIÓN Y FINANZAS",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "DDIO6K"
+  },
+  {
+    "numero": 31,
+    "nombre": "HUAMANI COTACALLAPA MANUEL",
+    "uo": "OFICINA DE PLANIFICACIÓN Y COOPERACIÓN TÉCNICA",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "CGR0IC"
+  },
+  {
+    "numero": 32,
+    "nombre": "INAFUKU MARAVI MIDORI PATRICIA",
+    "uo": "UNIDAD DE RECURSOS HUMANOS",
+    "cargo": "ANALISTA 2",
+    "codigo": "XR4AYY"
+  },
+  {
+    "numero": 33,
+    "nombre": "JARA JANCCO KATTY CANDY",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "5BKKQR"
+  },
+  {
+    "numero": 34,
+    "nombre": "LAZARTE ACUÑA GIOVANNA TANIA",
+    "uo": "OFICINA DE PRESUPUESTO",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "ZXUK20"
+  },
+  {
+    "numero": 35,
+    "nombre": "LEON CHARCA ALY FELIX",
+    "uo": "DESPACHO MIEMBRO 1",
+    "cargo": "ASESOR",
+    "codigo": "PCP6XP"
+  },
+  {
+    "numero": 36,
+    "nombre": "LLAMACURI  LERMO MIRIAM RUTH",
+    "uo": "DESPACHO MIEMBRO 2",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "XKPRB6"
+  },
+  {
+    "numero": 37,
+    "nombre": "LOZANO VILLEGAS HENRY NEISER",
+    "uo": "DIRECCION DE EVALUACION Y RATIFICACION",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "09EWL7"
+  },
+  {
+    "numero": 38,
+    "nombre": "LUJAN MORENO JOSE ANTONIO",
+    "uo": "OFICINA DE TECNOLOGIAS DE LA INFORMACION Y GOBIERNO DIGITAL",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "6TERTZ"
+  },
+  {
+    "numero": 39,
+    "nombre": "LUNA LIZA MARIO HAMLET",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "ANALISTA 2",
+    "codigo": "NVFNX9"
+  },
+  {
+    "numero": 40,
+    "nombre": "MAYTA CHAMPA ANA AGRIPINA",
+    "uo": "DIRECCION DE SELECCIÓN Y NOMBRAMIENTO",
+    "cargo": "ANALISTA 1",
+    "codigo": "WHTCTK"
+  },
+  {
+    "numero": 41,
+    "nombre": "MERCADO  CERRÓN JORDAN DONY",
+    "uo": "DESPACHO MIEMBRO 6",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "V7O1IC"
+  },
+  {
+    "numero": 42,
+    "nombre": "MOLLEAPAZA CALDERON RICARDO",
+    "uo": "UNIDAD DE CONTABILIDAD",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "Z46HES"
+  },
+  {
+    "numero": 43,
+    "nombre": "MONTENEGRO GONZALES JUAN CARLOS",
+    "uo": "UNIDAD DE ABASTECIMIENTO Y SERVICIOS GENERALES",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "M3J6A5"
+  },
+  {
+    "numero": 44,
+    "nombre": "MONTOYA LA ROSA ANTUANED MARIA",
+    "uo": "PROCURADURIA PUBLICA",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "T472P4"
+  },
+  {
+    "numero": 45,
+    "nombre": "MORALES CESPEDES EDWARD ERIC",
+    "uo": "OFICINA DE TECNOLOGIAS DE LA INFORMACION Y GOBIERNO DIGITAL",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "KY6326"
+  },
+  {
+    "numero": 46,
+    "nombre": "MUÑOZ FLORES WILLIAM ALCIDES",
+    "uo": "DIRECCION DE SELECCIÓN Y NOMBRAMIENTO",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "IL8XZJ"
+  },
+  {
+    "numero": 47,
+    "nombre": "ORDOÑEZ ESCARZA PAVEL",
+    "uo": "OFICINA DE ASESORIA JURIDICA",
+    "cargo": "ANALISTA 2",
+    "codigo": "1LG5R5"
+  },
+  {
+    "numero": 48,
+    "nombre": "PACHECO ARREGUI SILVERIO",
+    "uo": "UNIDAD DE ABASTECIMIENTO Y SERVICIOS GENERALES",
+    "cargo": "CHOFER",
+    "codigo": "UOTCHQ"
+  },
+  {
+    "numero": 49,
+    "nombre": "PALMADERA ARROSTICO ERMELINDO JULIO",
+    "uo": "PRESIDENCIA",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "59PMOK"
+  },
+  {
+    "numero": 50,
+    "nombre": "PATIÑO LOPEZ JORGE ALEJANDRO",
+    "uo": "SECRETARIA GENERAL",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "KODRUE"
+  },
+  {
+    "numero": 51,
+    "nombre": "PISSANI LEMBCKE DELIA MERCEDES",
+    "uo": "UNIDAD DE RECURSOS HUMANOS",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "33N8QX"
+  },
+  {
+    "numero": 52,
+    "nombre": "POMPILIO DURAN GUILIANA",
+    "uo": "DIRECCION DE SELECCIÓN Y NOMBRAMIENTO",
+    "cargo": "ANALISTA 2",
+    "codigo": "J38IC7"
+  },
+  {
+    "numero": 53,
+    "nombre": "REQUE MITTANI MARTIN",
+    "uo": "OFICINA DE PLANIFICACIÓN Y COOPERACIÓN TÉCNICA",
+    "cargo": "ESPECIALISTA (PROFESIONAL 1)",
+    "codigo": "YO8UFL"
+  },
+  {
+    "numero": 54,
+    "nombre": "RIVERO LI DE CASAVERDE KATHERINE JANETT",
+    "uo": "DIRECCION DE EVALUACION Y RATIFICACION",
+    "cargo": "APOYO PROFESIONAL",
+    "codigo": "2OA4P6"
+  },
+  {
+    "numero": 55,
+    "nombre": "SAENZ ALVARADO RONY ALBERTO",
+    "uo": "PROCURADURIA PUBLICA",
+    "cargo": "ANALISTA 2",
+    "codigo": "7K1G0S"
+  },
+  {
+    "numero": 56,
+    "nombre": "SALINAS MACHACA ALEJANDRO",
+    "uo": "OFICINA DE TECNOLOGIAS DE LA INFORMACION Y GOBIERNO DIGITAL",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "0SG5G1"
+  },
+  {
+    "numero": 57,
+    "nombre": "SILVA MACETAS GISSELA MARGARITA",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "ANALISTA 2",
+    "codigo": "77YAG7"
+  },
+  {
+    "numero": 58,
+    "nombre": "SILVA ROMERO ANTHONY JESUS",
+    "uo": "DESPACHO MIEMBRO 7",
+    "cargo": "ANALISTA 1",
+    "codigo": "6W4O64"
+  },
+  {
+    "numero": 59,
+    "nombre": "SOSA LINARES YURI ENRIQUE",
+    "uo": "UNIDAD DE ABASTECIMIENTO Y SERVICIOS GENERALES",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "NT0ITC"
+  },
+  {
+    "numero": 60,
+    "nombre": "TARAZONA RODRIGUEZ JORGE ESTEBAN",
+    "uo": "UNIDAD DE ABASTECIMIENTO Y SERVICIOS GENERALES",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "1DD05J"
+  },
+  {
+    "numero": 61,
+    "nombre": "TISZA ASTETE JUAN ALFREDO",
+    "uo": "DIRECCION GENERAL",
+    "cargo": "ASESOR",
+    "codigo": "MWO9GI"
+  },
+  {
+    "numero": 62,
+    "nombre": "TONGO CHÁVEZ OSCAR GONZALO",
+    "uo": "TRAMITE DOCUMENTARIO",
+    "cargo": "NOTIFICADOR",
+    "codigo": "QM01US"
+  },
+  {
+    "numero": 63,
+    "nombre": "TORRES CASAS WELINTONG",
+    "uo": "PROCURADURIA PUBLICA",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "7NY0PY"
+  },
+  {
+    "numero": 64,
+    "nombre": "TREJO SILVA RICHARD",
+    "uo": "DIRECCIÓN DE PROCESOS DISCIPLINARIOS",
+    "cargo": "ANALISTA 1",
+    "codigo": "8YU1ZE"
+  },
+  {
+    "numero": 65,
+    "nombre": "VALLEJOS HERENCIA MARIO ALBERTO",
+    "uo": "OFICINA DE TECNOLOGIAS DE LA INFORMACION Y GOBIERNO DIGITAL",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "IMLHVK"
+  },
+  {
+    "numero": 66,
+    "nombre": "VASQUEZ  SORIA KAROL ELENA",
+    "uo": "DIRECCION DE PROCESOS DISCIPLINARIOS",
+    "cargo": "ANALISTA 2",
+    "codigo": "YYOHK3"
+  },
+  {
+    "numero": 67,
+    "nombre": "VASQUEZ VILLANUEVA MARGARETH PAOLA",
+    "uo": "PROCURADURIA PUBLICA",
+    "cargo": "ANALISTA 2",
+    "codigo": "TNSFA4"
+  },
+  {
+    "numero": 68,
+    "nombre": "VEGA ARQUIÑO NATHALI SUSAN",
+    "uo": "ARIF",
+    "cargo": "ANALISTA 2",
+    "codigo": "EC5Q27"
+  },
+  {
+    "numero": 69,
+    "nombre": "VILLARROEL BERAÚN EDSON MICKY",
+    "uo": "DIRECCIÓN DE PROCESOS DISCIPLINARIOS",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "UMKJ45"
+  },
+  {
+    "numero": 70,
+    "nombre": "YAÑEZ ANCIETA LUIS GUILLERMO",
+    "uo": "DESPACHO MIEMBRO 4",
+    "cargo": "APOYO TÉCNICO",
+    "codigo": "7EXLUU"
+  }
+]

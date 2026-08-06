@@ -1,0 +1,53 @@
+/* ============================================================ */
+/* SIUTCASJNJ - Estilos del Modal de Descarga                     */
+/* ============================================================ */
+
+.descarga-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; backdrop-filter: blur(4px);
+}
+.descarga-modal {
+    background: #1f2937; border-radius: 16px; padding: 28px 32px;
+    max-width: 420px; width: 90%; box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    border: 1px solid #374151; animation: dmIn 0.2s ease-out;
+}
+@keyframes dmIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.descarga-modal-title {
+    color: #f3f4f6; font-size: 18px; font-weight: 700; margin-bottom: 4px;
+}
+.descarga-doc-name {
+    color: #60a5fa; font-size: 14px; margin-top: 4px;
+}
+.descarga-modal-content { margin: 16px 0; }
+.descarga-input {
+    width: 100%; padding: 12px 16px; border-radius: 10px;
+    background: #111827; border: 1px solid #374151; color: #f3f4f6;
+    font-size: 20px; text-align: center; letter-spacing: 6px;
+    font-family: 'Courier New', monospace; outline: none;
+    transition: border-color 0.15s; text-transform: uppercase;
+}
+.descarga-input:focus { border-color: #3b82f6; }
+.descarga-input-error { border-color: #ef4444 !important; animation: shake 0.4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-4px)} }
+.descarga-modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.descarga-btn {
+    padding: 10px 22px; border-radius: 10px; font-weight: 600; font-size: 14px;
+    cursor: pointer; border: none; transition: all 0.15s;
+}
+.descarga-btn-cancel { background: #374151; color: #d1d5db; }
+.descarga-btn-cancel:hover { background: #4b5563; }
+.descarga-btn-confirm { background: #2563eb; color: #fff; }
+.descarga-btn-confirm:hover { background: #1d4ed8; }
+.descarga-btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Toast */
+.descarga-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #065f46; color: #d1fae5; padding: 12px 28px;
+    border-radius: 12px; font-weight: 600; font-size: 14px;
+    z-index: 99999; animation: dtIn 0.3s, dtOut 0.3s 2.7s forwards;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+@keyframes dtIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes dtOut { from { opacity: 1; } to { opacity: 0; } }

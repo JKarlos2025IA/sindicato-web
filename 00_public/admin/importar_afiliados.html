@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Afiliados - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-2xl font-bold mb-2">Importar Afiliados a Firestore</h1>
+        <p class="text-gray-400 mb-6">Carga masiva de afiliados con codigos de descarga</p>
+
+        <div id="status" class="bg-gray-800 rounded-xl p-4 mb-4 hidden"></div>
+
+        <div class="flex gap-4 mb-6">
+            <button onclick="importar()" id="btn-importar"
+                class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition">
+                Importar 70 Afiliados
+            </button>
+            <button onclick="verColeccion()" id="btn-ver"
+                class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-semibold transition">
+                Ver en Firestore
+            </button>
+        </div>
+
+        <div id="tabla" class="overflow-x-auto hidden">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-800 text-left">
+                        <th class="p-3">#</th>
+                        <th class="p-3">Nombre</th>
+                        <th class="p-3">Codigo</th>
+                        <th class="p-3">UO</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, writeBatch, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+const fc = { apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0", authDomain: "sindicato-jnj.firebaseapp.com", projectId: "sindicato-jnj", storageBucket: "sindicato-jnj.firebasestorage.app", messagingSenderId: "1036915309355", appId: "1:1036915309355:web:fac53de65031a39597e36e" };
+const app = initializeApp(fc);
+const db = getFirestore(app);
+
+window.importar = async () => {
+    const btn = document.getElementById('btn-importar');
+    const status = document.getElementById('status');
+    btn.disabled = true;
+    btn.textContent = 'Importando...';
+
+    try {
+        const r = await fetch('afiliados_codigos.json');
+        const data = await r.json();
+
+        const batchSize = 50;
+        for (let i = 0; i < data.length; i += batchSize) {
+            const batch = writeBatch(db);
+            const chunk = data.slice(i, i + batchSize);
+            for (const a of chunk) {
+                const ref = doc(collection(db, 'afiliados'));
+                batch.set(ref, a);
+            }
+            await batch.commit();
+        }
+
+        status.className = 'bg-green-900 border border-green-700 rounded-xl p-4 mb-4';
+        status.innerHTML = `${data.length} afiliados importados correctamente.`;
+        status.classList.remove('hidden');
+    } catch (e) {
+        status.className = 'bg-red-900 border border-red-700 rounded-xl p-4 mb-4';
+        status.innerHTML = 'Error: ' + e.message;
+        status.classList.remove('hidden');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Importar 70 Afiliados';
+};
+
+window.verColeccion = async () => {
+    const tbody = document.getElementById('tbody');
+    const tabla = document.getElementById('tabla');
+    const btn = document.getElementById('btn-ver');
+    btn.disabled = true;
+    btn.textContent = 'Cargando...';
+
+    try {
+        const snap = await getDocs(collection(db, 'afiliados'));
+        tbody.innerHTML = '';
+        snap.forEach(doc => {
+            const d = doc.data();
+            tbody.innerHTML += `<tr class="border-b border-gray-700">
+                <td class="p-3">${d.numero}</td>
+                <td class="p-3">${d.nombre}</td>
+                <td class="p-3 font-mono text-blue-400">${d.codigo}</td>
+                <td class="p-3 text-gray-400">${d.uo}</td>
+            </tr>`;
+        });
+        tabla.classList.remove('hidden');
+        document.getElementById('status').classList.add('hidden');
+    } catch (e) {
+        document.getElementById('status').className = 'bg-red-900 border border-red-700 rounded-xl p-4 mb-4';
+        document.getElementById('status').innerHTML = 'Error: ' + e.message;
+        document.getElementById('status').classList.remove('hidden');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Ver en Firestore';
+};
+</script>
+</body>
+</html>
