@@ -21,14 +21,28 @@
             <div class="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ion-icon name="key-outline" class="text-4xl text-pink-600"></ion-icon>
             </div>
-            <h2 class="text-2xl font-black text-gray-800 mb-2">Actualizar Mis Datos</h2>
-            <p class="text-gray-500 mb-6">Ingresa tu codigo de afiliado para continuar</p>
-            <div class="flex gap-3 max-w-sm mx-auto">
+            <h2 class="text-2xl font-black text-gray-800 mb-2" id="titulo-paso1">Actualizar Mis Datos</h2>
+            <p class="text-gray-500 mb-2" id="subtitulo-paso1">Ingresa tu codigo de afiliado para continuar</p>
+            <div id="opciones-registro" class="hidden flex gap-2 justify-center mb-4">
+                <button id="btn-opcion-existente" onclick="window.mostrarCodigoInput()"
+                    class="bg-pink-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition">Ya soy afiliado</button>
+                <button id="btn-opcion-nuevo" onclick="window.mostrarRegistroNuevo()"
+                    class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition">Quiero afiliarme</button>
+            </div>
+            <div id="codigo-input-area" class="flex gap-3 max-w-sm mx-auto">
                 <input type="text" id="codigo-input" placeholder="Codigo de 6 digitos" maxlength="6" autocomplete="off"
                     class="flex-1 border-2 border-gray-300 rounded-xl p-4 text-center font-mono text-xl tracking-widest uppercase focus:ring-0 focus:border-pink-500 outline-none transition">
                 <button id="btn-ingresar" onclick="window.verificarCodigo()"
                     class="bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 rounded-xl transition flex items-center gap-2">
                     <ion-icon name="arrow-forward"></ion-icon> Ingresar
+                </button>
+            </div>
+            <div id="registro-nuevo-area" class="hidden space-y-3 max-w-md mx-auto mt-4">
+                <input type="text" id="reg-nombre" placeholder="APELLIDOS Y NOMBRES" autocomplete="off"
+                    class="w-full border-2 border-gray-300 rounded-xl p-4 text-center uppercase focus:ring-0 focus:border-amber-500 outline-none transition">
+                <button id="btn-registrar-nuevo" onclick="window.registrarNuevo()"
+                    class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-xl transition flex items-center justify-center gap-2">
+                    <ion-icon name="person-add"></ion-icon> Continuar registro
                 </button>
             </div>
             <p id="codigo-error" class="text-red-500 text-sm mt-3 hidden"></p>
@@ -69,7 +83,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const fc = { apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0", authDomain: "sindicato-jnj.firebaseapp.com", projectId: "sindicato-jnj", storageBucket: "sindicato-jnj.firebasestorage.app", messagingSenderId: "1036915309355", appId: "1:1036915309355:web:fac53de65031a39597e36e" };
         const app = initializeApp(fc);
@@ -83,6 +97,8 @@
         let campanaData = null;
         let camposExtra = [];
         let camposHabilitados = [];
+        let esNuevoRegistro = false;
+        let nombreNuevoRegistro = '';
 
         const CAMPOS_BASE_EDITABLES = [
             { nombre: 'email', etiqueta: 'Email', tipo: 'email', icon: 'mail-outline', inputType: 'email', placeholder: 'correo@ejemplo.com', validacion: 'Debe ser un correo valido con @' },
@@ -97,6 +113,37 @@
             const el = document.getElementById(id);
             if (el) { el.textContent = msg; el.classList.remove('hidden'); }
         }
+
+        window.mostrarCodigoInput = function () {
+            document.getElementById('codigo-input-area').classList.remove('hidden');
+            document.getElementById('registro-nuevo-area').classList.add('hidden');
+            document.getElementById('codigo-input').focus();
+        };
+
+        window.mostrarRegistroNuevo = function () {
+            document.getElementById('codigo-input-area').classList.add('hidden');
+            document.getElementById('registro-nuevo-area').classList.remove('hidden');
+            document.getElementById('codigo-error').classList.add('hidden');
+        };
+
+        window.registrarNuevo = async function () {
+            const nombre = document.getElementById('reg-nombre').value.trim().toUpperCase();
+            if (!nombre || nombre.length < 5) {
+                mostrarError('codigo-error', 'Ingresa tu nombre completo (APELLIDOS Y NOMBRES).');
+                return;
+            }
+            esNuevoRegistro = true;
+            nombreNuevoRegistro = nombre;
+            socioData = { nombre, codigo: 'PENDIENTE', dni: '', uo: '', cargo: '', fecha: '', email: '', telefono: '', activo: false, estado_registro: 'pendiente' };
+            socioDocId = null;
+
+            await cargarCampanaYCampos();
+            document.getElementById('paso-codigo').classList.add('hidden');
+            document.getElementById('paso-formulario').classList.remove('hidden');
+            document.getElementById('socio-nombre-display').textContent = nombre;
+            document.getElementById('socio-codigo-display').textContent = '(Pendiente de aprobacion)';
+            renderizarFormulario();
+        };
 
         window.verificarCodigo = async function () {
             const codigo = document.getElementById('codigo-input').value.trim().toUpperCase();
@@ -161,13 +208,18 @@
                     const campSnap = await getDocs(collection(db, 'campanas_actualizacion'));
                     campSnap.forEach(d => { if (d.id === campanaId) campanaData = { id: d.id, ...d.data() }; });
                 }
-                // Si no hay campana o no se encuentra, mostrar todos los campos como editables
                 camposHabilitados = campanaData?.campos_habilitados || [];
 
                 const campSnap = await getDocs(collection(db, 'campos_extra'));
                 camposExtra = [];
                 campSnap.forEach(d => camposExtra.push({ id: d.id, ...d.data() }));
                 camposExtra = camposExtra.filter(c => c.activo !== false).sort((a, b) => (a.orden || 99) - (b.orden || 99));
+
+                // Mostrar opciones de registro si la campana lo permite
+                if (campanaData?.permitir_registro) {
+                    document.getElementById('opciones-registro').classList.remove('hidden');
+                    document.getElementById('subtitulo-paso1').textContent = 'Elige como quieres continuar';
+                }
             } catch (e) { console.error('Error cargando config:', e); }
         }
 
@@ -343,6 +395,17 @@
             try {
                 const updateData = { timestamp: Date.now() };
 
+                if (esNuevoRegistro) {
+                    updateData.nombre = nombreNuevoRegistro;
+                    updateData.activo = false;
+                    updateData.estado_registro = 'pendiente';
+                    // Generar codigo
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let code = '';
+                    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+                    updateData.codigo = code;
+                }
+
                 // Guardar campos base habilitados
                 CAMPOS_BASE_EDITABLES.forEach(b => {
                     if (!camposHabilitados.includes(b.nombre)) return;
@@ -374,8 +437,13 @@
 
                 if (Object.keys(extra).length > 0) updateData.extra = extra;
 
-                await updateDoc(doc(db, 'socios', socioDocId), updateData);
-
+                if (esNuevoRegistro) {
+                    const ref = await addDoc(collection(db, 'socios'), updateData);
+                    document.getElementById('msg-exito').textContent = 'Registro enviado. Tu codigo es ' + updateData.codigo + '. Un administrador revisara tu solicitud.';
+                } else {
+                    await updateDoc(doc(db, 'socios', socioDocId), updateData);
+                    document.getElementById('msg-exito').textContent = 'Datos actualizados correctamente.';
+                }
                 document.getElementById('msg-exito').classList.remove('hidden');
                 document.getElementById('msg-exito').scrollIntoView({ behavior: 'smooth' });
 
@@ -393,17 +461,28 @@
             document.getElementById('paso-codigo').classList.remove('hidden');
             document.getElementById('paso-formulario').classList.add('hidden');
             document.getElementById('codigo-input').value = '';
+            document.getElementById('reg-nombre').value = '';
             document.getElementById('codigo-error').classList.add('hidden');
             document.getElementById('msg-exito').classList.add('hidden');
             document.getElementById('msg-error').classList.add('hidden');
             socioDocId = null;
             socioData = null;
+            esNuevoRegistro = false;
+            nombreNuevoRegistro = '';
+            // Resetear a vista de codigo normal si hay opciones de registro
+            if (campanaData?.permitir_registro) {
+                document.getElementById('codigo-input-area').classList.add('hidden');
+                document.getElementById('registro-nuevo-area').classList.add('hidden');
+            }
         };
 
         // Enter en el codigo
         document.getElementById('codigo-input').addEventListener('keydown', e => {
             if (e.key === 'Enter') window.verificarCodigo();
         });
+
+        // Cargar config de campana al iniciar (para opciones de registro)
+        cargarCampanaYCampos();
     </script>
 </body>
 </html>
