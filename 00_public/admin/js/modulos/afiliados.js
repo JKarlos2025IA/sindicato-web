@@ -17,8 +17,35 @@ export function initAfiliados() {
 
     window.cargarSocios = async function (filtro = '') {
         if (!listaSocios) return;
+        const theadRow = document.getElementById('thead-socios-row');
+        const thExtrasSlot = document.getElementById('th-extras-slot');
+        const COLUMNAS_BASE = 11;
+
         try {
-            listaSocios.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center">Cargando afiliados...</td></tr>';
+            listaSocios.innerHTML = `<tr><td colspan="${COLUMNAS_BASE}" class="px-3 py-4 text-center">Cargando afiliados...</td></tr>`;
+
+            // Cargar campos extra activos
+            let camposExtra = [];
+            try {
+                const snapCampos = await getDocs(collection(db, 'campos_extra'));
+                snapCampos.forEach(d => {
+                    const c = d.data();
+                    if (c.activo !== false) camposExtra.push(c);
+                });
+                camposExtra.sort((a, b) => (a.orden || 99) - (b.orden || 99));
+            } catch (e) { console.warn('No se pudieron cargar campos extra:', e); }
+
+            // Reconstruir thead
+            let colspanTotal = COLUMNAS_BASE + camposExtra.length;
+            if (theadRow && thExtrasSlot) {
+                let extraHeaders = '';
+                camposExtra.forEach(c => {
+                    extraHeaders += `<th class="px-2 py-3 text-violet-600">${c.etiqueta}</th>`;
+                });
+                thExtrasSlot.innerHTML = extraHeaders;
+            }
+
+            // Cargar socios
             const qSocios = await getDocs(collection(db, "socios"));
             const socios = [];
             qSocios.forEach(docSnap => socios.push({ id: docSnap.id, ...docSnap.data() }));
@@ -38,7 +65,7 @@ export function initAfiliados() {
             if (socioCount) socioCount.textContent = socios.length;
 
             if (filtrados.length === 0) {
-                listaSocios.innerHTML = `<tr><td colspan="11" class="px-3 py-4 text-center text-gray-500">${filtro ? 'No se encontraron resultados.' : 'No hay afiliados registrados.'}</td></tr>`;
+                listaSocios.innerHTML = `<tr><td colspan="${colspanTotal}" class="px-3 py-4 text-center text-gray-500">${filtro ? 'No se encontraron resultados.' : 'No hay afiliados registrados.'}</td></tr>`;
                 return;
             }
 
@@ -64,7 +91,20 @@ export function initAfiliados() {
                         <td class="px-3 py-2 text-gray-500 text-xs max-w-[150px] truncate" title="${s.email || ''}">${s.email || '-'}</td>
                         <td class="px-3 py-2 text-gray-500 text-xs whitespace-nowrap">${s.telefono || '-'}</td>
                         <td class="px-3 py-2 text-center">${genIcon}</td>
-                        <td class="px-3 py-2">${badge}</td>
+                        <td class="px-3 py-2">${badge}</td>`;
+
+                // Columnas de campos extra
+                const extra = s.extra || {};
+                camposExtra.forEach(c => {
+                    let val = extra[c.nombre] || '';
+                    if (c.tipo === 'si_no') {
+                        val = val === 'si' ? '<span class="text-emerald-600 font-bold">Si</span>'
+                            : val === 'no' ? '<span class="text-red-400">No</span>' : '-';
+                    }
+                    html += `<td class="px-2 py-2 text-xs text-gray-600 max-w-[100px] truncate" title="${c.etiqueta}: ${extra[c.nombre] || '-'}">${val || '-'}</td>`;
+                });
+
+                html += `
                         <td class="px-3 py-2 text-right space-x-1 whitespace-nowrap">
                             <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded text-xs font-bold transition btn-editar-socio" data-id="${s.id}">Editar</button>
                             <button class="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs font-bold transition btn-eliminar-socio" data-id="${s.id}">Eliminar</button>
@@ -111,7 +151,7 @@ export function initAfiliados() {
             });
         } catch (error) {
             console.error("Error cargando afiliados:", error);
-            listaSocios.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-red-500">Error al cargar afiliados.</td></tr>';
+            listaSocios.innerHTML = '<tr><td colspan="20" class="px-3 py-4 text-center text-red-500">Error al cargar afiliados.</td></tr>';
         }
     };
 
