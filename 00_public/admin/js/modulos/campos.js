@@ -475,7 +475,7 @@ function initFormCampana() {
             const permitir_registro = document.getElementById('campana-permitir-registro').checked;
 
             if (!nombre) return;
-            if (campos_habilitados.length === 0) { alert('Selecciona al menos un campo para actualizar.'); return; }
+            if (!permitir_registro && campos_habilitados.length === 0) { alert('Selecciona al menos un campo para actualizar, o marca "Solo para nuevos afiliados".'); return; }
 
             const data = { nombre, campos_habilitados, activo, permitir_registro, timestamp: Date.now() };
 
