@@ -49,7 +49,6 @@
         // Referencias de Navegación
         const navInicio = document.getElementById('nav-inicio');
         const navCultura = document.getElementById('nav-cultura');
-        const navGaleria = document.getElementById('nav-galeria');
         const navPortadas = document.getElementById('nav-portadas');
         const navSecretarias = document.getElementById('nav-secretarias');
         const navSocios = document.getElementById('nav-socios');
@@ -61,7 +60,6 @@
         const navEconomia = document.getElementById('nav-economia');
         const viewInicio = document.getElementById('view-inicio');
         const viewCultura = document.getElementById('view-cultura');
-        const viewGaleria = document.getElementById('view-galeria');
         const viewPortadas = document.getElementById('view-portadas');
         const viewSecretarias = document.getElementById('view-secretarias');
         const viewSocios = document.getElementById('view-socios');
@@ -78,7 +76,6 @@
         const formDoc = document.getElementById('form-doc');
         const btnSubmitDoc = document.getElementById('btn-submit-doc');
         const listaDocumentos = document.getElementById('lista-documentos');
-        const contenedorGaleriaAdmin = document.getElementById('contenedor-galeria-admin');
 
         // === AUTENTICACIÓN ===
         onAuthStateChanged(auth, (user) => {
@@ -214,7 +211,6 @@
 
             viewInicio.classList.add('hidden');
             viewCultura.classList.add('hidden');
-            if (viewGaleria) viewGaleria.classList.add('hidden');
             if (viewPortadas) viewPortadas.classList.add('hidden');
             if (viewSecretarias) viewSecretarias.classList.add('hidden');
             if (viewSocios) viewSocios.classList.add('hidden');
@@ -238,7 +234,6 @@
 
         navInicio.addEventListener('click', (e) => { e.preventDefault(); switchView(navInicio, viewInicio, 'Vista General'); });
         navCultura.addEventListener('click', (e) => { e.preventDefault(); switchView(navCultura, viewCultura, 'Gestión: Cultura y Deportes'); });
-        navGaleria.addEventListener('click', (e) => { e.preventDefault(); switchView(navGaleria, viewGaleria, 'Gestión: Álbumes de Fotos'); window.cargarAlbumes(); });
         if (navPortadas) navPortadas.addEventListener('click', (e) => { e.preventDefault(); switchView(navPortadas, viewPortadas, 'Gestión: Portadas del Carrusel'); window.cargarPortadas(); });
         if (navSecretarias) navSecretarias.addEventListener('click', (e) => { e.preventDefault(); switchView(navSecretarias, viewSecretarias, 'Gestión: Secretarías'); window.cargarSecretarias(); });
         if (navSocios) navSocios.addEventListener('click', (e) => { e.preventDefault(); switchView(navSocios, viewSocios, 'Gestión: Socios / Cumpleaños'); window.cargarSocios(); });
@@ -476,124 +471,6 @@
             } catch (error) {
                 console.error("Error cargando portadas:", error);
                 listaPortadas.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error al cargar datos de portadas.</td></tr>';
-            }
-        };
-
-        window.cargarAlbumes = async () => {
-            if (!contenedorGaleriaAdmin) return;
-            try {
-                contenedorGaleriaAdmin.innerHTML = '<p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando álbumes...</p>';
-
-                // Poblar selector de secretarías
-                const qSec = await getDocs(collection(db, "secretarias"));
-                const secretarias = [];
-                qSec.forEach(doc => secretarias.push({ id: doc.id, ...doc.data() }));
-                secretarias.sort((a, b) => (a.orden || 0) - (b.orden || 0));
-
-                const selectSec = document.getElementById('album-secretaria');
-                if (selectSec) {
-                    let opts = '<option value="">Selecciona una secretaría...</option>';
-                    secretarias.forEach(sec => {
-                        opts += `<option value="${sec.id}" data-link="${sec.archivo_html || ''}">${sec.nombre}</option>`;
-                    });
-                    selectSec.innerHTML = opts;
-                }
-
-                // Cargar álbumes
-                const qAlb = await getDocs(collection(db, "albumes"));
-                const albumes = [];
-                qAlb.forEach(doc => albumes.push({ id: doc.id, ...doc.data() }));
-                albumes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-                if (albumes.length === 0) {
-                    contenedorGaleriaAdmin.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay álbumes creados. Usa el formulario de arriba para crear el primero.</p>';
-                    return;
-                }
-
-                let htmlContent = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
-                albumes.forEach((album, idx) => {
-                    const link = album.link || '#';
-                    htmlContent += `
-                        <div class="relative group bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition">
-                            <div class="aspect-video bg-gray-100">
-                                <img src="${album.portada}" class="w-full h-full object-cover" loading="lazy">
-                            </div>
-                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                                <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition transform hover:scale-110 btn-reemplazar-portada shadow-lg" data-id="${album.id}" data-path="${album.storagePath || ''}" title="Cambiar Portada">
-                                    <ion-icon name="swap-horizontal" class="text-lg block"></ion-icon>
-                                </button>
-                                <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition transform hover:scale-110 btn-eliminar-album shadow-lg" data-id="${album.id}" data-path="${album.storagePath || ''}" title="Eliminar Álbum">
-                                    <ion-icon name="trash" class="text-lg block"></ion-icon>
-                                </button>
-                            </div>
-                            <div class="p-3">
-                                <p class="font-bold text-gray-800 text-sm truncate">${album.titulo}</p>
-                                <p class="text-xs text-gray-500 truncate">${album.secretaria || 'Sin secretaría'}</p>
-                            </div>
-                        </div>
-                    `;
-                });
-                htmlContent += '</div>';
-                contenedorGaleriaAdmin.innerHTML = htmlContent;
-
-                // Evento: Eliminar álbum
-                document.querySelectorAll('.btn-eliminar-album').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const target = e.currentTarget;
-                        const id = target.getAttribute('data-id');
-                        const path = target.getAttribute('data-path');
-                        if (confirm('¿Eliminar este álbum? La portada se borrará del servidor.')) {
-                            target.disabled = true;
-                            await deleteDoc(doc(db, "albumes", id));
-                            if (path) await deleteObject(ref(storage, path)).catch(() => {});
-                            await window.cargarAlbumes();
-                        }
-                    });
-                });
-
-                // Evento: Reemplazar portada
-                document.querySelectorAll('.btn-reemplazar-portada').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const target = e.currentTarget;
-                        const docId = target.getAttribute('data-id');
-                        const oldPath = target.getAttribute('data-path');
-
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*';
-                        input.onchange = async () => {
-                            const file = input.files[0];
-                            if (!file) return;
-
-                            target.disabled = true;
-                            target.querySelector('ion-icon').setAttribute('name', 'sync');
-                            target.querySelector('ion-icon').classList.add('animate-spin');
-
-                            try {
-                                const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
-                                const newPath = `albumes/${Date.now()}_${safeName}`;
-                                const sRef = ref(storage, newPath);
-                                await uploadBytes(sRef, file);
-                                const url = await getDownloadURL(sRef);
-
-                                await updateDoc(doc(db, "albumes", docId), { portada: url, storagePath: newPath, timestamp: Date.now() });
-
-                                if (oldPath) await deleteObject(ref(storage, oldPath)).catch(() => {});
-                                await window.cargarAlbumes();
-                            } catch (err) {
-                                alert("Error al reemplazar la portada.");
-                                target.disabled = false;
-                                target.querySelector('ion-icon').setAttribute('name', 'swap-horizontal');
-                                target.querySelector('ion-icon').classList.remove('animate-spin');
-                            }
-                        };
-                        input.click();
-                    });
-                });
-
-            } catch (error) {
-                console.error("Error cargando álbumes:", error);
-                contenedorGaleriaAdmin.innerHTML = '<p class="text-red-500 text-center py-4 font-bold border border-red-200 rounded-lg">Fallo al conectar con la base de datos (Álbumes).</p>';
             }
         };
 
@@ -1006,46 +883,6 @@
 
         // Delay events binding (se ejecuta al renderizar)
         function bindForms() {
-            const fAlbum = document.getElementById('form-album');
-            if (fAlbum) {
-                fAlbum.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const titulo = document.getElementById('album-titulo').value;
-                    const selectSec = document.getElementById('album-secretaria');
-                    const secretariaNombre = selectSec.options[selectSec.selectedIndex].text;
-                    const secretariaId = selectSec.value;
-                    const link = selectSec.options[selectSec.selectedIndex].getAttribute('data-link');
-                    const file = document.getElementById('album-portada').files[0];
-                    const btn = document.getElementById('btn-submit-album');
-
-                    if (!titulo || !secretariaId || !file) return;
-
-                    btn.disabled = true; btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Creando...';
-                    try {
-                        const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
-                        const path = `albumes/${Date.now()}_${safeName}`;
-                        const sRef = ref(storage, path);
-                        await uploadBytes(sRef, file);
-                        const portada = await getDownloadURL(sRef);
-                        await addDoc(collection(db, "albumes"), {
-                            titulo,
-                            secretaria: secretariaNombre,
-                            secretariaId,
-                            portada,
-                            storagePath: path,
-                            link: link ? `paginas/${link}` : '#',
-                            timestamp: Date.now()
-                        });
-                        fAlbum.reset();
-                        await window.cargarAlbumes();
-                    } catch (err) {
-                        alert("Error creando álbum.");
-                        console.error(err);
-                    }
-                    finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Crear Álbum'; }
-                });
-            }
-
             const fPortada = document.getElementById('form-portada');
             if (fPortada) {
 
@@ -1221,11 +1058,6 @@
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
                         <ion-icon name="document-text" class="mr-3 text-xl"></ion-icon>
                         Cultura y Deportes
-                    </a>
-                    <a href="#" id="nav-galeria"
-                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
-                        <ion-icon name="images" class="mr-3 text-xl"></ion-icon>
-                        Álbumes de Fotos
                     </a>
                     <a href="#" id="nav-portadas"
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
@@ -1425,69 +1257,6 @@
                                         <!-- Documentos dinámicos renderizados por JS -->
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- =================================== -->
-                    <!-- VISTA: ÁLBUMES DE FOTOS -->
-                    <!-- =================================== -->
-                    <div id="view-galeria" class="hidden space-y-8">
-
-                        <!-- Crear Álbum -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <ion-icon name="add-circle" class="text-blue-600 mr-2 text-xl"></ion-icon>
-                                    Crear Nuevo Álbum
-                                </h3>
-                            </div>
-                            <form id="form-album" class="p-6 space-y-5">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Título del Álbum</label>
-                                        <input type="text" id="album-titulo" required
-                                            placeholder="Ej: Campeonato Relámpago 2026"
-                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Secretaría</label>
-                                        <select id="album-secretaria" required
-                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none cursor-pointer">
-                                            <option value="">Cargando secretarías...</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Foto de Portada</label>
-                                        <input type="file" id="album-portada" required accept="image/*"
-                                            class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
-                                    </div>
-                                </div>
-                                <div class="pt-4 border-t border-gray-100">
-                                    <button type="submit" id="btn-submit-album"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto min-w-[250px]">
-                                        <ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon>
-                                        Crear Álbum
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Listado de Álbumes -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <ion-icon name="albums-outline" class="text-gray-500 mr-2 text-xl"></ion-icon>
-                                    Álbumes Publicados
-                                </h3>
-                                <button onclick="window.cargarAlbumes()"
-                                    class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
-                                    <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
-                                </button>
-                            </div>
-                            <div id="contenedor-galeria-admin" class="p-6">
-                                <!-- Contenido dinamico de albumes -->
                             </div>
                         </div>
 
@@ -1934,11 +1703,11 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-3">Campos que los afiliados podran actualizar:</label>
-                                        <div id="campana-campos-checklist" class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-4">
-                                            <p class="text-gray-400 text-sm">Cargando campos extra...</p>
+                                        <label class="block text-sm font-bold text-gray-700 mb-3">Selecciona los campos que los afiliados podran actualizar:</label>
+                                        <div id="campana-campos-checklist" class="space-y-2 max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                                            <p class="text-gray-400 text-sm">Cargando campos...</p>
                                         </div>
-                                        <p class="text-xs text-gray-400 mt-2">Selecciona los campos que los afiliados podran modificar. Los demas solo los veran como informacion.</p>
+                                        <p class="text-xs text-gray-400 mt-2">Aparecen todos los datos del afiliado (base + campos extra). Marca los que quieres que modifiquen.</p>
                                     </div>
                                     <div class="pt-4 border-t border-gray-100 flex gap-3">
                                         <button type="submit" id="btn-submit-campana"
