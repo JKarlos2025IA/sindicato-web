@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Mis Datos - SIUTCASJNJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); min-height: 100vh; }
+        .input-disabled { background-color: #f3f4f6; color: #6b7280; cursor: not-allowed; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .anim-fade-up { animation: fadeInUp 0.5s ease-out; }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full">
+        <!-- Paso 1: Ingresar codigo -->
+        <div id="paso-codigo" class="bg-white rounded-2xl shadow-2xl p-8 text-center anim-fade-up">
+            <div class="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ion-icon name="key-outline" class="text-4xl text-pink-600"></ion-icon>
+            </div>
+            <h2 class="text-2xl font-black text-gray-800 mb-2">Actualizar Mis Datos</h2>
+            <p class="text-gray-500 mb-6">Ingresa tu codigo de afiliado para continuar</p>
+            <div class="flex gap-3 max-w-sm mx-auto">
+                <input type="text" id="codigo-input" placeholder="Codigo de 6 digitos" maxlength="6" autocomplete="off"
+                    class="flex-1 border-2 border-gray-300 rounded-xl p-4 text-center font-mono text-xl tracking-widest uppercase focus:ring-0 focus:border-pink-500 outline-none transition">
+                <button id="btn-ingresar" onclick="window.verificarCodigo()"
+                    class="bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 rounded-xl transition flex items-center gap-2">
+                    <ion-icon name="arrow-forward"></ion-icon> Ingresar
+                </button>
+            </div>
+            <p id="codigo-error" class="text-red-500 text-sm mt-3 hidden"></p>
+        </div>
+
+        <!-- Paso 2: Formulario de actualizacion -->
+        <div id="paso-formulario" class="bg-white rounded-2xl shadow-2xl p-8 anim-fade-up hidden">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                <ion-icon name="person-circle-outline" class="text-4xl text-pink-600"></ion-icon>
+                <div>
+                    <h2 class="text-xl font-black text-gray-800" id="socio-nombre-display">-</h2>
+                    <p class="text-sm text-gray-500">Codigo: <span id="socio-codigo-display" class="font-mono font-bold text-gray-700">-</span></p>
+                </div>
+            </div>
+
+            <div id="campos-container" class="space-y-4">
+                <p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando...</p>
+            </div>
+
+            <div class="pt-6 mt-4 border-t border-gray-200 flex gap-3">
+                <button id="btn-guardar" onclick="window.guardarDatos()"
+                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2">
+                    <ion-icon name="save-outline" class="text-xl"></ion-icon> Guardar Cambios
+                </button>
+                <button onclick="window.volverAlCodigo()"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-4 px-6 rounded-xl transition">
+                    Salir
+                </button>
+            </div>
+
+            <div id="msg-exito" class="hidden mt-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 text-center font-bold">
+                Datos actualizados correctamente.
+            </div>
+            <div id="msg-error" class="hidden mt-4 bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-center font-bold">
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const fc = { apiKey: "AIzaSyAF7geSgASMmvXYUy_LamNh0K2allmZEy0", authDomain: "sindicato-jnj.firebaseapp.com", projectId: "sindicato-jnj", storageBucket: "sindicato-jnj.firebasestorage.app", messagingSenderId: "1036915309355", appId: "1:1036915309355:web:fac53de65031a39597e36e" };
+        const app = initializeApp(fc);
+        const db = getFirestore(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const campanaId = urlParams.get('campana');
+
+        let socioDocId = null;
+        let socioData = null;
+        let campanaData = null;
+        let camposExtra = [];
+        let camposHabilitados = [];
+
+        const CAMPOS_BASE_EDITABLES = [
+            { nombre: 'email', etiqueta: 'Email', tipo: 'texto', icon: 'mail-outline' },
+            { nombre: 'telefono', etiqueta: 'Telefono / WhatsApp', tipo: 'texto', icon: 'call-outline' },
+            { nombre: 'fecha', etiqueta: 'Fecha de Cumpleanos (DD/MM)', tipo: 'texto', icon: 'calendar-outline' },
+            { nombre: 'dni', etiqueta: 'DNI', tipo: 'texto', icon: 'card-outline' },
+            { nombre: 'uo', etiqueta: 'Unidad Organica', tipo: 'texto', icon: 'business-outline' },
+            { nombre: 'cargo', etiqueta: 'Cargo', tipo: 'texto', icon: 'briefcase-outline' },
+        ];
+
+        function mostrarError(id, msg) {
+            const el = document.getElementById(id);
+            if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+        }
+
+        window.verificarCodigo = async function () {
+            const codigo = document.getElementById('codigo-input').value.trim().toUpperCase();
+            const btn = document.getElementById('btn-ingresar');
+            if (!codigo || codigo.length < 4) {
+                mostrarError('codigo-error', 'Ingresa un codigo valido (minimo 4 caracteres).');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon> Verificando...';
+            document.getElementById('codigo-error').classList.add('hidden');
+
+            try {
+                // Buscar socio por codigo
+                let q = query(collection(db, 'socios'), where('codigo', '==', codigo));
+                let snap = await getDocs(q);
+                if (snap.empty) {
+                    q = query(collection(db, 'afiliados'), where('codigo', '==', codigo));
+                    snap = await getDocs(q);
+                }
+
+                if (snap.empty) {
+                    mostrarError('codigo-error', 'Codigo no encontrado. Verifica e intenta de nuevo.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<ion-icon name="arrow-forward"></ion-icon> Ingresar';
+                    return;
+                }
+
+                const docSnap = snap.docs[0];
+                socioDocId = docSnap.id;
+                socioData = docSnap.data();
+
+                if (socioData.activo === false) {
+                    mostrarError('codigo-error', 'Tu afiliacion esta inactiva. Contacta al sindicato.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<ion-icon name="arrow-forward"></ion-icon> Ingresar';
+                    return;
+                }
+
+                // Cargar campana y campos
+                await cargarCampanaYCampos();
+
+                // Mostrar formulario
+                document.getElementById('paso-codigo').classList.add('hidden');
+                document.getElementById('paso-formulario').classList.remove('hidden');
+                document.getElementById('socio-nombre-display').textContent = socioData.nombre || 'Afiliado';
+                document.getElementById('socio-codigo-display').textContent = socioData.codigo || '-';
+
+                renderizarFormulario();
+
+            } catch (err) {
+                mostrarError('codigo-error', 'Error: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = '<ion-icon name="arrow-forward"></ion-icon> Ingresar';
+            }
+        };
+
+        async function cargarCampanaYCampos() {
+            try {
+                if (campanaId) {
+                    const campSnap = await getDocs(collection(db, 'campanas_actualizacion'));
+                    campSnap.forEach(d => { if (d.id === campanaId) campanaData = { id: d.id, ...d.data() }; });
+                }
+                // Si no hay campana o no se encuentra, mostrar todos los campos como editables
+                camposHabilitados = campanaData?.campos_habilitados || [];
+
+                const campSnap = await getDocs(collection(db, 'campos_extra'));
+                camposExtra = [];
+                campSnap.forEach(d => camposExtra.push({ id: d.id, ...d.data() }));
+                camposExtra = camposExtra.filter(c => c.activo !== false).sort((a, b) => (a.orden || 99) - (b.orden || 99));
+            } catch (e) { console.error('Error cargando config:', e); }
+        }
+
+        function renderizarFormulario() {
+            const container = document.getElementById('campos-container');
+            const extra = socioData.extra || {};
+
+            const baseFieldsNoEditables = [
+                { label: 'Nombre Completo', value: socioData.nombre || '-', icon: 'person-outline' },
+                { label: 'Codigo', value: socioData.codigo || '-', icon: 'key-outline' },
+            ];
+
+            let html = '';
+            // Campos base fijos no editables
+            html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">';
+            baseFieldsNoEditables.forEach(f => {
+                html += `<div class="bg-gray-50 rounded-xl p-4">
+                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">${f.label}</label>
+                    <div class="flex items-center gap-2 mt-1">
+                        <ion-icon name="${f.icon}" class="text-gray-400 text-lg"></ion-icon>
+                        <span class="font-medium text-gray-700">${f.value}</span>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+
+            // Campos base editables (segun campana)
+            const hayBaseEditables = camposHabilitados.some(k => CAMPOS_BASE_EDITABLES.some(b => b.nombre === k));
+            const hayExtraEditables = camposExtra.length > 0;
+
+            if (hayBaseEditables || hayExtraEditables) {
+                html += '<h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-3">Datos a Actualizar</h3>';
+                html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+
+                CAMPOS_BASE_EDITABLES.forEach(b => {
+                    const editable = camposHabilitados.includes(b.nombre);
+                    if (!editable) return;
+                    const val = socioData[b.nombre] || '';
+                    const id = 'base-' + b.nombre;
+                    html += `<div class="bg-white border-2 border-emerald-200 rounded-xl p-4">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">${b.etiqueta} <span class="text-emerald-600 text-[10px]">*Editable</span></label>
+                        <div class="mt-1">
+                            <input type="text" id="${id}" value="${val}" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1">
+                        </div>
+                    </div>`;
+                });
+
+                camposExtra.forEach(campo => {
+                    const editable = !campanaData || camposHabilitados.includes(campo.nombre);
+                    const val = extra[campo.nombre] !== undefined ? extra[campo.nombre] : '';
+                    const id = 'field-' + campo.nombre;
+
+                    html += `<div class="bg-white border ${editable ? 'border-emerald-200' : 'border-gray-200'} rounded-xl p-4 ${!editable ? 'opacity-60' : ''}">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">${campo.etiqueta} ${editable ? '<span class="text-emerald-600 text-[10px]">*Editable</span>' : '<span class="text-gray-400 text-[10px]">(Informativo)</span>'}</label>
+                        <div class="mt-1">`;
+
+                    if (!editable) {
+                        html += `<span class="font-medium text-gray-400">${val || '-'}</span>`;
+                    } else {
+                        switch (campo.tipo) {
+                            case 'numero':
+                                html += `<input type="number" id="${id}" value="${val}" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1">`;
+                                break;
+                            case 'si_no':
+                                html += `<select id="${id}" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="si" ${val === 'si' ? 'selected' : ''}>Si</option>
+                                    <option value="no" ${val === 'no' ? 'selected' : ''}>No</option>
+                                </select>`;
+                                break;
+                            case 'opciones':
+                                const opciones = campo.opciones || [];
+                                if (campo.permitir_otros) opciones.push('Otros');
+                                if (!campo.permitir_otros && !opciones.includes(val) && val) opciones.push(val);
+                                html += `<select id="${id}" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1 campo-select" data-nombre="${campo.nombre}" data-otros="${campo.permitir_otros ? '1' : '0'}">
+                                    <option value="">Seleccionar...</option>`;
+                                opciones.forEach(opt => { html += `<option value="${opt}" ${val === opt ? 'selected' : ''}>${opt}</option>`; });
+                                html += `</select>`;
+                                if (campo.permitir_otros) {
+                                    const otrosVal = val && !(campo.opciones || []).includes(val) ? val : '';
+                                    html += `<input type="text" id="${id}-otros" placeholder="Especificar..." value="${otrosVal}" class="hidden w-full border-gray-300 rounded-lg p-2.5 border-2 mt-2 focus:ring-0 focus:border-emerald-500 outline-none transition campo-otros-input" data-select="${id}">`;
+                                }
+                                break;
+                            default:
+                                html += `<input type="text" id="${id}" value="${val}" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1">`;
+                        }
+                    }
+                    html += '</div></div>';
+                });
+                html += '</div>';
+            }
+
+            if (!hayBaseEditables && !hayExtraEditables) {
+                html += '<p class="text-center text-gray-400 py-4">No hay campos para actualizar en esta campana.</p>';
+            }
+
+            // Base fields informativos (no en campana)
+            const baseInfo = CAMPOS_BASE_EDITABLES.filter(b => !camposHabilitados.includes(b.nombre));
+            if (baseInfo.length > 0) {
+                html += '<h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide mt-6 mb-3">Datos Informativos</h3>';
+                html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                baseInfo.forEach(b => {
+                    html += `<div class="bg-gray-50 rounded-xl p-4 opacity-70">
+                        <label class="text-xs font-bold text-gray-400 uppercase tracking-wide">${b.etiqueta}</label>
+                        <div class="flex items-center gap-2 mt-1">
+                            <ion-icon name="${b.icon}" class="text-gray-400 text-lg"></ion-icon>
+                            <span class="font-medium text-gray-500">${socioData[b.nombre] || '-'}</span>
+                        </div>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+
+            document.querySelectorAll('.campo-select').forEach(sel => {
+                const otrosInput = document.getElementById(sel.id + '-otros');
+                if (!otrosInput) return;
+                sel.addEventListener('change', () => {
+                    otrosInput.classList.toggle('hidden', sel.value !== 'Otros');
+                });
+                if (sel.value === 'Otros') otrosInput.classList.remove('hidden');
+            });
+        }
+
+        window.guardarDatos = async function () {
+            if (!socioDocId) return;
+            const btn = document.getElementById('btn-guardar');
+            btn.disabled = true;
+            btn.innerHTML = '<ion-icon name="sync" class="animate-spin text-xl"></ion-icon> Guardando...';
+            document.getElementById('msg-exito').classList.add('hidden');
+            document.getElementById('msg-error').classList.add('hidden');
+
+            try {
+                const updateData = { timestamp: Date.now() };
+
+                // Guardar campos base habilitados
+                CAMPOS_BASE_EDITABLES.forEach(b => {
+                    if (!camposHabilitados.includes(b.nombre)) return;
+                    const el = document.getElementById('base-' + b.nombre);
+                    if (!el) return;
+                    const val = el.value.trim();
+                    if (val) updateData[b.nombre] = val;
+                });
+
+                // Guardar campos extra
+                const extra = socioData.extra || {};
+                const camposAProcesar = campanaData
+                    ? camposExtra.filter(c => camposHabilitados.includes(c.nombre))
+                    : camposExtra;
+
+                camposAProcesar.forEach(campo => {
+                    const el = document.getElementById('field-' + campo.nombre);
+                    if (!el) return;
+                    let val;
+                    if (campo.tipo === 'opciones' && campo.permitir_otros) {
+                        if (el.value === 'Otros') {
+                            const otrosEl = document.getElementById('field-' + campo.nombre + '-otros');
+                            val = otrosEl ? otrosEl.value.trim() : '';
+                        } else { val = el.value; }
+                    } else { val = el.value.trim(); }
+                    if (campo.tipo === 'numero' && val !== '') val = parseFloat(val) || 0;
+                    if (val !== '' && val !== undefined) extra[campo.nombre] = val;
+                });
+
+                if (Object.keys(extra).length > 0) updateData.extra = extra;
+
+                await updateDoc(doc(db, 'socios', socioDocId), updateData);
+
+                document.getElementById('msg-exito').classList.remove('hidden');
+                document.getElementById('msg-exito').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (err) {
+                const msgEl = document.getElementById('msg-error');
+                msgEl.textContent = 'Error al guardar: ' + err.message;
+                msgEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<ion-icon name="save-outline" class="text-xl"></ion-icon> Guardar Cambios';
+            }
+        };
+
+        window.volverAlCodigo = function () {
+            document.getElementById('paso-codigo').classList.remove('hidden');
+            document.getElementById('paso-formulario').classList.add('hidden');
+            document.getElementById('codigo-input').value = '';
+            document.getElementById('codigo-error').classList.add('hidden');
+            document.getElementById('msg-exito').classList.add('hidden');
+            document.getElementById('msg-error').classList.add('hidden');
+            socioDocId = null;
+            socioData = null;
+        };
+
+        // Enter en el codigo
+        document.getElementById('codigo-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') window.verificarCodigo();
+        });
+    </script>
+</body>
+</html>

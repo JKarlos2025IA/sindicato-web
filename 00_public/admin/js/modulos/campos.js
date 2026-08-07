@@ -8,6 +8,15 @@ let campanasCache = [];
 const COL_CAMPOS = 'campos_extra';
 const COL_CAMPANAS = 'campanas_actualizacion';
 
+const CAMPOS_BASE_EDITABLES = [
+    { nombre: 'email', etiqueta: 'Email', tipo: 'texto', base: true },
+    { nombre: 'telefono', etiqueta: 'Telefono / WhatsApp', tipo: 'texto', base: true },
+    { nombre: 'fecha', etiqueta: 'Fecha de Cumpleanos (DD/MM)', tipo: 'texto', base: true },
+    { nombre: 'dni', etiqueta: 'DNI', tipo: 'texto', base: true },
+    { nombre: 'uo', etiqueta: 'Unidad Organica (UO)', tipo: 'texto', base: true },
+    { nombre: 'cargo', etiqueta: 'Cargo', tipo: 'texto', base: true },
+];
+
 function slug(texto) {
     return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_').substring(0, 30);
@@ -321,23 +330,35 @@ async function cargarCamposChecklist() {
         snap.forEach(d => campos.push({ id: d.id, ...d.data() }));
         const activos = campos.filter(c => c.activo !== false).sort((a, b) => (a.orden || 99) - (b.orden || 99));
 
-        if (activos.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-sm">No hay campos extra creados. Ve a la pestana "Campos Extra" primero.</p>';
-            return;
-        }
-
-        let html = '';
-        activos.forEach(c => {
-            const tipoIcon = { texto: '📝', numero: '🔢', si_no: '✅', opciones: '📋' }[c.tipo] || '📌';
+        let html = '<p class="text-xs font-bold text-gray-500 mb-2 uppercase">Datos Base del Afiliado</p>';
+        CAMPOS_BASE_EDITABLES.forEach(c => {
+            const tipoIcon = { texto: 'ABC', numero: '123', si_no: 'S/N', opciones: '=' }[c.tipo] || '';
             html += `
-            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+            <label class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition border border-blue-100">
                 <input type="checkbox" class="campana-campo-check w-5 h-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500" value="${c.nombre}">
                 <div>
-                    <span class="text-sm font-bold text-gray-700">${tipoIcon} ${c.etiqueta}</span>
-                    <span class="text-xs text-gray-400 ml-2">(${c.nombre})</span>
+                    <span class="text-sm font-bold text-gray-700">${c.etiqueta}</span>
+                    <span class="text-xs text-blue-500 ml-2">(dato base)</span>
                 </div>
             </label>`;
         });
+
+        html += '<p class="text-xs font-bold text-gray-500 mt-4 mb-2 uppercase">Campos Extra Personalizados</p>';
+        if (activos.length === 0) {
+            html += '<p class="text-gray-400 text-sm">No hay campos extra creados. Ve a la pestana "Campos Extra" para crear.</p>';
+        } else {
+            activos.forEach(c => {
+                const tipoIcon = { texto: 'ABC', numero: '123', si_no: 'S/N', opciones: '=' }[c.tipo] || '';
+                html += `
+                <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                    <input type="checkbox" class="campana-campo-check w-5 h-5 rounded border-gray-300 text-pink-600 focus:ring-pink-500" value="${c.nombre}">
+                    <div>
+                        <span class="text-sm font-bold text-gray-700">${c.etiqueta}</span>
+                        <span class="text-xs text-gray-400 ml-2">(${c.nombre})</span>
+                    </div>
+                </label>`;
+            });
+        }
         container.innerHTML = html;
     } catch (err) { console.error('Error cargando checklist:', err); }
 }
@@ -365,6 +386,7 @@ async function cargarCampanas() {
         const snapCampos = await getDocs(collection(db, COL_CAMPOS));
         const mapaCampos = {};
         snapCampos.forEach(d => { const dt = d.data(); mapaCampos[dt.nombre] = dt.etiqueta; });
+        CAMPOS_BASE_EDITABLES.forEach(c => { mapaCampos[c.nombre] = c.etiqueta; });
 
         let html = '';
         campanasCache.forEach(cam => {
@@ -463,10 +485,13 @@ function initFormCampana() {
                 // Reset checks but keep checklist loaded
                 document.querySelectorAll('.campana-campo-check').forEach(chk => chk.checked = false);
                 await cargarCampanas();
-                // Abrir link si es nueva
                 if (data._nuevoId) {
                     const link = `${window.location.origin}/paginas/actualizar_mis_datos.html?campana=${data._nuevoId}`;
-                    window.open(link, '_blank');
+                    navigator.clipboard.writeText(link).then(() => {
+                        alert('Campana publicada. Link copiado al portapapeles:\n\n' + link + '\n\nCompartelo con los afiliados.');
+                    }).catch(() => {
+                        alert('Campana publicada. Comparte este link:\n\n' + link);
+                    });
                 }
             } catch (err) { alert('Error: ' + err.message); }
             finally { btn.disabled = false; }
