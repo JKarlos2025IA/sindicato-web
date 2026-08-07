@@ -1,21 +1,22 @@
 ﻿// ============================================================
 // SIUTCASJNJ - Modulo: Economia y Finanzas (v2)
 // ============================================================
-import { db, storage, collection, getDocs, query, orderBy, doc, updateDoc } from '../../core.js';
-import { ref, uploadBytes, getDownloadURL } from '../../core.js';
+import { db, storage, collection, getDocs, query, orderBy, doc, updateDoc, addDoc, deleteDoc } from '../../core.js';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from '../../core.js';
 
 let snapCache = null;
 
 export function initEconomia() {
     window.cargarSolicitudes = cargarSolicitudes;
     window.cargarLibroGastos = cargarLibroGastos;
-    window.cargarBalance = cargarBalance;
+    window.cargarBalances = cargarBalances;
     window.descargarLibro = descargarLibro;
     window.actualizarSelectFirmado = actualizarSelectFirmado;
+    window.cerrarModal = cerrarModal;
 
     cargarSolicitudes();
     cargarLibroGastos();
-    initBalance();
+    initBalanceForm();
     initUploadSigned();
     initModalButtons();
     document.getElementById('filtro-libro-tipo')?.addEventListener('change', cargarLibroGastos);
@@ -371,83 +372,112 @@ function initUploadSigned() {
 }
 
 // ============================================================
-// 3. BALANCE
+// 3. BALANCES (CARGA MANUAL DE PDFs)
 // ============================================================
 
-function initBalance() {
-    document.getElementById('balance-tipo')?.addEventListener('change', cargarBalance);
-    document.getElementById('balance-mes')?.addEventListener('change', cargarBalance);
-    document.getElementById('balance-anio')?.addEventListener('change', cargarBalance);
+function initBalanceForm() {
+    const form = document.getElementById('form-balance');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const mes = document.getElementById('balance-mes-upload').value;
+        const anio = document.getElementById('balance-anio-upload').value;
+        const descripcion = document.getElementById('balance-descripcion').value.trim();
+        const archivo = document.getElementById('balance-archivo').files[0];
+        const btn = document.getElementById('btn-submit-balance');
 
-    const now = new Date();
-    const selMes = document.getElementById('balance-mes');
-    const selAnio = document.getElementById('balance-anio');
-    if (selMes) selMes.value = now.getMonth() + 1;
-    if (selAnio) {
-        selAnio.value = now.getFullYear();
-        if (selAnio.options.length < 2) {
-            for (let y = now.getFullYear(); y >= 2020; y--)
-                selAnio.innerHTML += `<option value="${y}">${y}</option>`;
+        if (!mes || !anio || !descripcion || !archivo) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<ion-icon name="sync" class="animate-spin mr-2"></ion-icon> Subiendo...';
+
+        try {
+            const safeName = archivo.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+            const storagePath = `balances/${anio}_${mes}_${Date.now()}_${safeName}`;
+            const sRef = ref(storage, storagePath);
+            await uploadBytes(sRef, archivo);
+            const url = await getDownloadURL(sRef);
+
+            await addDoc(collection(db, 'balances'), {
+                mes: mes,
+                anio: parseInt(anio),
+                descripcion: descripcion,
+                archivoURL: url,
+                archivoNombre: archivo.name,
+                storagePath: storagePath,
+                timestamp: Date.now()
+            });
+
+            form.reset();
+            document.getElementById('balance-anio-upload').value = new Date().getFullYear();
+            alert('Balance publicado exitosamente. Ya visible en la pagina publica.');
+            cargarBalances();
+        } catch (err) {
+            alert('Error al publicar: ' + err.message);
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Publicar Balance';
         }
-    }
+    });
+
+    cargarBalances();
 }
 
-async function cargarBalance() {
-    const container = document.getElementById('balance-detalle');
-    const totalEl = document.getElementById('balance-total');
+async function cargarBalances() {
+    const container = document.getElementById('lista-balances-admin');
     if (!container) return;
 
-    const tipo = document.getElementById('balance-tipo')?.value || 'mes';
-    const mes = parseInt(document.getElementById('balance-mes')?.value) || (new Date().getMonth()+1);
-    const anio = parseInt(document.getElementById('balance-anio')?.value) || new Date().getFullYear();
-    const MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
     try {
-        const q = query(collection(db, 'viaticos'), orderBy('timestamp','desc'));
+        const q = query(collection(db, 'balances'), orderBy('timestamp', 'desc'));
         const snap = await getDocs(q);
-        const docs = snap.docs.filter(d => d.data().estado === 'anotado');
+        const balances = [];
+        snap.forEach(d => balances.push({ id: d.id, ...d.data() }));
 
-        const gastos = [];
-        docs.forEach(d => {
-            const v = d.data();
-            if (!v.timestamp?.toDate) return;
-            const date = v.timestamp.toDate();
-            gastos.push({ fecha: date, nombre: v.nombre, descripcion: v.descripcion, total: v.total||0, tipo: v.tipo||'GASTO', mes: date.getMonth()+1, anio: date.getFullYear(), unidad: v.unidad, cantidad: v.cantidad, pu: v.pu });
-        });
-
-        let filtrados = gastos;
-        if (tipo === 'mes') filtrados = gastos.filter(g => g.mes === mes && g.anio === anio);
-        else if (tipo === 'anio') filtrados = gastos.filter(g => g.anio === anio);
-
-        const totalIng = filtrados.filter(g => g.tipo === 'INGRESO').reduce((s,g) => s + g.total, 0);
-        const totalGas = filtrados.filter(g => g.tipo === 'GASTO').reduce((s,g) => s + g.total, 0);
-        const neto = totalIng - totalGas;
-        if (totalEl) totalEl.innerHTML = `<span class="text-blue-700 text-sm">Ing: +S/ ${totalIng.toFixed(2)}</span> <span class="text-red-500 text-sm mx-2">Gas: -S/ ${totalGas.toFixed(2)}</span> <span class="text-sm">=</span> <span class="${neto>=0?'text-emerald-700':'text-red-600'} text-lg">S/ ${neto.toFixed(2)}</span>`;
-
-        if (filtrados.length === 0) {
-            container.innerHTML = '<p class="text-center py-8 text-gray-400">Sin gastos en este periodo.</p>';
+        if (balances.length === 0) {
+            container.innerHTML = '<p class="text-center py-8 text-gray-400 italic">No hay balances publicados. Usa el formulario de arriba para publicar el primero.</p>';
             return;
         }
 
-        if (tipo === 'mes') {
-            const sorted = filtrados.sort((a,b) => b.fecha - a.fecha);
-            container.innerHTML = `<table class="w-full text-sm"><thead><tr class="bg-emerald-50"><th class="p-2 text-left">Fecha</th><th class="p-2 text-left">Solicitante</th><th class="p-2 text-left">Descripcion</th><th class="p-2 text-right">Monto</th></tr></thead><tbody>${sorted.map(g => `<tr class="border-b"><td class="p-2 text-xs">${g.fecha.toLocaleDateString('es-PE')}</td><td class="p-2 text-xs">${g.nombre}</td><td class="p-2 text-xs">${g.descripcion}</td><td class="p-2 text-xs text-right font-bold ${g.tipo==='INGRESO'?'text-blue-700':'text-red-500'}">${g.tipo==='INGRESO'?'+':'-'} S/ ${g.total.toFixed(2)}</td></tr>`).join('')}</tbody></table>`;
-        } else if (tipo === 'anio') {
-            const porMes = {};
-            filtrados.forEach(g => {
-                const k = `${g.anio}-${g.mes.toString().padStart(2,'0')}`;
-                if (!porMes[k]) porMes[k] = { total:0, mes:g.mes, anio:g.anio, items:[] };
-                porMes[k].total += g.total;
-                porMes[k].items.push(g);
+        container.innerHTML = balances.map(b => `
+            <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4 mb-3 hover:shadow-sm transition">
+                <div class="flex items-center gap-4">
+                    <div class="bg-emerald-100 text-emerald-700 font-bold text-sm px-3 py-2 rounded-lg text-center min-w-[70px]">
+                        ${b.mes}<br><span class="text-xs font-normal">${b.anio}</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">${b.descripcion}</p>
+                        <a href="${b.archivoURL}" target="_blank" class="text-emerald-600 hover:underline text-xs font-bold flex items-center gap-1 mt-1">
+                            <ion-icon name="document-text"></ion-icon> ${b.archivoNombre || 'Descargar PDF'}
+                        </a>
+                    </div>
+                </div>
+                <button class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg text-xs font-bold transition btn-eliminar-balance" data-id="${b.id}" data-path="${b.storagePath || ''}">
+                    <ion-icon name="trash"></ion-icon> Eliminar
+                </button>
+            </div>
+        `).join('');
+
+        container.querySelectorAll('.btn-eliminar-balance').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const id = this.dataset.id;
+                const path = this.dataset.path;
+                if (!confirm('Eliminar este balance? Desaparecera de la pagina publica.')) return;
+                this.disabled = true;
+                this.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon>';
+                try {
+                    await deleteDoc(doc(db, 'balances', id));
+                    if (path) await deleteObject(ref(storage, path)).catch(() => {});
+                    cargarBalances();
+                } catch (err) {
+                    alert('Error al eliminar: ' + err.message);
+                    this.disabled = false;
+                    this.innerHTML = '<ion-icon name="trash"></ion-icon> Eliminar';
+                }
             });
-            const meses = Object.values(porMes).sort((a,b) => b.anio!==a.anio ? b.anio-a.anio : b.mes-a.mes);
-            container.innerHTML = meses.map(m => `<div class="bg-white rounded-lg border p-4 mb-3"><div class="flex justify-between items-center mb-2"><h4 class="font-bold text-gray-800">${MESES[m.mes]} ${m.anio}</h4><span class="font-bold text-emerald-700">S/ ${m.total.toFixed(2)}</span></div><table class="w-full text-xs"><tbody>${m.items.sort((a,b)=>b.fecha-a.fecha).map(g=>`<tr class="border-t border-gray-100"><td class="py-1">${g.fecha.toLocaleDateString('es-PE')}</td><td class="py-1">${g.nombre}</td><td class="py-1">${g.descripcion}</td><td class="py-1 text-right">S/ ${g.total.toFixed(2)}</td></tr>`).join('')}</tbody></table></div>`).join('');
-        } else {
-            const todos = gastos.sort((a,b) => b.fecha - a.fecha);
-            container.innerHTML = `<table class="w-full text-sm"><thead><tr class="bg-emerald-50"><th class="p-2 text-left">Fecha</th><th class="p-2 text-left">Solicitante</th><th class="p-2 text-left">Descripcion</th><th class="p-2 text-center">Cant</th><th class="p-2 text-center">Unid</th><th class="p-2 text-right">P.U.</th><th class="p-2 text-right">Total</th></tr></thead><tbody>${todos.map(g => `<tr class="border-b"><td class="p-2 text-xs">${g.fecha.toLocaleDateString('es-PE')}</td><td class="p-2 text-xs">${g.nombre}</td><td class="p-2 text-xs">${g.descripcion}</td><td class="p-2 text-xs text-center">${g.cantidad||''}</td><td class="p-2 text-xs text-center">${g.unidad||''}</td><td class="p-2 text-xs text-right">${(g.pu||0).toFixed(2)}</td><td class="p-2 text-xs text-right font-bold">S/ ${g.total.toFixed(2)}</td></tr>`).join('')}</tbody></table>`;
-        }
+        });
     } catch (e) {
-        container.innerHTML = `<p class="text-center py-8 text-red-500">${e.message}</p>`;
+        container.innerHTML = `<p class="text-center py-8 text-red-500">Error: ${e.message}</p>`;
     }
 }
 
