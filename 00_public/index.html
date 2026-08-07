@@ -191,21 +191,16 @@
             </div>
         </div>
 
-        <!-- Galería Preview -->
+        <!-- Álbumes de Fotos -->
         <div class="mb-8">
             <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-blue-900 mb-2">Últimas Fotos</h2>
+                <h2 class="text-2xl font-bold text-blue-900 mb-2">Álbumes de Fotos</h2>
                 <div class="w-16 h-1 bg-purple-500 mx-auto rounded"></div>
             </div>
-            <div id="galeria-preview" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div id="albumes-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="col-span-full text-center py-6 text-gray-400">
-                    <p class="font-semibold">Cargando galería...</p>
+                    <p class="font-semibold">Cargando álbumes...</p>
                 </div>
-            </div>
-            <div class="text-center mt-6">
-                <a href="paginas/sec_cultura_deporte.html" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
-                    📸 Ver galería completa
-                </a>
             </div>
         </div>
 
@@ -476,7 +471,7 @@
         cargarSecretarias();
         cargarTema();
         cargarEventos();
-        cargarGaleriaPreview();
+        cargarAlbumes();
 
         // === CARGAR PRÓXIMOS EVENTOS ===
         async function cargarEventos() {
@@ -509,25 +504,36 @@
             }
         }
 
-        // === CARGAR GALERÍA PREVIEW ===
-        async function cargarGaleriaPreview() {
-            const grid = document.getElementById('galeria-preview');
+        // === CARGAR ÁLBUMES DE FOTOS ===
+        async function cargarAlbumes() {
+            const grid = document.getElementById('albumes-grid');
             if (!grid) return;
             try {
-                const qFotos = await getDocs(collection(db, "fotos"));
-                const fotos = [];
-                qFotos.forEach(docSnap => fotos.push(docSnap.data()));
-                fotos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                if (fotos.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center py-6 text-gray-400 italic">No hay fotos aún.</div>';
+                const qAlb = await getDocs(collection(db, "albumes"));
+                const albumes = [];
+                qAlb.forEach(docSnap => albumes.push(docSnap.data()));
+                albumes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                if (albumes.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-6 text-gray-400 italic">No hay álbumes aún.</div>';
                     return;
                 }
-                const recientes = fotos.slice(0, 10);
                 grid.innerHTML = '';
-                recientes.forEach(foto => {
+                albumes.forEach(album => {
                     const div = document.createElement('div');
-                    div.className = 'aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-md border border-gray-200 hover:scale-105 transition-transform cursor-pointer';
-                    div.innerHTML = `<img src="${foto.url}" class="w-full h-full object-cover" loading="lazy">`;
+                    div.className = 'relative group rounded-xl overflow-hidden shadow-md border border-gray-200 bg-white hover:shadow-lg transition-all cursor-pointer';
+                    div.innerHTML = `
+                        <div class="aspect-square bg-gray-100">
+                            <img src="${album.portada}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-4">
+                            <p class="text-white font-bold text-sm leading-tight">${album.titulo}</p>
+                            <p class="text-white/70 text-xs mt-1">${album.secretaria || ''}</p>
+                        </div>
+                    `;
+                    div.addEventListener('click', () => {
+                        if (album.link) window.location.href = album.link;
+                    });
+                    div.title = album.titulo;
                     grid.appendChild(div);
                 });
             } catch (error) {

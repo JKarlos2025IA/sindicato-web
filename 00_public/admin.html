@@ -238,7 +238,7 @@
 
         navInicio.addEventListener('click', (e) => { e.preventDefault(); switchView(navInicio, viewInicio, 'Vista General'); });
         navCultura.addEventListener('click', (e) => { e.preventDefault(); switchView(navCultura, viewCultura, 'Gestión: Cultura y Deportes'); });
-        navGaleria.addEventListener('click', (e) => { e.preventDefault(); switchView(navGaleria, viewGaleria, 'Gestión: Galería de Fotos'); window.cargarGaleria(); });
+        navGaleria.addEventListener('click', (e) => { e.preventDefault(); switchView(navGaleria, viewGaleria, 'Gestión: Álbumes de Fotos'); window.cargarAlbumes(); });
         if (navPortadas) navPortadas.addEventListener('click', (e) => { e.preventDefault(); switchView(navPortadas, viewPortadas, 'Gestión: Portadas del Carrusel'); window.cargarPortadas(); });
         if (navSecretarias) navSecretarias.addEventListener('click', (e) => { e.preventDefault(); switchView(navSecretarias, viewSecretarias, 'Gestión: Secretarías'); window.cargarSecretarias(); });
         if (navSocios) navSocios.addEventListener('click', (e) => { e.preventDefault(); switchView(navSocios, viewSocios, 'Gestión: Socios / Cumpleaños'); window.cargarSocios(); });
@@ -486,63 +486,80 @@
             }
         };
 
-        window.cargarGaleria = async () => {
+        window.cargarAlbumes = async () => {
             if (!contenedorGaleriaAdmin) return;
             try {
-                contenedorGaleriaAdmin.innerHTML = '<p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando fotos...</p>';
+                contenedorGaleriaAdmin.innerHTML = '<p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando álbumes...</p>';
 
-                const qFotos = await getDocs(collection(db, "fotos"));
-                const fotos = [];
-                qFotos.forEach(doc => fotos.push({ id: doc.id, ...doc.data() }));
-                fotos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                // Poblar selector de secretarías
+                const qSec = await getDocs(collection(db, "secretarias"));
+                const secretarias = [];
+                qSec.forEach(doc => secretarias.push({ id: doc.id, ...doc.data() }));
+                secretarias.sort((a, b) => (a.orden || 0) - (b.orden || 0));
 
-                if (fotos.length === 0) {
-                    contenedorGaleriaAdmin.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay fotos publicadas. Usa el formulario de arriba para subir la primera.</p>';
+                const selectSec = document.getElementById('album-secretaria');
+                if (selectSec) {
+                    let opts = '<option value="">Selecciona una secretaría...</option>';
+                    secretarias.forEach(sec => {
+                        opts += `<option value="${sec.id}" data-link="${sec.archivo_html || ''}">${sec.nombre}</option>`;
+                    });
+                    selectSec.innerHTML = opts;
+                }
+
+                // Cargar álbumes
+                const qAlb = await getDocs(collection(db, "albumes"));
+                const albumes = [];
+                qAlb.forEach(doc => albumes.push({ id: doc.id, ...doc.data() }));
+                albumes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                if (albumes.length === 0) {
+                    contenedorGaleriaAdmin.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay álbumes creados. Usa el formulario de arriba para crear el primero.</p>';
                     return;
                 }
 
-                let htmlContent = '<div class="grid grid-cols-2 md:grid-cols-5 gap-4">';
-                fotos.forEach((foto, idx) => {
+                let htmlContent = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+                albumes.forEach((album, idx) => {
+                    const link = album.link || '#';
                     htmlContent += `
-                        <div class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                            <img src="${foto.url}" class="w-full h-full object-cover" loading="lazy">
+                        <div class="relative group bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition">
+                            <div class="aspect-video bg-gray-100">
+                                <img src="${album.portada}" class="w-full h-full object-cover" loading="lazy">
+                            </div>
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                                <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition transform hover:scale-110 btn-reemplazar-foto shadow-lg" data-id="${foto.id}" data-path="${foto.storagePath || ''}" title="Reemplazar Foto">
+                                <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition transform hover:scale-110 btn-reemplazar-portada shadow-lg" data-id="${album.id}" data-path="${album.storagePath || ''}" title="Cambiar Portada">
                                     <ion-icon name="swap-horizontal" class="text-lg block"></ion-icon>
                                 </button>
-                                <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition transform hover:scale-110 btn-eliminar-foto shadow-lg" data-id="${foto.id}" data-path="${foto.storagePath || ''}" title="Eliminar Foto">
+                                <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition transform hover:scale-110 btn-eliminar-album shadow-lg" data-id="${album.id}" data-path="${album.storagePath || ''}" title="Eliminar Álbum">
                                     <ion-icon name="trash" class="text-lg block"></ion-icon>
                                 </button>
                             </div>
-                            <span class="absolute top-1 left-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded">${idx + 1}</span>
+                            <div class="p-3">
+                                <p class="font-bold text-gray-800 text-sm truncate">${album.titulo}</p>
+                                <p class="text-xs text-gray-500 truncate">${album.secretaria || 'Sin secretaría'}</p>
+                            </div>
                         </div>
                     `;
                 });
                 htmlContent += '</div>';
-
-                if (fotos.length >= 10) {
-                    htmlContent += '<p class="text-amber-600 text-sm text-center mt-4 bg-amber-50 py-2 rounded-lg">Se alcanzó el límite de 10 fotos. Elimina alguna para subir una nueva.</p>';
-                }
-
                 contenedorGaleriaAdmin.innerHTML = htmlContent;
 
-                // Evento: Eliminar foto
-                document.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
+                // Evento: Eliminar álbum
+                document.querySelectorAll('.btn-eliminar-album').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const target = e.currentTarget;
                         const id = target.getAttribute('data-id');
                         const path = target.getAttribute('data-path');
-                        if (confirm('¿Eliminar permanentemente esta foto?')) {
+                        if (confirm('¿Eliminar este álbum? La portada se borrará del servidor.')) {
                             target.disabled = true;
-                            await deleteDoc(doc(db, "fotos", id));
+                            await deleteDoc(doc(db, "albumes", id));
                             if (path) await deleteObject(ref(storage, path)).catch(() => {});
-                            await window.cargarGaleria();
+                            await window.cargarAlbumes();
                         }
                     });
                 });
 
-                // Evento: Reemplazar foto
-                document.querySelectorAll('.btn-reemplazar-foto').forEach(btn => {
+                // Evento: Reemplazar portada
+                document.querySelectorAll('.btn-reemplazar-portada').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const target = e.currentTarget;
                         const docId = target.getAttribute('data-id');
@@ -561,17 +578,17 @@
 
                             try {
                                 const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
-                                const newPath = `galeria/${Date.now()}_${safeName}`;
+                                const newPath = `albumes/${Date.now()}_${safeName}`;
                                 const sRef = ref(storage, newPath);
                                 await uploadBytes(sRef, file);
                                 const url = await getDownloadURL(sRef);
 
-                                await updateDoc(doc(db, "fotos", docId), { url, storagePath: newPath, timestamp: Date.now() });
+                                await updateDoc(doc(db, "albumes", docId), { portada: url, storagePath: newPath, timestamp: Date.now() });
 
                                 if (oldPath) await deleteObject(ref(storage, oldPath)).catch(() => {});
-                                await window.cargarGaleria();
+                                await window.cargarAlbumes();
                             } catch (err) {
-                                alert("Error al reemplazar la foto.");
+                                alert("Error al reemplazar la portada.");
                                 target.disabled = false;
                                 target.querySelector('ion-icon').setAttribute('name', 'swap-horizontal');
                                 target.querySelector('ion-icon').classList.remove('animate-spin');
@@ -582,8 +599,8 @@
                 });
 
             } catch (error) {
-                console.error("Error cargando galería:", error);
-                contenedorGaleriaAdmin.innerHTML = '<p class="text-red-500 text-center py-4 font-bold border border-red-200 rounded-lg">Fallo al conectar con la base de datos (Galería).</p>';
+                console.error("Error cargando álbumes:", error);
+                contenedorGaleriaAdmin.innerHTML = '<p class="text-red-500 text-center py-4 font-bold border border-red-200 rounded-lg">Fallo al conectar con la base de datos (Álbumes).</p>';
             }
         };
 
@@ -698,6 +715,12 @@
         // === LÓGICA DE ECONOMIA Y FINANZAS (modulo externo) ===
         import { initEconomia } from './admin/js/modulos/secretarias/economia.js';
         initEconomia();
+
+        // === LÓGICA DE CAMPOS EXTRA Y CAMPAÑAS (modulo externo) ===
+        import { initCamposExtra, cargarCamposExtrasEnForm, obtenerCamposExtrasDelForm } from './admin/js/modulos/campos.js';
+        initCamposExtra();
+        window.cargarCamposExtrasEnForm = cargarCamposExtrasEnForm;
+        window.obtenerCamposExtrasDelForm = obtenerCamposExtrasDelForm;
 
         // === LÓGICA DE CONFIGURACIÓN GENERAL ===
         window.cargarConfig = async function () {
@@ -990,36 +1013,43 @@
 
         // Delay events binding (se ejecuta al renderizar)
         document.addEventListener('DOMContentLoaded', () => {
-            const fFoto = document.getElementById('form-foto-simple');
-            if (fFoto) {
-                fFoto.addEventListener('submit', async (e) => {
+            const fAlbum = document.getElementById('form-album');
+            if (fAlbum) {
+                fAlbum.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const file = document.getElementById('foto-archivo').files[0];
-                    const btn = document.getElementById('btn-submit-foto');
-                    if (!file) return;
+                    const titulo = document.getElementById('album-titulo').value;
+                    const selectSec = document.getElementById('album-secretaria');
+                    const secretariaNombre = selectSec.options[selectSec.selectedIndex].text;
+                    const secretariaId = selectSec.value;
+                    const link = selectSec.options[selectSec.selectedIndex].getAttribute('data-link');
+                    const file = document.getElementById('album-portada').files[0];
+                    const btn = document.getElementById('btn-submit-album');
 
-                    // Verificar límite de 10
-                    const qFotos = await getDocs(collection(db, "fotos"));
-                    if (qFotos.size >= 10) {
-                        alert('Límite alcanzado (10 fotos). Elimina alguna antes de subir una nueva.');
-                        return;
-                    }
+                    if (!titulo || !secretariaId || !file) return;
 
-                    btn.disabled = true; btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
+                    btn.disabled = true; btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Creando...';
                     try {
                         const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
-                        const path = `galeria/${Date.now()}_${safeName}`;
+                        const path = `albumes/${Date.now()}_${safeName}`;
                         const sRef = ref(storage, path);
                         await uploadBytes(sRef, file);
-                        const url = await getDownloadURL(sRef);
-                        await addDoc(collection(db, "fotos"), { url, storagePath: path, timestamp: Date.now() });
-                        fFoto.reset();
-                        await window.cargarGaleria();
+                        const portada = await getDownloadURL(sRef);
+                        await addDoc(collection(db, "albumes"), {
+                            titulo,
+                            secretaria: secretariaNombre,
+                            secretariaId,
+                            portada,
+                            storagePath: path,
+                            link: link ? `paginas/${link}` : '#',
+                            timestamp: Date.now()
+                        });
+                        fAlbum.reset();
+                        await window.cargarAlbumes();
                     } catch (err) {
-                        alert("Error subiendo fotografía.");
+                        alert("Error creando álbum.");
                         console.error(err);
                     }
-                    finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir Foto'; }
+                    finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Crear Álbum'; }
                 });
             }
 
@@ -1196,7 +1226,7 @@
                     <a href="#" id="nav-galeria"
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
                         <ion-icon name="images" class="mr-3 text-xl"></ion-icon>
-                        Galería de Fotos
+                        Álbumes de Fotos
                     </a>
                     <a href="#" id="nav-portadas"
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
@@ -1402,48 +1432,63 @@
                     </div>
 
                     <!-- =================================== -->
-                    <!-- VISTA: ÚLTIMAS FOTOS -->
+                    <!-- VISTA: ÁLBUMES DE FOTOS -->
                     <!-- =================================== -->
                     <div id="view-galeria" class="hidden space-y-8">
 
-                        <!-- Subir Foto -->
+                        <!-- Crear Álbum -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <ion-icon name="cloud-upload-outline" class="text-blue-600 mr-2 text-xl"></ion-icon>
-                                    Subir Nueva Foto
+                                    <ion-icon name="add-circle" class="text-blue-600 mr-2 text-xl"></ion-icon>
+                                    Crear Nuevo Álbum
                                 </h3>
                             </div>
-                            <form id="form-foto-simple" class="p-6 space-y-5">
-                                <div>
-                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Fotografía</label>
-                                    <input type="file" id="foto-archivo" required accept="image/*"
-                                        class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
+                            <form id="form-album" class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Título del Álbum</label>
+                                        <input type="text" id="album-titulo" required
+                                            placeholder="Ej: Campeonato Relámpago 2026"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Secretaría</label>
+                                        <select id="album-secretaria" required
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none cursor-pointer">
+                                            <option value="">Cargando secretarías...</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Foto de Portada</label>
+                                        <input type="file" id="album-portada" required accept="image/*"
+                                            class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
+                                    </div>
                                 </div>
                                 <div class="pt-4 border-t border-gray-100">
-                                    <button type="submit" id="btn-submit-foto"
+                                    <button type="submit" id="btn-submit-album"
                                         class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto min-w-[250px]">
                                         <ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon>
-                                        Subir Foto
+                                        Crear Álbum
                                     </button>
                                 </div>
                             </form>
                         </div>
 
-                        <!-- Listado de Fotos -->
+                        <!-- Listado de Álbumes -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <ion-icon name="images-outline" class="text-gray-500 mr-2 text-xl"></ion-icon>
-                                    Fotos Publicadas <span class="text-sm text-gray-400 ml-2">(máx. 10)</span>
+                                    <ion-icon name="albums-outline" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Álbumes Publicados
                                 </h3>
-                                <button onclick="window.cargarGaleria()"
+                                <button onclick="window.cargarAlbumes()"
                                     class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
                                     <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
                                 </button>
                             </div>
                             <div id="contenedor-galeria-admin" class="p-6">
-                                <!-- Contenido dinamico de galeria -->
+                                <!-- Contenido dinamico de albumes -->
                             </div>
                         </div>
 
@@ -1585,6 +1630,22 @@
                             <ion-icon name="people" class="absolute -right-6 -bottom-6 text-[10rem] text-white opacity-10 z-0"></ion-icon>
                         </div>
 
+                        <!-- Sub-tabs de Socios -->
+                        <div class="flex bg-gray-100 rounded-xl p-1 gap-1">
+                            <button id="subtab-socio-afiliados" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition bg-white shadow text-pink-700">
+                                <ion-icon name="people-outline" class="mr-1 align-middle"></ion-icon> Afiliados
+                            </button>
+                            <button id="subtab-socio-campos" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
+                                <ion-icon name="add-circle-outline" class="mr-1 align-middle"></ion-icon> Campos Extra
+                            </button>
+                            <button id="subtab-socio-campanas" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition text-gray-500 hover:text-gray-700">
+                                <ion-icon name="megaphone-outline" class="mr-1 align-middle"></ion-icon> Campañas
+                            </button>
+                        </div>
+
+                        <!-- ===== SUBVISTA: AFILIADOS ===== -->
+                        <div id="panel-socio-afiliados" class="space-y-8">
+
                         <!-- Formulario Agregar / Editar Afiliado -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
@@ -1664,6 +1725,7 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div id="campos-extra-socio-container"></div>
                                 <div class="pt-4 border-t border-gray-100 flex gap-3">
                                     <button type="submit" id="btn-submit-socio"
                                         class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
@@ -1739,6 +1801,190 @@
                                 </table>
                             </div>
                         </div>
+                    </div>
+
+                        <!-- ===== SUBVISTA: CAMPOS EXTRA ===== -->
+                        <div id="panel-socio-campos" class="hidden space-y-8">
+
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden" id="form-campo-container">
+                                <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                    <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                        <ion-icon name="add-circle" class="text-violet-500 mr-2 text-xl"></ion-icon>
+                                        Crear / Editar Campo Extra
+                                    </h3>
+                                </div>
+                                <form id="form-campo" class="p-6 space-y-5">
+                                    <input type="hidden" id="campo-id-edit" value="">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Etiqueta</label>
+                                            <input type="text" id="campo-etiqueta" required placeholder="Ej: Tipo de Sangre"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-violet-500 bg-white shadow-sm transition outline-none">
+                                            <p class="text-xs text-gray-400 mt-1">Nombre visible para el usuario.</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Nombre Interno</label>
+                                            <input type="text" id="campo-nombre" placeholder="Auto-generado" readonly
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 bg-gray-100 shadow-sm outline-none font-mono text-sm text-gray-500">
+                                            <p class="text-xs text-gray-400 mt-1">Se genera automatico de la etiqueta.</p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Tipo de Campo</label>
+                                            <select id="campo-tipo"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-violet-500 bg-white shadow-sm transition outline-none">
+                                                <option value="texto">Texto</option>
+                                                <option value="numero">Numero</option>
+                                                <option value="si_no">Si / No</option>
+                                                <option value="opciones">Opciones (dropdown)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Orden</label>
+                                            <input type="number" id="campo-orden" value="1" min="1" max="99"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-violet-500 bg-white shadow-sm transition outline-none">
+                                        </div>
+                                        <div class="flex items-end pb-3">
+                                            <label class="flex items-center gap-3 cursor-pointer">
+                                                <span class="text-sm font-bold text-gray-700">Activo:</span>
+                                                <input type="checkbox" id="campo-activo" checked
+                                                    class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                                <span id="campo-activo-label" class="text-sm font-semibold text-emerald-600">Activo</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="campo-opciones-container" class="hidden">
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Opciones (una por linea)</label>
+                                        <textarea id="campo-opciones" rows="4" placeholder="O+&#10;O-&#10;A+&#10;A-&#10;B+&#10;B-&#10;AB+&#10;AB-"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-violet-500 bg-white shadow-sm transition outline-none text-sm"></textarea>
+                                        <label class="flex items-center gap-2 mt-2 cursor-pointer">
+                                            <input type="checkbox" id="campo-otros" class="w-4 h-4 rounded border-gray-300 text-violet-600">
+                                            <span class="text-sm text-gray-600">Permitir opcion "Otros" (el usuario podra escribir un valor libre)</span>
+                                        </label>
+                                    </div>
+                                    <div class="pt-4 border-t border-gray-100 flex gap-3">
+                                        <button type="submit" id="btn-submit-campo"
+                                            class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
+                                            <ion-icon name="save" class="mr-2 text-xl"></ion-icon>
+                                            <span id="btn-campo-text">Crear Campo</span>
+                                        </button>
+                                        <button type="button" id="btn-cancel-campo"
+                                            class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3.5 px-6 rounded-lg transition-all">
+                                            Cancelar Edicion
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                                <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                    <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                        <ion-icon name="list" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                        Campos Extra Creados
+                                    </h3>
+                                    <button onclick="window._cargarCamposExtra()"
+                                        class="text-sm font-semibold text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded flex items-center transition">
+                                        <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                    </button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-left text-sm text-gray-600">
+                                        <thead class="bg-white text-gray-400 text-xs uppercase font-extrabold border-b border-gray-100">
+                                            <tr>
+                                                <th class="px-3 py-3">Etiqueta</th>
+                                                <th class="px-3 py-3">Clave</th>
+                                                <th class="px-3 py-3">Tipo</th>
+                                                <th class="px-3 py-3">Opciones</th>
+                                                <th class="px-3 py-3 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-campos-extra" class="divide-y divide-gray-100">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- ===== SUBVISTA: CAMPAÑAS ===== -->
+                        <div id="panel-socio-campanas" class="hidden space-y-8">
+
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden" id="form-campana-container">
+                                <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                    <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                        <ion-icon name="megaphone" class="text-amber-500 mr-2 text-xl"></ion-icon>
+                                        Crear / Editar Campaña de Actualizacion
+                                    </h3>
+                                </div>
+                                <form id="form-campana" class="p-6 space-y-5">
+                                    <input type="hidden" id="campana-id-edit" value="">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Nombre de la Campaña</label>
+                                            <input type="text" id="campana-nombre" required placeholder="Ej: Actualizacion de Datos de Salud"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
+                                        </div>
+                                        <div class="flex items-end pb-3">
+                                            <label class="flex items-center gap-3 cursor-pointer">
+                                                <span class="text-sm font-bold text-gray-700">Activa:</span>
+                                                <input type="checkbox" id="campana-activo-edit" checked
+                                                    class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                                <span class="text-sm font-semibold text-emerald-600">Activa</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-3">Campos que los afiliados podran actualizar:</label>
+                                        <div id="campana-campos-checklist" class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                                            <p class="text-gray-400 text-sm">Cargando campos extra...</p>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-2">Selecciona los campos que los afiliados podran modificar. Los demas solo los veran como informacion.</p>
+                                    </div>
+                                    <div class="pt-4 border-t border-gray-100 flex gap-3">
+                                        <button type="submit" id="btn-submit-campana"
+                                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
+                                            <ion-icon name="send" class="mr-2 text-xl"></ion-icon>
+                                            <span id="btn-campana-text">Publicar Campaña</span>
+                                        </button>
+                                        <button type="button" id="btn-cancel-campana"
+                                            class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3.5 px-6 rounded-lg transition-all">
+                                            Cancelar Edicion
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                                <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                    <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                        <ion-icon name="list" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                        Campañas Publicadas
+                                    </h3>
+                                    <button onclick="window._cargarCampanas()"
+                                        class="text-sm font-semibold text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded flex items-center transition">
+                                        <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                    </button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-left text-sm text-gray-600">
+                                        <thead class="bg-white text-gray-400 text-xs uppercase font-extrabold border-b border-gray-100">
+                                            <tr>
+                                                <th class="px-3 py-3">Nombre</th>
+                                                <th class="px-3 py-3">Campos Habilitados</th>
+                                                <th class="px-3 py-3">Estado</th>
+                                                <th class="px-3 py-3">Fecha</th>
+                                                <th class="px-3 py-3 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-campanas" class="divide-y divide-gray-100">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
 
                     <!-- =================================== -->
