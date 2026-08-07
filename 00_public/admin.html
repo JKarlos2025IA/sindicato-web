@@ -49,6 +49,7 @@
         // Referencias de Navegación
         const navInicio = document.getElementById('nav-inicio');
         const navCultura = document.getElementById('nav-cultura');
+        const navGaleria = document.getElementById('nav-galeria');
         const navPortadas = document.getElementById('nav-portadas');
         const navSecretarias = document.getElementById('nav-secretarias');
         const navSocios = document.getElementById('nav-socios');
@@ -60,6 +61,7 @@
         const navEconomia = document.getElementById('nav-economia');
         const viewInicio = document.getElementById('view-inicio');
         const viewCultura = document.getElementById('view-cultura');
+        const viewGaleria = document.getElementById('view-galeria');
         const viewPortadas = document.getElementById('view-portadas');
         const viewSecretarias = document.getElementById('view-secretarias');
         const viewSocios = document.getElementById('view-socios');
@@ -76,6 +78,7 @@
         const formDoc = document.getElementById('form-doc');
         const btnSubmitDoc = document.getElementById('btn-submit-doc');
         const listaDocumentos = document.getElementById('lista-documentos');
+        const contenedorGaleriaAdmin = document.getElementById('contenedor-galeria-admin');
 
         // === AUTENTICACIÓN ===
         onAuthStateChanged(auth, (user) => {
@@ -210,7 +213,8 @@
             activeNav.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
 
             viewInicio.classList.add('hidden');
-            viewCultura.classList.add('hidden');
+            if (viewCultura) viewCultura.classList.add('hidden');
+            if (viewGaleria) viewGaleria.classList.add('hidden');
             if (viewPortadas) viewPortadas.classList.add('hidden');
             if (viewSecretarias) viewSecretarias.classList.add('hidden');
             if (viewSocios) viewSocios.classList.add('hidden');
@@ -234,6 +238,7 @@
 
         navInicio.addEventListener('click', (e) => { e.preventDefault(); switchView(navInicio, viewInicio, 'Vista General'); });
         navCultura.addEventListener('click', (e) => { e.preventDefault(); switchView(navCultura, viewCultura, 'Gestión: Cultura y Deportes'); });
+        navGaleria.addEventListener('click', (e) => { e.preventDefault(); switchView(navGaleria, viewGaleria, 'Gestión: Álbumes'); window.cargarAlbumes(); });
         if (navPortadas) navPortadas.addEventListener('click', (e) => { e.preventDefault(); switchView(navPortadas, viewPortadas, 'Gestión: Portadas del Carrusel'); window.cargarPortadas(); });
         if (navSecretarias) navSecretarias.addEventListener('click', (e) => { e.preventDefault(); switchView(navSecretarias, viewSecretarias, 'Gestión: Secretarías'); window.cargarSecretarias(); });
         if (navSocios) navSocios.addEventListener('click', (e) => { e.preventDefault(); switchView(navSocios, viewSocios, 'Gestión: Socios / Cumpleaños'); window.cargarSocios(); });
@@ -471,6 +476,85 @@
             } catch (error) {
                 console.error("Error cargando portadas:", error);
                 listaPortadas.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error al cargar datos de portadas.</td></tr>';
+            }
+        };
+
+        window.cargarAlbumes = async () => {
+            if (!contenedorGaleriaAdmin) return;
+            try {
+                contenedorGaleriaAdmin.innerHTML = '<p class="text-center py-6 text-gray-400"><ion-icon name="sync" class="animate-spin text-2xl"></ion-icon><br>Cargando...</p>';
+
+                // Poblar selectores de secretaría
+                const qSec = await getDocs(collection(db, "secretarias"));
+                const secretarias = [];
+                qSec.forEach(doc => secretarias.push({ id: doc.id, ...doc.data() }));
+                secretarias.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+
+                // Selector del form
+                const selectForm = document.getElementById('album-secretaria');
+                if (selectForm) {
+                    let opts = '<option value="">Selecciona una secretaría...</option>';
+                    secretarias.forEach(sec => opts += `<option value="${sec.id}" data-nombre="${sec.nombre}">${sec.nombre}</option>`);
+                    selectForm.innerHTML = opts;
+                }
+
+                // Selector de filtro
+                const selectFiltro = document.getElementById('filtro-secretaria-album');
+                if (selectFiltro) {
+                    let opts = '<option value="">Todas las secretarías</option>';
+                    secretarias.forEach(sec => opts += `<option value="${sec.id}">${sec.nombre}</option>`);
+                    selectFiltro.innerHTML = opts;
+                    selectFiltro.onchange = () => window.cargarAlbumes();
+                }
+
+                // Cargar álbumes
+                const qAlb = await getDocs(collection(db, "albumes"));
+                const albumes = [];
+                qAlb.forEach(doc => albumes.push({ id: doc.id, ...doc.data() }));
+                albumes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                // Aplicar filtro
+                const filtroId = selectFiltro?.value || '';
+                const filtrados = filtroId ? albumes.filter(a => a.secretariaId === filtroId) : albumes;
+
+                if (filtrados.length === 0) {
+                    contenedorGaleriaAdmin.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay álbumes. Usa el formulario de arriba para crear uno.</p>';
+                    return;
+                }
+
+                let html = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-200 text-left text-gray-500"><th class="pb-3 font-semibold">Álbum</th><th class="pb-3 font-semibold">Secretaría</th><th class="pb-3 font-semibold">Link</th><th class="pb-3 font-semibold text-right">Acción</th></tr></thead><tbody>';
+                filtrados.forEach(album => {
+                    html += `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 font-medium text-gray-800">${album.titulo}</td>
+                            <td class="py-3 text-gray-500">${album.secretaria || '-'}</td>
+                            <td class="py-3 text-blue-600 font-mono text-xs">${album.link || '-'}</td>
+                            <td class="py-3 text-right">
+                                <button class="text-red-500 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded text-xs font-bold btn-eliminar-album" data-id="${album.id}">
+                                    <ion-icon name="trash" class="align-text-bottom"></ion-icon> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table></div>';
+                contenedorGaleriaAdmin.innerHTML = html;
+
+                // Eventos eliminar
+                document.querySelectorAll('.btn-eliminar-album').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        if (confirm('¿Eliminar este álbum?')) {
+                            e.currentTarget.disabled = true;
+                            await deleteDoc(doc(db, "albumes", id));
+                            await window.cargarAlbumes();
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error(error);
+                contenedorGaleriaAdmin.innerHTML = '<p class="text-red-500 text-center py-4 font-bold">Error cargando álbumes.</p>';
             }
         };
 
@@ -883,6 +967,38 @@
 
         // Delay events binding (se ejecuta al renderizar)
         function bindForms() {
+            const fAlbum = document.getElementById('form-album');
+            if (fAlbum) {
+                fAlbum.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const selectSec = document.getElementById('album-secretaria');
+                    const secretariaNombre = selectSec.options[selectSec.selectedIndex].getAttribute('data-nombre');
+                    const secretariaId = selectSec.value;
+                    const nombre = document.getElementById('album-nombre').value.trim();
+                    const link = document.getElementById('album-link').value.trim();
+                    const btn = document.getElementById('btn-submit-album');
+
+                    if (!secretariaId || !nombre || !link) return;
+
+                    btn.disabled = true; btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Creando...';
+                    try {
+                        await addDoc(collection(db, "albumes"), {
+                            titulo: nombre,
+                            secretaria: secretariaNombre,
+                            secretariaId,
+                            link,
+                            timestamp: Date.now()
+                        });
+                        document.getElementById('album-nombre').value = '';
+                        document.getElementById('album-link').value = '';
+                        await window.cargarAlbumes();
+                    } catch (err) {
+                        alert("Error creando álbum: " + err.message);
+                    }
+                    finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="add" class="mr-2 text-xl"></ion-icon> Crear Álbum'; }
+                });
+            }
+
             const fPortada = document.getElementById('form-portada');
             if (fPortada) {
 
@@ -1058,6 +1174,11 @@
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
                         <ion-icon name="document-text" class="mr-3 text-xl"></ion-icon>
                         Cultura y Deportes
+                    </a>
+                    <a href="#" id="nav-galeria"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="albums" class="mr-3 text-xl"></ion-icon>
+                        Álbumes
                     </a>
                     <a href="#" id="nav-portadas"
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
@@ -1257,6 +1378,76 @@
                                         <!-- Documentos dinámicos renderizados por JS -->
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: ÁLBUMES -->
+                    <!-- =================================== -->
+                    <div id="view-galeria" class="hidden space-y-8">
+
+                        <!-- Crear Álbum -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="add-circle" class="text-blue-600 mr-2 text-xl"></ion-icon>
+                                    Crear Álbum
+                                </h3>
+                            </div>
+                            <form id="form-album" class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Secretaría</label>
+                                        <select id="album-secretaria" required
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none cursor-pointer">
+                                            <option value="">Cargando...</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Nombre del Álbum</label>
+                                        <input type="text" id="album-nombre" required
+                                            placeholder="Ej: Campeonato Marzo 2026"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Link</label>
+                                        <input type="text" id="album-link" required
+                                            placeholder="Ej: paginas/album_campeonato_marzo.html"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100">
+                                    <button type="submit" id="btn-submit-album"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto min-w-[250px]">
+                                        <ion-icon name="add" class="mr-2 text-xl"></ion-icon>
+                                        Crear Álbum
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Listado de Álbumes -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="albums-outline" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Álbumes Creados
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <select id="filtro-secretaria-album"
+                                        class="border-gray-300 rounded-lg px-3 py-2 text-sm border-2 focus:ring-0 focus:border-blue-600 outline-none cursor-pointer">
+                                        <option value="">Todas las secretarías</option>
+                                    </select>
+                                    <button onclick="window.cargarAlbumes()"
+                                        class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded flex items-center transition whitespace-nowrap">
+                                        <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="contenedor-galeria-admin" class="p-6">
+                                <!-- Contenido dinamico -->
                             </div>
                         </div>
 
