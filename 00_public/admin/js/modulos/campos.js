@@ -51,6 +51,7 @@ function initSubTabs() {
             if (panel) panel.classList.remove('hidden');
             // Cargar pendientes al abrir esa pestana
             if (id === 'subtab-socio-pendientes') cargarPendientes();
+            if (id === 'subtab-socio-campanas') { cargarCampanas(); cargarCamposChecklist(); }
         });
     });
 }

@@ -217,8 +217,18 @@
 
                 // Mostrar opciones de registro si la campana lo permite
                 if (campanaData?.permitir_registro) {
-                    document.getElementById('opciones-registro').classList.remove('hidden');
-                    document.getElementById('subtitulo-paso1').textContent = 'Elige como quieres continuar';
+                    // Si es SOLO para nuevos, mostrar directo el registro
+                    const soloNuevos = !campanaData.campos_habilitados || campanaData.campos_habilitados.length === 0;
+                    if (soloNuevos) {
+                        document.getElementById('codigo-input-area').classList.add('hidden');
+                        document.getElementById('registro-nuevo-area').classList.remove('hidden');
+                        document.getElementById('opciones-registro').classList.add('hidden');
+                        document.getElementById('titulo-paso1').textContent = 'Registro de Nuevo Afiliado';
+                        document.getElementById('subtitulo-paso1').textContent = 'Ingresa tu nombre completo para comenzar';
+                    } else {
+                        document.getElementById('opciones-registro').classList.remove('hidden');
+                        document.getElementById('subtitulo-paso1').textContent = 'Elige como quieres continuar';
+                    }
                 }
             } catch (e) { console.error('Error cargando config:', e); }
         }
