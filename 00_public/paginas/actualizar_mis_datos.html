@@ -246,26 +246,28 @@
             });
             html += '</div>';
 
-            // Campos base editables (segun campana)
-            const hayBaseEditables = camposHabilitados.some(k => CAMPOS_BASE_EDITABLES.some(b => b.nombre === k));
+            // Campos base editables (segun campana, o todos si es nuevo)
+            const hayBaseEditables = esNuevoRegistro || camposHabilitados.some(k => CAMPOS_BASE_EDITABLES.some(b => b.nombre === k));
             const hayExtraEditables = camposExtra.length > 0;
 
             if (hayBaseEditables || hayExtraEditables) {
-                html += '<h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-3">Datos a Actualizar</h3>';
+                html += `<h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-3">${esNuevoRegistro ? 'Completa tus datos' : 'Datos a Actualizar'}</h3>`;
                 html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
 
                 CAMPOS_BASE_EDITABLES.forEach(b => {
-                    const editable = camposHabilitados.includes(b.nombre);
+                    const editable = esNuevoRegistro || camposHabilitados.includes(b.nombre);
                     if (!editable) return;
                     const val = socioData[b.nombre] || '';
                     const id = 'base-' + b.nombre;
+                    const required = esNuevoRegistro && (b.nombre === 'dni' || b.nombre === 'email');
                     const attrs = [];
                     if (b.inputType) attrs.push(`type="${b.inputType}"`);
                     if (b.pattern) attrs.push(`pattern="${b.pattern}"`);
                     if (b.maxlength) attrs.push(`maxlength="${b.maxlength}"`);
                     if (b.placeholder) attrs.push(`placeholder="${b.placeholder}"`);
+                    if (required) attrs.push('required');
                     html += `<div class="bg-white border-2 border-emerald-200 rounded-xl p-4">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">${b.etiqueta} <span class="text-emerald-600 text-[10px]">*Editable</span></label>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">${b.etiqueta} ${required ? '<span class="text-red-500 text-[10px]">*</span>' : ''} <span class="text-emerald-600 text-[10px]">*Editable</span></label>
                         <div class="mt-1">
                             <input id="${id}" value="${val}" ${attrs.join(' ')} class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1 campo-base-input">
                         </div>
@@ -274,7 +276,7 @@
                 });
 
                 camposExtra.forEach(campo => {
-                    const editable = !campanaData || camposHabilitados.includes(campo.nombre);
+                    const editable = esNuevoRegistro || !campanaData || camposHabilitados.includes(campo.nombre);
                     const val = extra[campo.nombre] !== undefined ? extra[campo.nombre] : '';
                     const id = 'field-' + campo.nombre;
 
@@ -322,7 +324,8 @@
                 html += '<p class="text-center text-gray-400 py-4">No hay campos para actualizar en esta campana.</p>';
             }
 
-            // Base fields informativos (no en campana)
+            // Base fields informativos solo si no es nuevo registro
+            if (!esNuevoRegistro) {
             const baseInfo = CAMPOS_BASE_EDITABLES.filter(b => !camposHabilitados.includes(b.nombre));
             if (baseInfo.length > 0) {
                 html += '<h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide mt-6 mb-3">Datos Informativos</h3>';
@@ -337,6 +340,7 @@
                     </div>`;
                 });
                 html += '</div>';
+            }
             }
 
             container.innerHTML = html;
@@ -361,7 +365,7 @@
             let errores = [];
             document.querySelectorAll('.campo-base-error').forEach(el => el.classList.add('hidden'));
             CAMPOS_BASE_EDITABLES.forEach(b => {
-                if (!camposHabilitados.includes(b.nombre)) return;
+                if (!esNuevoRegistro && !camposHabilitados.includes(b.nombre)) return;
                 const el = document.getElementById('base-' + b.nombre);
                 if (!el) return;
                 const val = el.value.trim();
@@ -406,20 +410,20 @@
                     updateData.codigo = code;
                 }
 
-                // Guardar campos base habilitados
+                // Guardar campos base habilitados (o todos si es nuevo)
                 CAMPOS_BASE_EDITABLES.forEach(b => {
-                    if (!camposHabilitados.includes(b.nombre)) return;
+                    if (!esNuevoRegistro && !camposHabilitados.includes(b.nombre)) return;
                     const el = document.getElementById('base-' + b.nombre);
                     if (!el) return;
                     const val = el.value.trim();
                     if (val) updateData[b.nombre] = val;
                 });
 
-                // Guardar campos extra
+                // Guardar campos extra (todos si es nuevo, o solo habilitados)
                 const extra = socioData.extra || {};
-                const camposAProcesar = campanaData
-                    ? camposExtra.filter(c => camposHabilitados.includes(c.nombre))
-                    : camposExtra;
+                const camposAProcesar = esNuevoRegistro
+                    ? camposExtra
+                    : (campanaData ? camposExtra.filter(c => camposHabilitados.includes(c.nombre)) : camposExtra);
 
                 camposAProcesar.forEach(campo => {
                     const el = document.getElementById('field-' + campo.nombre);
