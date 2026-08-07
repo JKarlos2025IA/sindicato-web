@@ -1110,6 +1110,7 @@
                     const titulo = document.getElementById('portada-titulo').value;
                     const desc = document.getElementById('portada-desc').value;
                     const link = document.getElementById('portada-link').value.trim();
+                    const ajustar = document.getElementById('portada-ajustar').checked;
                     const orden = parseInt(document.getElementById('portada-orden').value) || 0;
                     const file = document.getElementById('portada-archivo').files[0];
                     const btn = document.getElementById('btn-submit-portada');
@@ -1133,6 +1134,7 @@
                             descripcion: desc,
                             link: link || '',
                             orden: orden,
+                            objectFit: ajustar ? 'contain' : 'cover',
                             url: url,
                             storagePath: storagePath,
                             timestamp: Date.now()
@@ -1566,6 +1568,13 @@
                                             <label class="block text-sm font-bold text-gray-700 mb-1.5">Link al hacer click (Opcional)</label>
                                             <input type="text" id="portada-link" placeholder="Ej: paginas/actualizar_mis_datos.html"
                                                 class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                        </div>
+                                        <div class="flex items-center pt-2">
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="portada-ajustar" class="sr-only peer" checked>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                <span class="ms-3 text-sm font-bold text-gray-700">Ajustar imagen completa (sin recorte)</span>
+                                            </label>
                                         </div>
                                     </div>
 
