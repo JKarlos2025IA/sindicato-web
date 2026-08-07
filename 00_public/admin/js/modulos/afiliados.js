@@ -115,6 +115,7 @@ export function initAfiliados() {
 
             document.querySelectorAll('.btn-editar-socio').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
+                    try {
                     const id = e.currentTarget.getAttribute('data-id');
                     const socio = socios.find(s => s.id === id);
                     if (!socio) return;
@@ -137,6 +138,7 @@ export function initAfiliados() {
                     document.getElementById('btn-cancel-socio').classList.remove('hidden');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     if (window.cargarCamposExtrasEnForm) await window.cargarCamposExtrasEnForm(id);
+                    } catch (err) { alert('Error al cargar afiliado: ' + err.message); console.error(err); }
                 });
             });
 

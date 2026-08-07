@@ -1,7 +1,7 @@
 // ============================================================
 // SIUTCASJNJ - Modulo: Campos Extra & Campanas de Actualizacion
 // ============================================================
-import { db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, writeBatch, serverTimestamp } from '../core.js';
+import { db, collection, addDoc, getDocs, getDoc, deleteDoc, doc, updateDoc, writeBatch, serverTimestamp } from '../core.js';
 
 let camposCache = [];
 let campanasCache = [];
@@ -229,11 +229,12 @@ export async function cargarCamposExtrasEnForm(docId) {
         let socioExtra = {};
         if (docId) {
             try {
-                const socioSnap = await getDocs(collection(db, 'socios'));
-                let found = null;
-                socioSnap.forEach(d => { if (d.id === docId) found = d.data(); });
-                if (found && found.extra) socioExtra = found.extra;
-            } catch (e) {}
+                const socioRef = await getDoc(doc(db, 'socios', docId));
+                if (socioRef.exists()) {
+                    const data = socioRef.data();
+                    if (data.extra) socioExtra = data.extra;
+                }
+            } catch (e) { console.warn('Error cargando extra del socio:', e); }
         }
 
         let html = '<div class="border-t border-gray-200 pt-4 mt-4"><h4 class="text-sm font-bold text-gray-600 mb-3">Datos Adicionales</h4>';

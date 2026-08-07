@@ -8,7 +8,7 @@
 // --- Firebase ---
 import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, getDoc, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -31,7 +31,7 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Exportar funciones Firestore para modulos
-export { collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, where, writeBatch };
+export { collection, addDoc, getDocs, getDoc, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, where, writeBatch };
 export { ref, uploadBytes, getDownloadURL, deleteObject };
 export { signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail };
 
