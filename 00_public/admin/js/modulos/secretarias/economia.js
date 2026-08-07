@@ -256,18 +256,20 @@ async function cargarLibroGastos() {
 
         if (docs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="12" class="text-center py-8 text-gray-400">No hay registros anotados.</td></tr>';
-            document.getElementById('total-libro').textContent = '0.00';
+            document.getElementById('total-libro').textContent = 'S/ 0.00';
             document.getElementById('btn-descargar-libro').disabled = true;
             window._snapLibro = [];
             return;
         }
 
-        let total = 0;
+        let totalIngresos = 0;
+        let totalGastos = 0;
         window._snapLibro = docs;
 
         tbody.innerHTML = docs.map(d => {
             const v = d.data();
-            total += v.total || 0;
+            if (v.tipo === 'INGRESO') totalIngresos += v.total || 0;
+            else totalGastos += v.total || 0;
             const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : '';
             const tipoBadge = v.tipo === 'INGRESO'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Ingreso</span>'
@@ -307,7 +309,13 @@ async function cargarLibroGastos() {
             </tr>`;
         }).join('');
 
-        document.getElementById('total-libro').textContent = total.toFixed(2);
+        const neto = totalIngresos - totalGastos;
+        document.getElementById('total-libro').innerHTML = `
+            <span class="text-blue-600 text-sm">+ S/ ${totalIngresos.toFixed(2)}</span>
+            <span class="text-red-500 text-sm mx-2">- S/ ${totalGastos.toFixed(2)}</span>
+            <span class="text-sm text-gray-500">=</span>
+            <span class="${neto >= 0 ? 'text-emerald-700' : 'text-red-600'} text-xl">S/ ${neto.toFixed(2)}</span>
+        `;
         document.getElementById('btn-descargar-libro').disabled = false;
         actualizarSelectFirmado();
 
