@@ -217,7 +217,7 @@
 
                 // Mostrar opciones de registro si la campana lo permite
                 if (campanaData?.permitir_registro) {
-                    const soloNuevos = !campanaData.campos_habilitados || campanaData.campos_habilitados.length === 0;
+                    const soloNuevos = !campanaData?.campos_habilitados || (campanaData?.campos_habilitados?.length || 0) === 0;
                     if (soloNuevos) {
                         // Ir directo al formulario completo sin pedir nombre primero
                         esNuevoRegistro = true;
@@ -394,8 +394,8 @@
             if (esNuevoRegistro) {
                 const nombreEl = document.getElementById('base-nombre');
                 const nombreVal = (nombreEl?.value || '').trim().toUpperCase();
-                if (!nombreVal || nombreVal.length < 5) {
-                    errores.push('Nombre completo es obligatorio (min. 5 caracteres)');
+                if (!nombreVal || nombreVal.length < 2) {
+                    errores.push('Nombre completo es obligatorio');
                     if (nombreEl) nombreEl.classList.add('border-red-500');
                 } else {
                     nombreNuevoRegistro = nombreVal;
@@ -407,7 +407,7 @@
                 const el = document.getElementById('base-' + b.nombre);
                 if (!el) return;
                 const val = el.value.trim();
-                if (!val) return;
+                if (!val) return; // campo vacio no se valida, solo si tiene algo
                 if (b.pattern) {
                     const regex = new RegExp('^' + b.pattern + '$');
                     if (!regex.test(val)) {
@@ -426,8 +426,10 @@
             });
 
             if (errores.length > 0) {
-                document.getElementById('msg-error').textContent = 'Corrige: ' + errores.join(' | ');
-                document.getElementById('msg-error').classList.remove('hidden');
+                const msgEl = document.getElementById('msg-error');
+                msgEl.textContent = 'Corrige: ' + errores.join(' | ');
+                msgEl.classList.remove('hidden');
+                msgEl.scrollIntoView({ behavior: 'smooth' });
                 return;
             }
 
