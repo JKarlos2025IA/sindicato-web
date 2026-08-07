@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Campeonato Relampago Copa SIUTCASJNJ - Abril 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Oswald:wght@400;500;600;700&display=swap');
+
+  :root {
+    --azul:    #0D47A1;
+    --azul-m:  #1565C0;
+    --azul-l:  #1976D2;
+    --celeste: #38B6FF;
+    --cel-l:   #81D4FA;
+    --gold:    #F9A825;
+    --dark:    #0A1628;
+    --card:    #0E1F3D;
+    --card2:   #132444;
+    --white:   #FFFFFF;
+    --offwhite:#D6E4F7;
+    --slate:   #7B9EC4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--dark);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(56,182,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,182,255,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .bg-blob {
+    position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none;
+  }
+  .bg-blob.b1 { width:500px;height:500px; top:-100px;left:-100px; background:rgba(13,71,161,.35); }
+  .bg-blob.b2 { width:400px;height:400px; bottom:-80px;right:-80px; background:rgba(56,182,255,.18); }
+  .bg-blob.b3 { width:300px;height:300px; top:40%;left:60%; background:rgba(21,101,192,.2); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-l) 60%, rgba(56,182,255,.3) 100%);
+    border-bottom: 3px solid var(--celeste);
+    padding: 40px 0 32px;
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content:''; position:absolute; top:-60px; right:-60px;
+    width:300px; height:300px; border-radius:50%;
+    background: rgba(255,255,255,.05);
+  }
+  .header-inner { text-align: center; }
+  .header-org { font-size: 12px; letter-spacing: 2px; color: var(--cel-l); font-weight: 500; text-transform: uppercase; }
+  .header-title { font-family: 'Oswald', sans-serif; font-size: clamp(32px, 5vw, 52px); font-weight: 700; line-height: 1.15; margin-top: 8px; }
+  .header-title span { color: var(--celeste); }
+  .header-title .year { color: var(--gold); }
+  .header-sub { font-size: 14px; color: var(--offwhite); margin-top: 12px; letter-spacing: 1px; }
+
+  /* COUNTERS */
+  .counters { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin-top: 24px; }
+  .counter-item { text-align: center; }
+  .counter-num { font-family: 'Oswald', sans-serif; font-size: 32px; font-weight: 700; color: var(--celeste); }
+  .counter-lbl { font-size: 11px; color: var(--cel-l); letter-spacing: 1px; text-transform: uppercase; }
+
+  /* BACK LINK */
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--cel-l); text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(129,212,247,.3);
+    transition: all .2s; margin-top: 16px;
+  }
+  .back-link:hover { background: rgba(255,255,255,.1); border-color: var(--celeste); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 8px; margin: 32px 0 24px; flex-wrap: wrap; }
+  .tab {
+    padding: 10px 24px; border-radius: 50px; border: 1.5px solid rgba(56,182,255,.3);
+    background: transparent; color: var(--slate); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; letter-spacing: .5px;
+  }
+  .tab:hover { border-color: var(--celeste); color: var(--celeste); }
+  .tab.active { background: var(--celeste); border-color: var(--celeste); color: var(--dark); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* PHOTO MOSAIC */
+  .mosaic {
+    columns: 4 280px;
+    column-gap: 12px;
+  }
+  .mosaic-item {
+    break-inside: avoid;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid rgba(56,182,255,.15);
+    transition: transform .25s, border-color .25s;
+  }
+  .mosaic-item:hover {
+    transform: scale(1.02);
+    border-color: var(--celeste);
+    z-index: 2;
+  }
+  .mosaic-item img {
+    width: 100%;
+    display: block;
+    transition: transform .4s;
+  }
+  .mosaic-item:hover img { transform: scale(1.06); }
+  .mosaic-item .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,22,40,.85) 0%, transparent 40%);
+    opacity: 0; transition: opacity .3s;
+    display: flex; align-items: flex-end; padding: 14px;
+  }
+  .mosaic-item:hover .overlay { opacity: 1; }
+  .overlay-text { font-size: 12px; color: var(--white); font-weight: 600; }
+
+  @media (max-width: 600px) {
+    .mosaic { columns: 2 1fr; }
+  }
+
+  /* VIDEO CARDS */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .video-card {
+    background: var(--card);
+    border: 1px solid rgba(56,182,255,.2);
+    border-radius: 14px; overflow: hidden;
+    transition: transform .2s, border-color .2s;
+    cursor: pointer;
+  }
+  .video-card:hover { transform: translateY(-4px); border-color: var(--celeste); }
+  .video-thumb {
+    aspect-ratio: 16/9;
+    background: var(--card2);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .video-thumb .play-btn {
+    width: 64px; height: 64px;
+    background: rgba(56,182,255,.85);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: var(--white);
+    transition: transform .2s, background .2s;
+    box-shadow: 0 4px 20px rgba(56,182,255,.4);
+  }
+  .video-card:hover .play-btn { transform: scale(1.1); background: var(--celeste); }
+  .video-info { padding: 14px 16px; }
+  .video-info .v-title { font-weight: 700; font-size: 14px; color: var(--white); }
+  .video-info .v-date { font-size: 11px; color: var(--slate); margin-top: 4px; }
+  .video-info .v-dur { font-size: 11px; color: var(--cel-l); margin-top: 2px; }
+
+  /* LIGHTBOX */
+  .lightbox {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.95);
+    align-items: center; justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 95vw; max-height: 95vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 0 60px rgba(56,182,255,.15);
+  }
+  .lb-close {
+    position: absolute; top: 20px; right: 24px;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 50%; color: var(--white); font-size: 22px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s; z-index: 10;
+  }
+  .lb-close:hover { background: rgba(255,255,255,.2); }
+  .lb-prev, .lb-next {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+    border-radius: 50%; color: var(--white); font-size: 24px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s; z-index: 10;
+  }
+  .lb-prev:hover, .lb-next:hover { background: rgba(255,255,255,.18); }
+  .lb-prev { left: 20px; }
+  .lb-next { right: 20px; }
+
+  /* VIDEO MODAL */
+  .video-modal {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.95);
+    align-items: center; justify-content: center;
+  }
+  .video-modal.open { display: flex; }
+  .video-modal video {
+    max-width: 95vw; max-height: 85vh;
+    border-radius: 8px;
+    box-shadow: 0 0 60px rgba(56,182,255,.15);
+    outline: none;
+  }
+  .vm-close {
+    position: absolute; top: 20px; right: 24px;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 50%; color: var(--white); font-size: 22px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s; z-index: 10;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid rgba(56,182,255,.15); margin-top: 48px; padding: 32px 0;
+    text-align: center; color: var(--slate); font-size: 13px;
+  }
+  footer strong { color: var(--celeste); }
+
+  .section-pad { padding: 0 0 32px; }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-blob b1"></div>
+<div class="bg-blob b2"></div>
+<div class="bg-blob b3"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="header-org">SIUTCASJNJ &middot; Secretaria de Cultura y Deporte</div>
+      <div class="header-title">
+        CAMPEONATO <span>RELAMPAGO</span><br>
+        COPA SIUTCASJNJ <span class="year">2026</span>
+      </div>
+      <div class="header-sub">17 y 24 de Abril &middot; Sport School San Isidro &middot; Futbol 7</div>
+      <div class="counters">
+        <div class="counter-item"><div class="counter-num">12</div><div class="counter-lbl">Fotos</div></div>
+        <div class="counter-item"><div class="counter-num">14</div><div class="counter-lbl">Videos</div></div>
+        <div class="counter-item"><div class="counter-num">4</div><div class="counter-lbl">Equipos</div></div>
+        <div class="counter-item"><div class="counter-num">2</div><div class="counter-lbl">Jornadas</div></div>
+      </div>
+      <a href="sec_cultura_deporte.html" class="back-link">Volver a Albumes</a>
+    </div>
+  </div>
+</header>
+
+<div class="container section-pad">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('fotos', this)">Fotos (12)</button>
+    <button class="tab" onclick="switchTab('videos', this)">Videos (14)</button>
+  </div>
+
+  <!-- PANEL FOTOS -->
+  <div id="panel-fotos" class="panel active">
+    <div class="mosaic" id="mosaic-fotos"></div>
+  </div>
+
+  <!-- PANEL VIDEOS -->
+  <div id="panel-videos" class="panel">
+    <div class="video-grid" id="grid-videos"></div>
+  </div>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">&times;</button>
+  <button class="lb-prev" onclick="navLightbox(-1)">&#8249;</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-next" onclick="navLightbox(1)">&#8250;</button>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="video-modal" id="videoModal">
+  <button class="vm-close" onclick="closeVideoModal()">&times;</button>
+  <video id="vm-video" controls playsinline></video>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>Album de fotos y videos del <strong>Campeonato Relampago Copa SIUTCASJNJ 2026</strong></p>
+    <p style="margin-top:4px;">Secretaria de Cultura y Deporte &middot; Gestion 2026-2028</p>
+  </div>
+</footer>
+
+<script>
+// ── FOTOS ──
+const fotos = [
+  { src: '../assets/img/campeonato/IMG_20260417_180704.jpg', alt: 'Previa del campeonato', grupo: '17 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260417_180740.jpg', alt: 'Equipos listos', grupo: '17 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_195732.jpg', alt: 'Jornada 2', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_195802.jpg', alt: 'Partido en juego', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_195821.jpg', alt: 'Jugada destacada', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_195859.jpg', alt: 'Accion en la cancha', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_200005.jpg', alt: 'Defensa firme', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_200041.jpg', alt: 'Momento del partido', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_200043.jpg', alt: 'Jugada colectiva', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_200050.jpg', alt: 'Tiro al arco', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_200056.jpg', alt: 'Celebracion', grupo: '24 Abr' },
+  { src: '../assets/img/campeonato/IMG_20260424_200058.jpg', alt: 'Foto grupal', grupo: '24 Abr' }
+];
+
+// ── VIDEOS ──
+const videos = [
+  { nombre: 'Partido 1 - Inicio',        fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 1 - Continuacion',  fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 2 - Primer tiempo', fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 2 - Segundo tiempo',fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 3 - Accion',        fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 3 - Continuacion',  fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 4 - Inicio',        fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 4 - Gol',           fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 5 - Jugada',        fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 5 - Segundo tiempo',fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 6 - Inicio',        fecha: '17 Abr', src: '' },
+  { nombre: 'Partido 6 - Final',         fecha: '17 Abr', src: '' },
+  { nombre: 'Premiacion - Ceremonia',    fecha: '24 Abr', src: '' },
+  { nombre: 'Gran Final - Resumen',      fecha: '24 Abr', src: '' }
+];
+
+// ── RENDER FOTOS ──
+function renderFotos() {
+  const mosaic = document.getElementById('mosaic-fotos');
+  let html = '';
+  fotos.forEach((f, i) => {
+    html += `
+      <div class="mosaic-item" onclick="openLightbox(${i})">
+        <img src="${f.src}" alt="${f.alt}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23132444%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%237B9EC4%22 font-size=%2214%22>Sin imagen</text></svg>'">
+        <div class="overlay"><span class="overlay-text">${f.grupo} &middot; ${f.alt}</span></div>
+      </div>`;
+  });
+  mosaic.innerHTML = html;
+}
+
+// ── RENDER VIDEOS ──
+function renderVideos() {
+  const grid = document.getElementById('grid-videos');
+  let html = '';
+  videos.forEach((v, i) => {
+    const tieneVideo = v.src && v.src.trim() !== '';
+    html += `
+      <div class="video-card" onclick="${tieneVideo ? `openVideo('${v.src}')` : ''}" style="${tieneVideo ? '' : 'cursor:default;'}">
+        <div class="video-thumb">
+          <div class="play-btn">${tieneVideo ? '&#9654;' : '&#128250;'}</div>
+        </div>
+        <div class="video-info">
+          <div class="v-title">${v.nombre}</div>
+          <div class="v-date">${v.fecha}</div>
+          <div class="v-dur">${tieneVideo ? 'Click para reproducir' : 'Proximamente'}</div>
+        </div>
+      </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+// ── TABS ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+// ── LIGHTBOX ──
+let currentIdx = 0;
+
+function openLightbox(idx) {
+  currentIdx = idx;
+  document.getElementById('lb-img').src = fotos[idx].src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function navLightbox(dir) {
+  currentIdx = (currentIdx + dir + fotos.length) % fotos.length;
+  document.getElementById('lb-img').src = fotos[currentIdx].src;
+}
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('lightbox').classList.contains('open')) {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navLightbox(-1);
+    if (e.key === 'ArrowRight') navLightbox(1);
+  }
+  if (document.getElementById('videoModal').classList.contains('open')) {
+    if (e.key === 'Escape') closeVideoModal();
+  }
+});
+
+// ── VIDEO MODAL ──
+function openVideo(src) {
+  const vm = document.getElementById('videoModal');
+  const vid = document.getElementById('vm-video');
+  vid.querySelectorAll('source').forEach(s => s.remove());
+  const source = document.createElement('source');
+  source.src = src;
+  source.type = 'video/mp4';
+  vid.appendChild(source);
+  vid.load();
+  vm.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVideoModal() {
+  const vm = document.getElementById('videoModal');
+  const vid = document.getElementById('vm-video');
+  vid.pause();
+  vm.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('videoModal').addEventListener('click', function(e) {
+  if (e.target === this) closeVideoModal();
+});
+
+// ── INIT ──
+renderFotos();
+renderVideos();
+</script>
+
+</body>
+</html>
