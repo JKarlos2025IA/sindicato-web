@@ -85,10 +85,10 @@
         let camposHabilitados = [];
 
         const CAMPOS_BASE_EDITABLES = [
-            { nombre: 'email', etiqueta: 'Email', tipo: 'texto', icon: 'mail-outline' },
-            { nombre: 'telefono', etiqueta: 'Telefono / WhatsApp', tipo: 'texto', icon: 'call-outline' },
-            { nombre: 'fecha', etiqueta: 'Fecha de Cumpleanos (DD/MM)', tipo: 'texto', icon: 'calendar-outline' },
-            { nombre: 'dni', etiqueta: 'DNI', tipo: 'texto', icon: 'card-outline' },
+            { nombre: 'email', etiqueta: 'Email', tipo: 'email', icon: 'mail-outline', inputType: 'email', placeholder: 'correo@ejemplo.com', validacion: 'Debe ser un correo valido con @' },
+            { nombre: 'telefono', etiqueta: 'Telefono / WhatsApp', tipo: 'texto', icon: 'call-outline', inputType: 'tel', placeholder: '999888777', maxlength: '9', pattern: '\\d{9}', validacion: 'Debe tener 9 digitos' },
+            { nombre: 'fecha', etiqueta: 'Fecha de Cumpleanos (DD/MM/AAAA)', tipo: 'texto', icon: 'calendar-outline', placeholder: '11/01/1985', maxlength: '10', pattern: '\\d{2}/\\d{2}/\\d{4}', validacion: 'Formato: DD/MM/AAAA' },
+            { nombre: 'dni', etiqueta: 'DNI', tipo: 'texto', icon: 'card-outline', inputType: 'text', placeholder: '12345678', maxlength: '8', pattern: '\\d{8}', validacion: 'Debe tener 8 digitos' },
             { nombre: 'uo', etiqueta: 'Unidad Organica', tipo: 'texto', icon: 'business-outline' },
             { nombre: 'cargo', etiqueta: 'Cargo', tipo: 'texto', icon: 'briefcase-outline' },
         ];
@@ -207,11 +207,17 @@
                     if (!editable) return;
                     const val = socioData[b.nombre] || '';
                     const id = 'base-' + b.nombre;
+                    const attrs = [];
+                    if (b.inputType) attrs.push(`type="${b.inputType}"`);
+                    if (b.pattern) attrs.push(`pattern="${b.pattern}"`);
+                    if (b.maxlength) attrs.push(`maxlength="${b.maxlength}"`);
+                    if (b.placeholder) attrs.push(`placeholder="${b.placeholder}"`);
                     html += `<div class="bg-white border-2 border-emerald-200 rounded-xl p-4">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">${b.etiqueta} <span class="text-emerald-600 text-[10px]">*Editable</span></label>
                         <div class="mt-1">
-                            <input type="text" id="${id}" value="${val}" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1">
+                            <input id="${id}" value="${val}" ${attrs.join(' ')} class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1 campo-base-input">
                         </div>
+                        ${b.validacion ? `<p class="text-xs text-red-400 mt-1 hidden campo-base-error" id="err-${b.nombre}">${b.validacion}</p>` : ''}
                     </div>`;
                 });
 
@@ -296,10 +302,43 @@
         window.guardarDatos = async function () {
             if (!socioDocId) return;
             const btn = document.getElementById('btn-guardar');
-            btn.disabled = true;
-            btn.innerHTML = '<ion-icon name="sync" class="animate-spin text-xl"></ion-icon> Guardando...';
             document.getElementById('msg-exito').classList.add('hidden');
             document.getElementById('msg-error').classList.add('hidden');
+
+            // Validar campos base editables
+            let errores = [];
+            document.querySelectorAll('.campo-base-error').forEach(el => el.classList.add('hidden'));
+            CAMPOS_BASE_EDITABLES.forEach(b => {
+                if (!camposHabilitados.includes(b.nombre)) return;
+                const el = document.getElementById('base-' + b.nombre);
+                if (!el) return;
+                const val = el.value.trim();
+                if (!val) return;
+                if (b.pattern) {
+                    const regex = new RegExp('^' + b.pattern + '$');
+                    if (!regex.test(val)) {
+                        errores.push(b.etiqueta + ': ' + b.validacion);
+                        el.classList.add('border-red-500');
+                        const errEl = document.getElementById('err-' + b.nombre);
+                        if (errEl) errEl.classList.remove('hidden');
+                    } else {
+                        el.classList.remove('border-red-500');
+                    }
+                }
+                if (b.nombre === 'email' && val && !val.includes('@')) {
+                    errores.push(b.etiqueta + ': ' + b.validacion);
+                    el.classList.add('border-red-500');
+                }
+            });
+
+            if (errores.length > 0) {
+                document.getElementById('msg-error').textContent = 'Corrige: ' + errores.join(' | ');
+                document.getElementById('msg-error').classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<ion-icon name="sync" class="animate-spin text-xl"></ion-icon> Guardando...';
 
             try {
                 const updateData = { timestamp: Date.now() };
