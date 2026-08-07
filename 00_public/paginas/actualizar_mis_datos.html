@@ -382,7 +382,7 @@
         }
 
         window.guardarDatos = async function () {
-            if (!socioDocId) return;
+            if (!socioDocId && !esNuevoRegistro) return;
             const btn = document.getElementById('btn-guardar');
             document.getElementById('msg-exito').classList.add('hidden');
             document.getElementById('msg-error').classList.add('hidden');
