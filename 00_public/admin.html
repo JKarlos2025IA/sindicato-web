@@ -263,19 +263,12 @@
             [panelSol, panelLib, panelBal].forEach(p => p.classList.add('hidden'));
             if (active === 'sol') { subtabSol.className = 'flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition bg-white shadow text-emerald-700'; panelSol.classList.remove('hidden'); }
             if (active === 'lib') { subtabLib.className = 'flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition bg-white shadow text-emerald-700'; panelLib.classList.remove('hidden'); window.cargarLibroGastos?.(); window.actualizarSelectFirmado?.(); }
-            if (active === 'bal') { subtabBal.className = 'flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition bg-white shadow text-emerald-700'; panelBal.classList.remove('hidden'); window.cargarBalance?.(); }
+            if (active === 'bal') { subtabBal.className = 'flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition bg-white shadow text-emerald-700'; panelBal.classList.remove('hidden'); window.cargarBalances?.(); }
         }
 
         if (subtabSol) subtabSol.addEventListener('click', () => cambiarSubTab('sol'));
         if (subtabLib) subtabLib.addEventListener('click', () => cambiarSubTab('lib'));
         if (subtabBal) subtabBal.addEventListener('click', () => cambiarSubTab('bal'));
-
-        // Exponer funciones al scope global para onclick
-        window.cargarSolicitudes = () => { if (typeof cargarSolicitudesModule === 'function') cargarSolicitudesModule(); };
-        window.cargarLibroGastos = () => { if (typeof cargarLibroGastosModule === 'function') cargarLibroGastosModule(); };
-        window.cargarBalance = () => { if (typeof cargarBalanceModule === 'function') cargarBalanceModule(); };
-        window.descargarLibro = () => { if (typeof descargarLibroModule === 'function') descargarLibroModule(); };
-        window.actualizarSelectFirmado = () => { if (typeof actualizarSelectFirmadoModule === 'function') actualizarSelectFirmadoModule(); }; // Helper global para ir desde el home
 
         // === LÓGICA DE DOCUMENTOS ===
         formDoc.addEventListener('submit', async (e) => {
@@ -1012,7 +1005,7 @@
         };
 
         // Delay events binding (se ejecuta al renderizar)
-        document.addEventListener('DOMContentLoaded', () => {
+        function bindForms() {
             const fAlbum = document.getElementById('form-album');
             if (fAlbum) {
                 fAlbum.addEventListener('submit', async (e) => {
@@ -1126,7 +1119,13 @@
                     }
                 });
             }
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindForms);
+        } else {
+            bindForms();
+        }
     </script>
 </head>
 
