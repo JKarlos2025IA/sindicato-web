@@ -289,9 +289,13 @@
                 portadas.forEach((portada, index) => {
                     // Slide HTML
                     const div = document.createElement('div');
-                    // Usar fondo negro si es contain
                     div.className = "w-full h-full flex-shrink-0 relative " + (portada.objectFit === 'contain' ? 'bg-black' : '');
-                    div.innerHTML = `<img src="${portada.url}" alt="Portada ${index + 1}" class="w-full h-full object-${portada.objectFit || 'cover'}" onerror="this.src='https://via.placeholder.com/1200x500?text=Imagen+no+encontrada';">`;
+                    const imgTag = `<img src="${portada.url}" alt="Portada ${index + 1}" class="w-full h-full object-${portada.objectFit || 'cover'}" onerror="this.src='https://via.placeholder.com/1200x500?text=Imagen+no+encontrada';">`;
+                    if (portada.link) {
+                        div.innerHTML = `<a href="${portada.link}" class="block w-full h-full cursor-pointer">${imgTag}</a>`;
+                    } else {
+                        div.innerHTML = imgTag;
+                    }
                     wrapper.appendChild(div);
 
                     // Indicador Html

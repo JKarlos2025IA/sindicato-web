@@ -1109,6 +1109,7 @@
                     e.preventDefault();
                     const titulo = document.getElementById('portada-titulo').value;
                     const desc = document.getElementById('portada-desc').value;
+                    const link = document.getElementById('portada-link').value.trim();
                     const orden = parseInt(document.getElementById('portada-orden').value) || 0;
                     const file = document.getElementById('portada-archivo').files[0];
                     const btn = document.getElementById('btn-submit-portada');
@@ -1130,6 +1131,7 @@
                         await addDoc(collection(db, "portadas"), {
                             titulo: titulo,
                             descripcion: desc,
+                            link: link || '',
                             orden: orden,
                             url: url,
                             storagePath: storagePath,
@@ -1558,6 +1560,11 @@
                                                 breve (Opcional)</label>
                                             <input type="text" id="portada-desc" placeholder="Texto de subtítulo"
                                                 maxlength="80"
+                                                class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Link al hacer click (Opcional)</label>
+                                            <input type="text" id="portada-link" placeholder="Ej: paginas/actualizar_mis_datos.html"
                                                 class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none">
                                         </div>
                                     </div>
