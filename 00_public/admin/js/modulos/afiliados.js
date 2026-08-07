@@ -96,6 +96,7 @@ export function initAfiliados() {
                     document.getElementById('btn-socio-text').textContent = 'Actualizar Afiliado';
                     document.getElementById('btn-cancel-socio').classList.remove('hidden');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (window.cargarCamposExtrasEnForm) await window.cargarCamposExtrasEnForm(id);
                 });
             });
 
@@ -313,6 +314,8 @@ export function initAfiliados() {
 
             try {
                 const data = { nombre, dni, codigo, fecha, email, telefono, uo, cargo, activo, genero, timestamp: Date.now() };
+                const extra = window.obtenerCamposExtrasDelForm ? await window.obtenerCamposExtrasDelForm() : {};
+                if (Object.keys(extra).length > 0) data.extra = extra;
                 if (idEdit) { await updateDoc(doc(db, "socios", idEdit), data); }
                 else { await addDoc(collection(db, "socios"), data); }
                 formSocio.reset();
