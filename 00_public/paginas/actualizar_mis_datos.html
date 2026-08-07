@@ -217,18 +217,22 @@
 
                 // Mostrar opciones de registro si la campana lo permite
                 if (campanaData?.permitir_registro) {
-                    // Si es SOLO para nuevos, mostrar directo el registro
                     const soloNuevos = !campanaData.campos_habilitados || campanaData.campos_habilitados.length === 0;
                     if (soloNuevos) {
-                        document.getElementById('codigo-input-area').classList.add('hidden');
-                        document.getElementById('registro-nuevo-area').classList.remove('hidden');
-                        document.getElementById('opciones-registro').classList.add('hidden');
-                        document.getElementById('titulo-paso1').textContent = 'Registro de Nuevo Afiliado';
-                        document.getElementById('subtitulo-paso1').textContent = 'Ingresa tu nombre completo para comenzar';
-                    } else {
-                        document.getElementById('opciones-registro').classList.remove('hidden');
-                        document.getElementById('subtitulo-paso1').textContent = 'Elige como quieres continuar';
+                        // Ir directo al formulario completo sin pedir nombre primero
+                        esNuevoRegistro = true;
+                        nombreNuevoRegistro = '';
+                        socioData = { nombre: '', codigo: 'PENDIENTE', dni: '', uo: '', cargo: '', fecha: '', email: '', telefono: '', activo: false, estado_registro: 'pendiente' };
+                        socioDocId = null;
+                        document.getElementById('paso-codigo').classList.add('hidden');
+                        document.getElementById('paso-formulario').classList.remove('hidden');
+                        document.getElementById('socio-nombre-display').textContent = 'Nuevo Afiliado';
+                        document.getElementById('socio-codigo-display').textContent = '(Pendiente de aprobacion)';
+                        renderizarFormulario();
+                        return;
                     }
+                    document.getElementById('opciones-registro').classList.remove('hidden');
+                    document.getElementById('subtitulo-paso1').textContent = 'Elige como quieres continuar';
                 }
             } catch (e) { console.error('Error cargando config:', e); }
         }
@@ -243,18 +247,30 @@
             ];
 
             let html = '';
-            // Campos base fijos no editables
-            html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">';
-            baseFieldsNoEditables.forEach(f => {
+            // Campos base fijos (nombre editable si es nuevo)
+            if (esNuevoRegistro) {
+                html += '<div class="bg-white border-2 border-emerald-200 rounded-xl p-4 mb-4">';
+                html += '<label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Nombre Completo <span class="text-red-500 text-[10px]">*</span></label>';
+                html += '<input type="text" id="base-nombre" placeholder="APELLIDOS Y NOMBRES" class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-emerald-500 outline-none transition mt-1 uppercase font-bold text-lg">';
+                html += '</div>';
+            } else {
+                html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">';
                 html += `<div class="bg-gray-50 rounded-xl p-4">
-                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">${f.label}</label>
+                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Nombre Completo</label>
                     <div class="flex items-center gap-2 mt-1">
-                        <ion-icon name="${f.icon}" class="text-gray-400 text-lg"></ion-icon>
-                        <span class="font-medium text-gray-700">${f.value}</span>
+                        <ion-icon name="person-outline" class="text-gray-400 text-lg"></ion-icon>
+                        <span class="font-medium text-gray-700">${socioData.nombre || '-'}</span>
                     </div>
                 </div>`;
-            });
-            html += '</div>';
+                html += `<div class="bg-gray-50 rounded-xl p-4">
+                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Codigo</label>
+                    <div class="flex items-center gap-2 mt-1">
+                        <ion-icon name="key-outline" class="text-gray-400 text-lg"></ion-icon>
+                        <span class="font-medium text-gray-700">${socioData.codigo || '-'}</span>
+                    </div>
+                </div>`;
+                html += '</div>';
+            }
 
             // Campos base editables (segun campana, o todos si es nuevo)
             const hayBaseEditables = esNuevoRegistro || camposHabilitados.some(k => CAMPOS_BASE_EDITABLES.some(b => b.nombre === k));
@@ -374,6 +390,18 @@
             // Validar campos base editables
             let errores = [];
             document.querySelectorAll('.campo-base-error').forEach(el => el.classList.add('hidden'));
+
+            if (esNuevoRegistro) {
+                const nombreEl = document.getElementById('base-nombre');
+                const nombreVal = (nombreEl?.value || '').trim().toUpperCase();
+                if (!nombreVal || nombreVal.length < 5) {
+                    errores.push('Nombre completo es obligatorio (min. 5 caracteres)');
+                    if (nombreEl) nombreEl.classList.add('border-red-500');
+                } else {
+                    nombreNuevoRegistro = nombreVal;
+                    if (nombreEl) nombreEl.classList.remove('border-red-500');
+                }
+            }
             CAMPOS_BASE_EDITABLES.forEach(b => {
                 if (!esNuevoRegistro && !camposHabilitados.includes(b.nombre)) return;
                 const el = document.getElementById('base-' + b.nombre);
