@@ -489,91 +489,95 @@
         window.cargarGaleria = async () => {
             if (!contenedorGaleriaAdmin) return;
             try {
-                contenedorGaleriaAdmin.innerHTML = '<p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando galería...</p>';
+                contenedorGaleriaAdmin.innerHTML = '<p class="text-center py-8 text-gray-400"><ion-icon name="sync" class="animate-spin text-3xl"></ion-icon><br>Cargando fotos...</p>';
 
-                // Cargar Actividades
-                const qActs = await getDocs(collection(db, "actividades"));
-                const actividades = [];
-                qActs.forEach(doc => actividades.push({ id: doc.id, ...doc.data() }));
-                actividades.sort((a, b) => a.timestamp - b.timestamp); // Antiguas primero o cronologico
-
-                // Cargar Fotos
                 const qFotos = await getDocs(collection(db, "fotos"));
                 const fotos = [];
                 qFotos.forEach(doc => fotos.push({ id: doc.id, ...doc.data() }));
+                fotos.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-                // Poblar select
-                let optionsHtml = '<option value="">Selecciona una actividad...</option>';
-                actividades.forEach(act => {
-                    optionsHtml += `<option value="${act.id}">${act.titulo}</option>`;
-                });
-                if (document.getElementById('foto-actividad-id')) document.getElementById('foto-actividad-id').innerHTML = optionsHtml;
-
-                // Renderizar
-                if (actividades.length === 0) {
-                    contenedorGaleriaAdmin.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay actividades registradas. Usa el formulario de arriba para crear una.</p>';
+                if (fotos.length === 0) {
+                    contenedorGaleriaAdmin.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay fotos publicadas. Usa el formulario de arriba para subir la primera.</p>';
                     return;
                 }
 
-                let htmlContent = '';
-                actividades.forEach((act, idx) => {
+                let htmlContent = '<div class="grid grid-cols-2 md:grid-cols-5 gap-4">';
+                fotos.forEach((foto, idx) => {
                     htmlContent += `
-                        <div class="mb-8 border border-gray-200 rounded-lg p-5 relative bg-white shadow-sm">
-                            <button class="absolute top-4 right-4 text-red-500 hover:text-red-700 bg-red-50 text-xs font-bold px-3 py-1.5 rounded transition btn-eliminar-actividad border border-red-200" data-id="${act.id}" title="Eliminar Actividad">
-                                Eliminar Actividad
-                            </button>
-                            <h4 class="text-xl font-bold text-blue-800 mb-5 pb-2 border-b border-gray-100">Actividad ${idx + 1}: ${act.titulo} ${act.pagina_html ? `<a href="${act.pagina_html}" target="_blank" class="text-xs text-blue-500 font-normal hover:underline ml-2">📄 ${act.pagina_html}</a>` : ''}</h4>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                            <img src="${foto.url}" class="w-full h-full object-cover" loading="lazy">
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                                <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition transform hover:scale-110 btn-reemplazar-foto shadow-lg" data-id="${foto.id}" data-path="${foto.storagePath || ''}" title="Reemplazar Foto">
+                                    <ion-icon name="swap-horizontal" class="text-lg block"></ion-icon>
+                                </button>
+                                <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition transform hover:scale-110 btn-eliminar-foto shadow-lg" data-id="${foto.id}" data-path="${foto.storagePath || ''}" title="Eliminar Foto">
+                                    <ion-icon name="trash" class="text-lg block"></ion-icon>
+                                </button>
+                            </div>
+                            <span class="absolute top-1 left-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded">${idx + 1}</span>
+                        </div>
                     `;
-
-                    const fotosAct = fotos.filter(f => f.actividadId === act.id);
-                    if (fotosAct.length === 0) {
-                        htmlContent += `<div class="col-span-full py-4 text-gray-400 text-sm italic text-center">No hay fotos subidas para esta actividad todavía.</div>`;
-                    } else {
-                        fotosAct.forEach(foto => {
-                            htmlContent += `
-                                <div class="relative group aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                                    <img src="${foto.url}" class="w-full h-full object-cover">
-                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <button class="bg-red-500 text-white p-2 md:p-3 rounded-full hover:bg-red-600 transition transform hover:scale-110 btn-eliminar-foto shadow-lg" data-id="${foto.id}" data-path="${foto.storagePath}" title="Eliminar Foto">
-                                            <ion-icon name="trash" class="text-xl block"></ion-icon>
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    }
-                    htmlContent += `</div></div>`;
                 });
+                htmlContent += '</div>';
+
+                if (fotos.length >= 10) {
+                    htmlContent += '<p class="text-amber-600 text-sm text-center mt-4 bg-amber-50 py-2 rounded-lg">Se alcanzó el límite de 10 fotos. Elimina alguna para subir una nueva.</p>';
+                }
 
                 contenedorGaleriaAdmin.innerHTML = htmlContent;
 
-                // Binding Evento Borrar Foto
+                // Evento: Eliminar foto
                 document.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const target = e.currentTarget;
                         const id = target.getAttribute('data-id');
                         const path = target.getAttribute('data-path');
-                        if (confirm('¿Seguro de que deseas eliminar permanentemente esta foto?')) {
+                        if (confirm('¿Eliminar permanentemente esta foto?')) {
                             target.disabled = true;
                             await deleteDoc(doc(db, "fotos", id));
-                            if (path) await deleteObject(ref(storage, path)).catch(err => console.log(err));
+                            if (path) await deleteObject(ref(storage, path)).catch(() => {});
                             await window.cargarGaleria();
                         }
                     });
                 });
 
-                // Binding Evento Borrar Actividad
-                document.querySelectorAll('.btn-eliminar-actividad').forEach(btn => {
+                // Evento: Reemplazar foto
+                document.querySelectorAll('.btn-reemplazar-foto').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const target = e.currentTarget;
-                        const id = target.getAttribute('data-id');
-                        if (confirm('¿ATENCIÓN: ELIMINAR ACTIVIDAD?\nEsto solo elimina el título de la actividad. Para no dejar archivos sueltos (basura en la nube), asegúrate de eliminar PRIMERO todas las fotos de esta actividad individualmente.\n¿Continuar de todos modos?')) {
+                        const docId = target.getAttribute('data-id');
+                        const oldPath = target.getAttribute('data-path');
+
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = async () => {
+                            const file = input.files[0];
+                            if (!file) return;
+
                             target.disabled = true;
-                            target.innerText = "Borrando...";
-                            await deleteDoc(doc(db, "actividades", id));
-                            await window.cargarGaleria();
-                        }
+                            target.querySelector('ion-icon').setAttribute('name', 'sync');
+                            target.querySelector('ion-icon').classList.add('animate-spin');
+
+                            try {
+                                const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
+                                const newPath = `galeria/${Date.now()}_${safeName}`;
+                                const sRef = ref(storage, newPath);
+                                await uploadBytes(sRef, file);
+                                const url = await getDownloadURL(sRef);
+
+                                await updateDoc(doc(db, "fotos", docId), { url, storagePath: newPath, timestamp: Date.now() });
+
+                                if (oldPath) await deleteObject(ref(storage, oldPath)).catch(() => {});
+                                await window.cargarGaleria();
+                            } catch (err) {
+                                alert("Error al reemplazar la foto.");
+                                target.disabled = false;
+                                target.querySelector('ion-icon').setAttribute('name', 'swap-horizontal');
+                                target.querySelector('ion-icon').classList.remove('animate-spin');
+                            }
+                        };
+                        input.click();
                     });
                 });
 
@@ -986,44 +990,35 @@
 
         // Delay events binding (se ejecuta al renderizar)
         document.addEventListener('DOMContentLoaded', () => {
-            const fAct = document.getElementById('form-actividad');
-            if (fAct) {
-                fAct.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const titulo = document.getElementById('actividad-titulo').value;
-                    const pagina = document.getElementById('actividad-pagina').value.trim();
-                    const btn = document.getElementById('btn-submit-actividad');
-                    btn.disabled = true; btn.innerHTML = 'Creando...';
-                    try {
-                        const data = { titulo: titulo, timestamp: Date.now() };
-                        if (pagina) data.pagina_html = pagina;
-                        await addDoc(collection(db, "actividades"), data);
-                        fAct.reset();
-                        await window.cargarGaleria();
-                    } catch (err) { alert("Error creando actividad."); }
-                    finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="add" class="mr-1 text-xl"></ion-icon> Crear Actividad'; }
-                });
-            }
-
-            const fFoto = document.getElementById('form-foto');
+            const fFoto = document.getElementById('form-foto-simple');
             if (fFoto) {
                 fFoto.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const actId = document.getElementById('foto-actividad-id').value;
                     const file = document.getElementById('foto-archivo').files[0];
                     const btn = document.getElementById('btn-submit-foto');
-                    if (!actId || !file) return;
-                    btn.disabled = true; btn.innerHTML = 'Subiendo...';
+                    if (!file) return;
+
+                    // Verificar límite de 10
+                    const qFotos = await getDocs(collection(db, "fotos"));
+                    if (qFotos.size >= 10) {
+                        alert('Límite alcanzado (10 fotos). Elimina alguna antes de subir una nueva.');
+                        return;
+                    }
+
+                    btn.disabled = true; btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
                     try {
                         const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
-                        const path = `galeria/${actId}/${Date.now()}_${safeName}`;
+                        const path = `galeria/${Date.now()}_${safeName}`;
                         const sRef = ref(storage, path);
                         await uploadBytes(sRef, file);
                         const url = await getDownloadURL(sRef);
-                        await addDoc(collection(db, "fotos"), { actividadId: actId, url: url, storagePath: path, timestamp: Date.now() });
+                        await addDoc(collection(db, "fotos"), { url, storagePath: path, timestamp: Date.now() });
                         fFoto.reset();
                         await window.cargarGaleria();
-                    } catch (err) { alert("Error subiendo fotografía."); console.log(err); }
+                    } catch (err) {
+                        alert("Error subiendo fotografía.");
+                        console.error(err);
+                    }
                     finally { btn.disabled = false; btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir Foto'; }
                 });
             }
@@ -1407,68 +1402,23 @@
                     </div>
 
                     <!-- =================================== -->
-                    <!-- VISTA: GALERÍA DE FOTOS -->
+                    <!-- VISTA: ÚLTIMAS FOTOS -->
                     <!-- =================================== -->
                     <div id="view-galeria" class="hidden space-y-8">
 
-                        <!-- Caja de Crear Actividad -->
+                        <!-- Subir Foto -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <ion-icon name="add-circle" class="text-orange-500 mr-2 text-xl"></ion-icon>
-                                    1. Crear Nueva Actividad
+                                    <ion-icon name="cloud-upload-outline" class="text-blue-600 mr-2 text-xl"></ion-icon>
+                                    Subir Nueva Foto
                                 </h3>
                             </div>
-                            <form id="form-actividad" class="p-6">
-                                <div class="flex flex-col md:flex-row gap-4">
-                                    <div class="flex-grow">
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Nombre de la
-                                            Actividad</label>
-                                        <input type="text" id="actividad-titulo" required
-                                            placeholder="Ej: Campeonato Relámpago de Fulbito"
-                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none">
-                                    </div>
-                                </div>
-                                <div class="flex flex-col md:flex-row gap-4 mt-4">
-                                    <div class="flex-grow">
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Pagina HTML del evento <span class="text-gray-400 font-normal">(opcional)</span></label>
-                                        <input type="text" id="actividad-pagina" placeholder="Ej: campeonato_2026.html"
-                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-orange-500 bg-white shadow-sm transition outline-none">
-                                    </div>
-                                    <div class="flex items-end">
-                                        <button type="submit" id="btn-submit-actividad"
-                                            class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center w-full md:w-auto h-[52px]">
-                                            <ion-icon name="add" class="mr-1 text-xl"></ion-icon>
-                                            Crear Actividad
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Caja de Subir Foto -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <ion-icon name="image" class="text-blue-600 mr-2 text-xl"></ion-icon>
-                                    2. Subir Fotos a Actividad
-                                </h3>
-                            </div>
-                            <form id="form-foto" class="p-6 space-y-5">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Seleccionar
-                                            Actividad</label>
-                                        <select id="foto-actividad-id" required
-                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none cursor-pointer">
-                                            <option value="">Cargando actividades...</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Fotografía</label>
-                                        <input type="file" id="foto-archivo" required accept="image/*"
-                                            class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
-                                    </div>
+                            <form id="form-foto-simple" class="p-6 space-y-5">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Fotografía</label>
+                                    <input type="file" id="foto-archivo" required accept="image/*"
+                                        class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-blue-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer text-sm text-gray-600">
                                 </div>
                                 <div class="pt-4 border-t border-gray-100">
                                     <button type="submit" id="btn-submit-foto"
@@ -1480,20 +1430,19 @@
                             </form>
                         </div>
 
-                        <!-- Visor de Galería -->
+                        <!-- Listado de Fotos -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div
-                                class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                                     <ion-icon name="images-outline" class="text-gray-500 mr-2 text-xl"></ion-icon>
-                                    Gestión de Galería Activa
+                                    Fotos Publicadas <span class="text-sm text-gray-400 ml-2">(máx. 10)</span>
                                 </h3>
                                 <button onclick="window.cargarGaleria()"
                                     class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
                                     <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
                                 </button>
                             </div>
-                            <div id="contenedor-galeria-admin" class="p-6 space-y-8">
+                            <div id="contenedor-galeria-admin" class="p-6">
                                 <!-- Contenido dinamico de galeria -->
                             </div>
                         </div>
