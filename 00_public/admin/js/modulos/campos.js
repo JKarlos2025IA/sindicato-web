@@ -28,7 +28,6 @@ function slug(texto) {
 function initSubTabs() {
     const tabs = {
         'subtab-socio-afiliados': 'panel-socio-afiliados',
-        'subtab-socio-pendientes': 'panel-socio-pendientes',
         'subtab-socio-campos': 'panel-socio-campos',
         'subtab-socio-campanas': 'panel-socio-campanas'
     };
@@ -49,8 +48,6 @@ function initSubTabs() {
             });
             const panel = document.getElementById(tabs[id]);
             if (panel) panel.classList.remove('hidden');
-            // Cargar pendientes al abrir esa pestana
-            if (id === 'subtab-socio-pendientes') cargarPendientes();
             if (id === 'subtab-socio-campanas') { cargarCampanas(); cargarCamposChecklist(); }
         });
     });
@@ -521,101 +518,6 @@ function initFormCampana() {
 }
 
 // ============================================================
-// PENDIENTES DE APROBACION
-// ============================================================
-async function cargarPendientes() {
-    const tbody = document.getElementById('lista-pendientes');
-    const countEl = document.getElementById('pendientes-count');
-    const badgeEl = document.getElementById('badge-pendientes');
-    if (!tbody) return;
-
-    tbody.innerHTML = '<tr><td colspan="7" class="px-3 py-4 text-center text-gray-400">Cargando...</td></tr>';
-    try {
-        const q = await getDocs(collection(db, 'socios'));
-        const pendientes = [];
-        q.forEach(d => {
-            const data = d.data();
-            if (data.estado_registro === 'pendiente') pendientes.push({ id: d.id, ...data });
-        });
-        pendientes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-        if (countEl) countEl.textContent = pendientes.length;
-        if (badgeEl) {
-            if (pendientes.length > 0) { badgeEl.textContent = pendientes.length; badgeEl.classList.remove('hidden'); }
-            else badgeEl.classList.add('hidden');
-        }
-
-        if (pendientes.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="px-3 py-4 text-center text-gray-500">No hay solicitudes pendientes.</td></tr>';
-            return;
-        }
-
-        let html = '';
-        pendientes.forEach(p => {
-            const fecha = p.timestamp ? new Date(p.timestamp).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
-            html += `
-            <tr class="hover:bg-amber-50 transition border-b border-gray-100 bg-amber-50/30">
-                <td class="px-3 py-2 font-mono text-xs font-bold text-blue-600">${p.codigo || '-'}</td>
-                <td class="px-3 py-2 font-medium text-gray-800 text-xs">${p.nombre || '-'}</td>
-                <td class="px-3 py-2 text-xs text-gray-500">${p.dni || '-'}</td>
-                <td class="px-3 py-2 text-xs text-gray-500 max-w-[150px] truncate" title="${p.email || ''}">${p.email || '-'}</td>
-                <td class="px-3 py-2 text-xs text-gray-500">${p.telefono || '-'}</td>
-                <td class="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">${fecha}</td>
-                <td class="px-3 py-2 text-right space-x-1 whitespace-nowrap">
-                    <button class="text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-2 py-1 rounded text-xs font-bold btn-aprobar-pendiente" data-id="${p.id}">Aprobar</button>
-                    <button class="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs font-bold btn-rechazar-pendiente" data-id="${p.id}">Rechazar</button>
-                </td>
-            </tr>`;
-        });
-        tbody.innerHTML = html;
-
-        document.querySelectorAll('.btn-aprobar-pendiente').forEach(btn => {
-            btn.addEventListener('click', async e => {
-                const id = e.currentTarget.getAttribute('data-id');
-                if (!confirm('Aprobar este afiliado? Pasa a la lista activa.')) return;
-                try {
-                    await updateDoc(doc(db, 'socios', id), { activo: true, estado_registro: 'aprobado', timestamp: Date.now() });
-                    await cargarPendientes();
-                    if (window.cargarSocios) window.cargarSocios();
-                } catch (err) { alert('Error: ' + err.message); }
-            });
-        });
-
-        document.querySelectorAll('.btn-rechazar-pendiente').forEach(btn => {
-            btn.addEventListener('click', async e => {
-                const id = e.currentTarget.getAttribute('data-id');
-                if (!confirm('Rechazar esta solicitud? Se eliminara del sistema.')) return;
-                try {
-                    await deleteDoc(doc(db, 'socios', id));
-                    await cargarPendientes();
-                } catch (err) { alert('Error: ' + err.message); }
-            });
-        });
-
-    } catch (err) { console.error('Error cargando pendientes:', err); tbody.innerHTML = '<tr><td colspan="7" class="px-3 py-4 text-center text-red-500">Error.</td></tr>'; }
-}
-
-window._cargarPendientes = cargarPendientes;
-
-window._aprobarTodosPendientes = async function () {
-    try {
-        const q = await getDocs(collection(db, 'socios'));
-        const batch = writeBatch(db);
-        let count = 0;
-        q.forEach(d => {
-            const data = d.data();
-            if (data.estado_registro === 'pendiente') { batch.update(d.ref, { activo: true, estado_registro: 'aprobado', timestamp: Date.now() }); count++; }
-        });
-        if (count === 0) { alert('No hay pendientes para aprobar.'); return; }
-        if (!confirm('Aprobar los ' + count + ' afiliados pendientes?')) return;
-        await batch.commit();
-        alert(count + ' afiliados aprobados.');
-        await cargarPendientes();
-        if (window.cargarSocios) window.cargarSocios();
-    } catch (err) { alert('Error: ' + err.message); }
-};
-
-// ============================================================
 // INIT PRINCIPAL
 // ============================================================
 export function initCamposExtra() {
@@ -642,10 +544,6 @@ export function initCamposExtra() {
         if (panelCamp && !panelCamp.classList.contains('hidden')) {
             cargarCampanas();
             cargarCamposChecklist();
-        }
-        const panelPend = document.getElementById('panel-socio-pendientes');
-        if (panelPend && !panelPend.classList.contains('hidden')) {
-            cargarPendientes();
         }
     });
 

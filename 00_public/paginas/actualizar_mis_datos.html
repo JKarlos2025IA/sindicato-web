@@ -134,7 +134,7 @@
             }
             esNuevoRegistro = true;
             nombreNuevoRegistro = nombre;
-            socioData = { nombre, codigo: 'PENDIENTE', dni: '', uo: '', cargo: '', fecha: '', email: '', telefono: '', activo: false, estado_registro: 'pendiente' };
+            socioData = { nombre, codigo: 'PENDIENTE', dni: '', uo: '', cargo: '', fecha: '', email: '', telefono: '', activo: false };
             socioDocId = null;
 
             await cargarCampanaYCampos();
@@ -222,7 +222,7 @@
                         // Ir directo al formulario completo sin pedir nombre primero
                         esNuevoRegistro = true;
                         nombreNuevoRegistro = '';
-                        socioData = { nombre: '', codigo: 'PENDIENTE', dni: '', uo: '', cargo: '', fecha: '', email: '', telefono: '', activo: false, estado_registro: 'pendiente' };
+                        socioData = { nombre: '', codigo: 'PENDIENTE', dni: '', uo: '', cargo: '', fecha: '', email: '', telefono: '', activo: false };
                         socioDocId = null;
                         document.getElementById('paso-codigo').classList.add('hidden');
                         document.getElementById('paso-formulario').classList.remove('hidden');
@@ -442,8 +442,6 @@
                 if (esNuevoRegistro) {
                     updateData.nombre = nombreNuevoRegistro;
                     updateData.activo = false;
-                    updateData.estado_registro = 'pendiente';
-                    // Generar codigo
                     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                     let code = '';
                     for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
