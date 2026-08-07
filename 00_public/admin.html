@@ -413,6 +413,7 @@
                                     <span class="block font-bold">${data.titulo || 'Sin título'}</span>
                                     <span class="text-xs text-gray-500 block max-w-xs truncate">${data.descripcion || '-'}</span>
                                     <span class="text-xs text-blue-500 mt-1 block"><a href="${data.url}" target="_blank" class="hover:underline flex items-center"><ion-icon name="link-outline" class="mr-1"></ion-icon> Ver imagen</a></span>
+                                    ${data.link ? `<span class="text-xs text-green-600 mt-0.5 block"><ion-icon name="link" class="mr-1 align-text-bottom"></ion-icon>${data.link}</span>` : ''}
                                 </div>
                             </div>
                         </td>
@@ -420,6 +421,9 @@
                             <input type="number" class="w-20 p-2 border border-gray-300 rounded text-center input-orden focus:ring-2 focus:ring-blue-500 outline-none" data-id="${data.id}" value="${data.orden}">
                         </td>
                         <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                            <button class="text-amber-600 hover:text-white hover:bg-amber-600 bg-amber-50 px-3 py-1.5 rounded transition btn-editar-portada font-semibold border border-amber-200 hover:border-amber-600" data-id="${data.id}">
+                                <ion-icon name="create-outline" class="mr-1 align-text-bottom"></ion-icon> Editar
+                            </button>
                             <button class="text-blue-600 hover:text-white hover:bg-blue-600 bg-blue-50 px-3 py-1.5 rounded transition btn-guardar-orden font-semibold border border-blue-200 hover:border-blue-600" data-id="${data.id}">
                                 <ion-icon name="save-outline" class="mr-1 align-text-bottom"></ion-icon> Orden
                             </button>
@@ -470,6 +474,23 @@
                             target.innerHTML = 'Error';
                             target.disabled = false;
                         }
+                    });
+                });
+
+                document.querySelectorAll('.btn-editar-portada').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-id');
+                        const data = portadas.find(p => p.id === id);
+                        if (!data) return;
+                        document.getElementById('portada-titulo').value = data.titulo || '';
+                        document.getElementById('portada-desc').value = data.descripcion || '';
+                        document.getElementById('portada-link').value = data.link || '';
+                        document.getElementById('portada-orden').value = data.orden || 1;
+                        document.getElementById('portada-ajustar').checked = data.objectFit === 'contain';
+                        document.getElementById('portada-archivo').required = false;
+                        document.getElementById('btn-submit-portada').innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Actualizar Portada';
+                        document.getElementById('btn-submit-portada').dataset.editId = id;
+                        document.getElementById('form-portada').scrollIntoView({ behavior: 'smooth' });
                     });
                 });
 
@@ -1114,41 +1135,52 @@
                     const orden = parseInt(document.getElementById('portada-orden').value) || 0;
                     const file = document.getElementById('portada-archivo').files[0];
                     const btn = document.getElementById('btn-submit-portada');
+                    const editId = btn.dataset.editId;
 
-                    if (!file) return;
+                    if (!editId && !file) return;
 
                     btn.disabled = true;
-                    btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Redimensionando...';
 
                     try {
-                        const resizedFile = await resizeImage(file, 1200, 500);
-                        btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
-                        const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
-                        const storagePath = `portadas/${Date.now()}_${safeName}`;
-                        const sRef = ref(storage, storagePath);
-                        await uploadBytes(sRef, resizedFile);
-                        const url = await getDownloadURL(sRef);
-
-                        await addDoc(collection(db, "portadas"), {
+                        const data = {
                             titulo: titulo,
                             descripcion: desc,
                             link: link || '',
                             orden: orden,
                             objectFit: ajustar ? 'contain' : 'cover',
-                            url: url,
-                            storagePath: storagePath,
                             timestamp: Date.now()
-                        });
+                        };
+
+                        if (file) {
+                            btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Redimensionando...';
+                            const resizedFile = await resizeImage(file, 1200, 500);
+                            btn.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Subiendo...';
+                            const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, "_");
+                            const storagePath = `portadas/${Date.now()}_${safeName}`;
+                            const sRef = ref(storage, storagePath);
+                            await uploadBytes(sRef, resizedFile);
+                            data.url = await getDownloadURL(sRef);
+                            data.storagePath = storagePath;
+                        }
+
+                        if (editId) {
+                            await updateDoc(doc(db, "portadas", editId), data);
+                        } else {
+                            await addDoc(collection(db, "portadas"), data);
+                        }
 
                         fPortada.reset();
-                        alert('¡Portada publicada en el inicio exitosamente!');
+                        document.getElementById('portada-archivo').required = true;
+                        document.getElementById('portada-orden').value = '1';
+                        btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir y Publicar Portada';
+                        delete btn.dataset.editId;
                         await window.cargarPortadas();
                     } catch (err) {
-                        alert("Error: " + (err.message || err) + "\n\nVerifica las reglas de Storage en Firebase Console.");
+                        alert("Error: " + (err.message || err));
                         console.error(err);
                     } finally {
                         btn.disabled = false;
-                        btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir y Publicar Portada';
+                        if (!editId) btn.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Subir y Publicar Portada';
                     }
                 });
             }
