@@ -282,18 +282,25 @@
         const db = getFirestore(app);
 
         // ──────────────────────────────────────────────
-        // SECCION 1: Anuncio Principal
-        // Coleccion: "anuncios" (doc con: titulo, descripcion, imagen_url, link_url, activo)
+        // SECCION 1: Anuncios Rotativos
+        // Coleccion: "anuncios" — muestra todos los activos con rotacion automatica
         // ──────────────────────────────────────────────
+        let anunciosCache = [];
+        let idxAnuncio = 0;
+        let timerAnuncio = null;
+
         async function cargarAnuncio() {
             const contenedor = document.getElementById('contenedor-anuncio');
             if (!contenedor) return;
             try {
                 const q = await getDocs(query(collection(db, "anuncios"), orderBy("timestamp", "desc")));
-                const anuncios = [];
-                q.forEach(doc => anuncios.push(doc.data()));
-                const activo = anuncios.find(a => a.activo !== false);
-                if (!activo) {
+                anunciosCache = [];
+                q.forEach(doc => {
+                    const d = doc.data();
+                    if (d.activo !== false) anunciosCache.push(d);
+                });
+
+                if (anunciosCache.length === 0) {
                     contenedor.innerHTML = `
                         <div class="anuncio-hero p-6 md:p-10">
                             <div class="relative z-10 text-center">
@@ -304,19 +311,47 @@
                         </div>`;
                     return;
                 }
-                contenedor.innerHTML = `
-                    <div class="anuncio-hero p-6 md:p-10">
-                        <div class="relative z-10">
-                            <span class="inline-block bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">📢 ${activo.etiqueta || 'Anuncio'}</span>
-                            <h3 class="text-2xl md:text-3xl font-extrabold text-white mb-3">${activo.titulo}</h3>
-                            ${activo.descripcion ? `<p class="text-blue-200 text-sm md:text-base mb-5 max-w-2xl">${activo.descripcion}</p>` : ''}
-                            ${activo.link_url ? `<a href="${activo.link_url}" class="btn-orange" style="background:#fff;color:#1e3a8a;">${activo.link_texto || 'Ver mas'}</a>` : ''}
-                        </div>
-                    </div>`;
+
+                idxAnuncio = 0;
+                renderAnuncio(0);
+
+                if (anunciosCache.length > 1) {
+                    clearInterval(timerAnuncio);
+                    timerAnuncio = setInterval(() => {
+                        idxAnuncio = (idxAnuncio + 1) % anunciosCache.length;
+                        renderAnuncio(idxAnuncio);
+                    }, 5000);
+                }
             } catch (e) {
                 console.error("Error cargando anuncio:", e);
                 contenedor.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">Anuncio no disponible.</p>';
             }
+        }
+
+        function renderAnuncio(idx) {
+            const contenedor = document.getElementById('contenedor-anuncio');
+            if (!contenedor || idx >= anunciosCache.length) return;
+            const a = anunciosCache[idx];
+
+            let dotsHtml = '';
+            if (anunciosCache.length > 1) {
+                dotsHtml = '<div class="flex justify-center gap-1.5 mt-4 relative z-10">';
+                for (let i = 0; i < anunciosCache.length; i++) {
+                    dotsHtml += `<button class="w-2.5 h-2.5 rounded-full transition-all ${i === idx ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/60'}" onclick="event.stopPropagation(); idxAnuncio=${i}; renderAnuncio(${i}); clearInterval(timerAnuncio); if(anunciosCache.length>1) timerAnuncio=setInterval(()=>{idxAnuncio=(idxAnuncio+1)%anunciosCache.length;renderAnuncio(idxAnuncio);},5000);"></button>`;
+                }
+                dotsHtml += '</div>';
+            }
+
+            contenedor.innerHTML = `
+                <div class="anuncio-hero p-6 md:p-10">
+                    <div class="relative z-10">
+                        <span class="inline-block bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">📢 ${a.etiqueta || 'Anuncio'}</span>
+                        <h3 class="text-2xl md:text-3xl font-extrabold text-white mb-3">${a.titulo}</h3>
+                        ${a.descripcion ? `<p class="text-blue-200 text-sm md:text-base mb-5 max-w-2xl">${a.descripcion}</p>` : ''}
+                        ${a.link_url ? `<a href="${a.link_url}" target="_blank" class="btn-orange" style="background:#fff;color:#1e3a8a;">${a.link_texto || 'Ver mas'}</a>` : ''}
+                    </div>
+                    ${dotsHtml}
+                </div>`;
         }
 
         // ──────────────────────────────────────────────

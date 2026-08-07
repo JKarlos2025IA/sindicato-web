@@ -873,46 +873,122 @@
 
         // === LÓGICA DE BANNER DE ANUNCIOS ===
         window.cargarAnuncioAdmin = async function () {
+            const lista = document.getElementById('lista-anuncios-admin');
+            if (!lista) return;
             try {
-                const qConfig = await getDocs(collection(db, "config_site"));
-                qConfig.forEach(docSnap => {
-                    const cfg = docSnap.data();
-                    document.getElementById('anuncio-activo').checked = cfg.anuncio_activo || false;
-                    document.getElementById('anuncio-texto-input').value = cfg.anuncio_texto || '';
-                    document.getElementById('anuncio-url-input').value = cfg.anuncio_url || '';
+                lista.innerHTML = '<p class="text-center text-gray-400 py-4">Cargando...</p>';
+                const q = await getDocs(query(collection(db, "anuncios"), orderBy("timestamp", "desc")));
+                const anuncios = [];
+                q.forEach(doc => anuncios.push({ id: doc.id, ...doc.data() }));
+
+                if (anuncios.length === 0) {
+                    lista.innerHTML = '<p class="text-gray-500 text-center italic border-2 border-dashed border-gray-200 py-8 rounded-lg">No hay anuncios. Crea el primero arriba.</p>';
+                    return;
+                }
+
+                let html = '<div class="space-y-3">';
+                anuncios.forEach(a => {
+                    const activo = a.activo !== false;
+                    html += `
+                        <div class="flex items-center justify-between border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition ${activo ? 'border-l-4 border-l-green-500' : 'opacity-60'}">
+                            <div class="flex-1 min-w-0 mr-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-gray-800 truncate">${a.titulo || 'Sin título'}</span>
+                                    ${activo ? '<span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-bold">Activo</span>' : '<span class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">Inactivo</span>'}
+                                </div>
+                                ${a.descripcion ? `<p class="text-sm text-gray-500 truncate mt-1">${a.descripcion}</p>` : ''}
+                                ${a.link_url ? `<p class="text-xs text-blue-500 truncate mt-1">${a.link_url}</p>` : ''}
+                            </div>
+                            <div class="flex gap-1 flex-shrink-0">
+                                <button class="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded text-xs font-bold btn-editar-anuncio" data-id="${a.id}">Editar</button>
+                                <button class="text-red-500 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded text-xs font-bold btn-eliminar-anuncio" data-id="${a.id}">Eliminar</button>
+                            </div>
+                        </div>`;
                 });
-            } catch (error) {
-                console.error("Error cargando anuncio:", error);
+                html += '</div>';
+                lista.innerHTML = html;
+
+                // Eventos editar
+                document.querySelectorAll('.btn-editar-anuncio').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-id');
+                        const a = anuncios.find(x => x.id === id);
+                        if (!a) return;
+                        document.getElementById('anuncio-edit-id').value = id;
+                        document.getElementById('anuncio-titulo').value = a.titulo || '';
+                        document.getElementById('anuncio-etiqueta').value = a.etiqueta || '';
+                        document.getElementById('anuncio-descripcion').value = a.descripcion || '';
+                        document.getElementById('anuncio-link-url').value = a.link_url || '';
+                        document.getElementById('anuncio-link-texto').value = a.link_texto || 'Ver más →';
+                        document.getElementById('anuncio-activo').checked = a.activo !== false;
+                        document.getElementById('form-anuncio-title').textContent = 'Editar Anuncio';
+                        document.getElementById('btn-submit-anuncio').innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Actualizar';
+                        document.getElementById('btn-cancel-anuncio').classList.remove('hidden');
+                        document.getElementById('form-anuncio').scrollIntoView({ behavior: 'smooth' });
+                    });
+                });
+
+                // Eventos eliminar
+                document.querySelectorAll('.btn-eliminar-anuncio').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (!confirm('¿Eliminar este anuncio?')) return;
+                        await deleteDoc(doc(db, "anuncios", btn.getAttribute('data-id')));
+                        await window.cargarAnuncioAdmin();
+                    });
+                });
+
+            } catch (err) {
+                console.error(err);
+                lista.innerHTML = '<p class="text-red-500 text-center py-4">Error cargando anuncios.</p>';
             }
         };
 
         const formAnuncio = document.getElementById('form-anuncio');
         if (formAnuncio) {
+            const btnCancel = document.getElementById('btn-cancel-anuncio');
+            btnCancel?.addEventListener('click', () => {
+                formAnuncio.reset();
+                document.getElementById('anuncio-edit-id').value = '';
+                document.getElementById('form-anuncio-title').textContent = 'Nuevo Anuncio';
+                document.getElementById('btn-submit-anuncio').innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Guardar Anuncio';
+                btnCancel.classList.add('hidden');
+            });
+
             formAnuncio.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const editId = document.getElementById('anuncio-edit-id').value;
+                const titulo = document.getElementById('anuncio-titulo').value.trim();
+                const etiqueta = document.getElementById('anuncio-etiqueta').value.trim();
+                const descripcion = document.getElementById('anuncio-descripcion').value.trim();
+                const link_url = document.getElementById('anuncio-link-url').value.trim();
+                const link_texto = document.getElementById('anuncio-link-texto').value.trim();
                 const activo = document.getElementById('anuncio-activo').checked;
-                const texto = document.getElementById('anuncio-texto-input').value.trim();
-                const url = document.getElementById('anuncio-url-input').value.trim();
                 const btn = document.getElementById('btn-submit-anuncio');
+
+                if (!titulo) return;
                 btn.disabled = true;
                 btn.innerHTML = '<ion-icon name="sync" class="animate-spin mr-2"></ion-icon> Guardando...';
 
                 try {
-                    const qConfig = await getDocs(collection(db, "config_site"));
-                    let configId = null;
-                    qConfig.forEach(docSnap => { configId = docSnap.id; });
-                    const data = { anuncio_activo: activo, anuncio_texto: texto, anuncio_url: url, updated: Date.now() };
-                    if (configId) {
-                        await updateDoc(doc(db, "config_site", configId), data);
+                    const data = { titulo, etiqueta, descripcion, link_url, link_texto, activo, timestamp: Date.now() };
+                    if (editId) {
+                        await updateDoc(doc(db, "anuncios", editId), data);
                     } else {
-                        await addDoc(collection(db, "config_site"), data);
+                        await addDoc(collection(db, "anuncios"), data);
                     }
-                    alert('Anuncio guardado. La página pública se actualizará al recargar.');
+                    formAnuncio.reset();
+                    document.getElementById('anuncio-edit-id').value = '';
+                    document.getElementById('form-anuncio-title').textContent = 'Nuevo Anuncio';
+                    document.getElementById('btn-submit-anuncio').innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Guardar Anuncio';
+                    btnCancel.classList.add('hidden');
+                    await window.cargarAnuncioAdmin();
                 } catch (err) {
                     alert('Error al guardar: ' + err.message);
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Guardar Anuncio';
+                    btn.innerHTML = editId
+                        ? '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Actualizar'
+                        : '<ion-icon name="save" class="mr-2 text-xl"></ion-icon> Guardar Anuncio';
                 }
             });
         }
@@ -2079,51 +2155,86 @@
                         <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
                             <div class="relative z-10">
                                 <h3 class="text-2xl font-black mb-2">Banner de Anuncios</h3>
-                                <p class="text-amber-100">Muestra un aviso importante en la página principal. Ideal para comunicar asambleas, eventos o noticias urgentes.</p>
+                                <p class="text-amber-100">Crea múltiples anuncios. Los activos se mostrarán de forma rotativa en la página principal y en las secciones de cada secretaría.</p>
                             </div>
                             <ion-icon name="megaphone" class="absolute -right-6 -bottom-6 text-[10rem] text-white opacity-10 z-0"></ion-icon>
                         </div>
 
+                        <!-- Crear Anuncio -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
                                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <ion-icon name="create" class="text-amber-500 mr-2 text-xl"></ion-icon>
-                                    Configurar Anuncio
+                                    <ion-icon name="add-circle" class="text-amber-500 mr-2 text-xl"></ion-icon>
+                                    <span id="form-anuncio-title">Nuevo Anuncio</span>
                                 </h3>
                             </div>
                             <form id="form-anuncio" class="p-6 space-y-5">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="anuncio-activo" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                                        <span class="ms-3 text-sm font-bold text-gray-700">Anuncio activo</span>
-                                    </label>
+                                <input type="hidden" id="anuncio-edit-id">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Título</label>
+                                        <input type="text" id="anuncio-titulo" required placeholder="Ej: Asamblea General"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Etiqueta</label>
+                                        <input type="text" id="anuncio-etiqueta" placeholder="Ej: 📢 Urgente"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Texto / Descripción</label>
+                                        <input type="text" id="anuncio-descripcion" placeholder="Descripción del anuncio..."
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Link (opcional)</label>
+                                        <input type="text" id="anuncio-link-url" placeholder="https://..."
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Texto del botón</label>
+                                        <input type="text" id="anuncio-link-texto" placeholder="Ej: Ver más →" value="Ver más →"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div class="flex items-end gap-3">
+                                        <label class="relative inline-flex items-center cursor-pointer mb-3">
+                                            <input type="checkbox" id="anuncio-activo" class="sr-only peer" checked>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                                            <span class="ms-3 text-sm font-bold text-gray-700">Activo</span>
+                                        </label>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Texto del anuncio</label>
-                                    <input type="text" id="anuncio-texto-input" placeholder="Ej: Próxima Asamblea General — Viernes 15 de Junio"
-                                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Enlace del botón (opcional)</label>
-                                    <input type="text" id="anuncio-url-input" placeholder="Ej: https://drive.google.com/..."
-                                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-500 bg-white shadow-sm transition outline-none">
-                                    <p class="text-xs text-gray-400 mt-1">Si dejas vacío, no se muestra botón.</p>
-                                </div>
-                                <div class="pt-4 border-t border-gray-100">
+                                <div class="pt-4 border-t border-gray-100 flex gap-3">
                                     <button type="submit" id="btn-submit-anuncio"
                                         class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-8 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
                                         <ion-icon name="save" class="mr-2 text-xl"></ion-icon>
                                         Guardar Anuncio
                                     </button>
+                                    <button type="button" id="btn-cancel-anuncio"
+                                        class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3.5 px-6 rounded-lg transition-all">
+                                        Cancelar
+                                    </button>
                                 </div>
                             </form>
                         </div>
 
-                        <div id="anuncio-preview" class="bg-blue-900 text-white rounded-xl p-6 text-center hidden">
-                            <p class="text-sm text-blue-200 mb-1">Vista previa en la web:</p>
-                            <p id="anuncio-preview-texto" class="text-xl font-bold">📢 </p>
+                        <!-- Listado de Anuncios -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="list" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Anuncios Creados
+                                </h3>
+                                <button onclick="window.cargarAnuncioAdmin()"
+                                    class="text-sm font-semibold text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded flex items-center transition">
+                                    <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                </button>
+                            </div>
+                            <div id="lista-anuncios-admin" class="p-6">
+                                <p class="text-center text-gray-400 py-4">Cargando...</p>
+                            </div>
                         </div>
+
                     </div>
 
                     <!-- =================================== -->

@@ -134,16 +134,20 @@
     <div id="snowfall-container" class="snowfall fixed inset-0 pointer-events-none z-[998]"></div>
 
     <!-- Banner de Anuncios -->
-    <div id="anuncio-banner" class="hidden bg-gradient-to-r from-blue-900 to-blue-700 text-white py-4 px-4 text-center shadow-md relative z-20">
-        <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-4">
+    <div id="anuncio-banner" class="hidden bg-gradient-to-r from-blue-900 to-blue-700 text-white py-4 px-4 text-center shadow-md relative z-20 transition-opacity duration-500">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-4 relative">
             <div class="flex items-center gap-3">
                 <span class="text-2xl">📢</span>
-                <p id="anuncio-texto" class="font-semibold text-lg"></p>
+                <div>
+                    <p id="anuncio-texto" class="font-semibold text-lg"></p>
+                    <p id="anuncio-desc" class="text-sm text-blue-200 hidden"></p>
+                </div>
             </div>
-            <a id="anuncio-boton" href="#" target="_blank" class="hidden bg-white text-blue-900 font-bold px-6 py-2 rounded-full hover:bg-blue-50 transition-all shadow-lg text-sm">
+            <a id="anuncio-boton" href="#" target="_blank" class="hidden bg-white text-blue-900 font-bold px-6 py-2 rounded-full hover:bg-blue-50 transition-all shadow-lg text-sm whitespace-nowrap">
                 Ver más →
             </a>
         </div>
+        <div id="anuncio-dots" class="flex justify-center gap-1.5 mt-2"></div>
     </div>
 
     <!-- Birthday Banner -->
@@ -376,23 +380,77 @@
                     if (cfg.ubicacion) document.getElementById('footer-ubicacion').textContent = cfg.ubicacion;
                     if (cfg.email) document.getElementById('footer-email').textContent = cfg.email;
                     if (cfg.gestion) document.getElementById('footer-gestion').textContent = 'Gestión ' + cfg.gestion;
-                    if (cfg.anuncio_activo && cfg.anuncio_texto) {
-                        const banner = document.getElementById('anuncio-banner');
-                        if (banner) banner.classList.remove('hidden');
-                        document.getElementById('anuncio-texto').textContent = cfg.anuncio_texto;
-                        if (cfg.anuncio_url) {
-                            const btn = document.getElementById('anuncio-boton');
-                            btn.href = cfg.anuncio_url;
-                            btn.classList.remove('hidden');
-                        }
-                    }
                 });
             } catch (error) {
                 console.error("Error cargando config:", error);
             }
         }
 
-        // === CARGAR SECRETARÍAS DINÁMICAS ===
+        // === CARGAR ANUNCIOS ROTATIVOS ===
+        let anunciosActivos = [];
+        let anuncioActual = 0;
+        let anuncioTimer = null;
+
+        async function cargarAnunciosRotativos() {
+            try {
+                const q = await getDocs(query(collection(db, "anuncios"), orderBy("timestamp", "desc")));
+                anunciosActivos = [];
+                q.forEach(doc => {
+                    const d = doc.data();
+                    if (d.activo !== false) anunciosActivos.push(d);
+                });
+
+                const banner = document.getElementById('anuncio-banner');
+                if (!banner || anunciosActivos.length === 0) return;
+
+                banner.classList.remove('hidden');
+                mostrarAnuncio(0);
+
+                if (anunciosActivos.length > 1) {
+                    clearInterval(anuncioTimer);
+                    anuncioTimer = setInterval(() => {
+                        anuncioActual = (anuncioActual + 1) % anunciosActivos.length;
+                        mostrarAnuncio(anuncioActual);
+                    }, 5000);
+                }
+            } catch (e) { console.error("Error anuncios:", e); }
+        }
+
+        function mostrarAnuncio(idx) {
+            if (idx >= anunciosActivos.length) return;
+            const a = anunciosActivos[idx];
+            anuncioActual = idx;
+
+            document.getElementById('anuncio-texto').textContent = a.titulo || '';
+            const descEl = document.getElementById('anuncio-desc');
+            if (a.descripcion) {
+                descEl.textContent = a.descripcion;
+                descEl.classList.remove('hidden');
+            } else {
+                descEl.classList.add('hidden');
+            }
+
+            const btn = document.getElementById('anuncio-boton');
+            if (a.link_url) {
+                btn.href = a.link_url;
+                btn.textContent = a.link_texto || 'Ver más →';
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+
+            // Dots
+            const dots = document.getElementById('anuncio-dots');
+            if (anunciosActivos.length > 1) {
+                let html = '';
+                for (let i = 0; i < anunciosActivos.length; i++) {
+                    html += `<button class="w-2 h-2 rounded-full transition-all ${i === idx ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/60'}" onclick="mostrarAnuncio(${i}); clearInterval(anuncioTimer); anuncioTimer = setInterval(() => { anuncioActual = (anuncioActual + 1) % anunciosActivos.length; mostrarAnuncio(anuncioActual); }, 5000);"></button>`;
+                }
+                dots.innerHTML = html;
+            } else {
+                dots.innerHTML = '';
+            }
+        }
         async function cargarSecretarias() {
             const grid = document.getElementById('secretarias-grid');
             if (!grid) return;
@@ -469,6 +527,7 @@
 
         // Ejecutar cargas adicionales
         cargarConfig();
+        cargarAnunciosRotativos();
         cargarSecretarias();
         cargarTema();
         cargarEventos();
