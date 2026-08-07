@@ -302,7 +302,7 @@ async function cargarLibroGastos() {
                 <td class="p-2 text-xs text-center">${v.cantidad||''}</td>
                 <td class="p-2 text-xs text-center">${v.unidad||''}</td>
                 <td class="p-2 text-xs text-right">${(v.pu||0).toFixed(2)}</td>
-                <td class="p-2 text-xs text-right font-bold">${(v.total||0).toFixed(2)}</td>
+                <td class="p-2 text-xs text-right font-bold ${v.tipo==='GASTO' ? 'text-red-500' : 'text-blue-600'}">${v.tipo==='INGRESO' ? '+' : '-'} S/ ${Math.abs(v.total||0).toFixed(2)}</td>
                 <td class="p-2 text-xs">${v.observacion||''}</td>
                 <td class="p-2 text-xs text-center">${fichaCont}</td>
                 <td class="p-2 text-xs">${docsHTML}</td>
