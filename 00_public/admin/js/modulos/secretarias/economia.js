@@ -268,8 +268,9 @@ async function cargarLibroGastos() {
 
         tbody.innerHTML = docs.map(d => {
             const v = d.data();
-            if (v.tipo === 'INGRESO') totalIngresos += v.total || 0;
-            else totalGastos += v.total || 0;
+            const monto = Math.abs(v.total || 0);
+            if (v.tipo === 'INGRESO') totalIngresos += monto;
+            else totalGastos += monto;
             const f = v.timestamp?.toDate ? v.timestamp.toDate().toLocaleDateString('es-PE') : '';
             const tipoBadge = v.tipo === 'INGRESO'
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Ingreso</span>'
