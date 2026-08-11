@@ -74,7 +74,7 @@ export function initAuth() {
 }
 
 // --- Permisos por rol ---
-const SECCIONES_COMPARTIDAS = ['nav-inicio', 'nav-portadas', 'nav-anuncio', 'nav-eventos'];
+const SECCIONES_COMPARTIDAS = ['nav-inicio', 'nav-portadas', 'nav-anuncio', 'nav-eventos', 'nav-documentos'];
 const SECCIONES_ADMIN = ['nav-socios', 'nav-config', 'nav-tema', 'nav-descargas', 'nav-admins'];
 const MAPEO_SECRETARIA_NAV = {
     'Secretaría General': 'nav-sec-general',

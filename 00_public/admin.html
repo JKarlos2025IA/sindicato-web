@@ -12,6 +12,9 @@
     <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- docx.js + FileSaver para generacion de documentos Word -->
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
     <!-- Firebase SDKs -->
     <script type="module">
@@ -59,6 +62,7 @@
         const navEventos = document.getElementById('nav-eventos');
         const navDescargas = document.getElementById('nav-descargas');
         const navEconomia = document.getElementById('nav-economia');
+        const navDocumentos = document.getElementById('nav-documentos');
         const viewInicio = document.getElementById('view-inicio');
         const viewCultura = document.getElementById('view-cultura');
         const viewGaleria = document.getElementById('view-galeria');
@@ -71,6 +75,7 @@
         const viewEventos = document.getElementById('view-eventos');
         const viewDescargas = document.getElementById('view-descargas');
         const viewEconomia = document.getElementById('view-economia');
+        const viewDocumentos = document.getElementById('view-documentos');
         const viewTitle = document.getElementById('view-title');
         const navItems = document.querySelectorAll('.nav-menu-item');
 
@@ -224,6 +229,7 @@
             if (viewEventos) viewEventos.classList.add('hidden');
             if (viewDescargas) viewDescargas.classList.add('hidden');
             if (viewEconomia) viewEconomia.classList.add('hidden');
+            if (viewDocumentos) viewDocumentos.classList.add('hidden');
             activeView.classList.remove('hidden');
             viewTitle.textContent = title;
 
@@ -248,6 +254,7 @@
         if (navEventos) navEventos.addEventListener('click', (e) => { e.preventDefault(); switchView(navEventos, viewEventos, 'Próximos Eventos'); window.cargarEventosAdmin(); });
         if (navDescargas) navDescargas.addEventListener('click', (e) => { e.preventDefault(); switchView(navDescargas, viewDescargas, 'Registro de Descargas'); window.cargarDescargas(); });
         if (navEconomia) navEconomia.addEventListener('click', (e) => { e.preventDefault(); switchView(navEconomia, viewEconomia, 'Economia y Finanzas'); });
+        if (navDocumentos) navDocumentos.addEventListener('click', (e) => { e.preventDefault(); switchView(navDocumentos, viewDocumentos, 'Generador de Documentos'); window.cargarDocumentosOficiales(); });
         window.forceNavCultura = () => { navCultura.click(); }
 
         // === SUB-TABS ECONOMIA ===
@@ -1186,6 +1193,314 @@
             }
         }
 
+        // ============================================================
+        // GENERADOR DE DOCUMENTOS OFICIALES (Cartas, Oficios, Comunicados)
+        // ============================================================
+        const SIGLAS = {
+            'Secretaria General':             { sigla: 'SG',  persona: 'Pavel Ordonez Escarza' },
+            'Sub-Secretaria General':         { sigla: 'SSG', persona: 'Katty Candy Jara Jancco' },
+            'Organizacion':                   { sigla: 'SO',  persona: 'Juan Alfredo Tisza Astete' },
+            'Defensa':                        { sigla: 'SD',  persona: 'Richard Trejo Silva' },
+            'Economia':                       { sigla: 'SE',  persona: 'Ricardo Molleapaza Calderon' },
+            'Actas y Archivo':                { sigla: 'SAA', persona: 'Lucy Alvarez Herrera' },
+            'Control y Disciplina':           { sigla: 'SCD', persona: 'Antuaned Maria Montoya La Rosa' },
+            'Prensa y Propaganda':            { sigla: 'SPP', persona: 'Jimmy Geraldo Chalco Bustinza' },
+            'Cultura y Deporte':              { sigla: 'SCyD', persona: 'Juan Carlos Montenegro Gonzales' },
+            'Bienestar Social':               { sigla: 'SBS', persona: 'Gissela Margarita Silva Macetas' },
+        };
+
+        const TIPOS_DOC = { carta: { label: 'CARTA', prefijo: 'CARTA' }, oficio: { label: 'OFICIO', prefijo: 'OFICIO' }, comunicado: { label: 'COMUNICADO', prefijo: 'COM' } };
+
+        async function cargarSelectSecretarias() {
+            try {
+                const q = await getDocs(collection(db, 'secretarias'));
+                const secretarias = [];
+                q.forEach(d => {
+                    const data = d.data();
+                    secretarias.push({ nombre: data.nombre, titular: data.titular });
+                });
+                secretarias.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                const selects = [document.getElementById('doc-oficial-de'), document.getElementById('doc-oficial-para')];
+                selects.forEach(sel => {
+                    if (!sel) return;
+                    sel.innerHTML = '<option value="">Seleccionar...</option>';
+                    secretarias.forEach(s => {
+                        const sigla = SIGLAS[s.nombre] ? SIGLAS[s.nombre].sigla : '';
+                        sel.innerHTML += '<option value="' + s.nombre + '">' + s.nombre + ' (' + sigla + ') - ' + (s.titular||'') + '</option>';
+                    });
+                });
+            } catch (e) { console.warn('Error cargando secretarias:', e); }
+        }
+
+        function formatearNumeroDoc(tipo, sigla, anio, num) {
+            const pref = TIPOS_DOC[tipo] ? TIPOS_DOC[tipo].prefijo : tipo.toUpperCase();
+            return pref + ' N.° ' + String(num).padStart(3, '0') + '-' + anio + '-SIUTCASJNJ/' + sigla;
+        }
+
+        async function siguienteNumero(tipo, anio) {
+            try {
+                const q = query(collection(db, 'documentos_oficiales'), orderBy('timestamp', 'desc'));
+                const snap = await getDocs(q);
+                let maxNum = 0;
+                snap.forEach(d => { const data = d.data(); if (data.tipo === tipo && data.anio === anio && data.numeroSecuencial) maxNum = Math.max(maxNum, data.numeroSecuencial); });
+                return maxNum + 1;
+            } catch (e) { return 1; }
+        }
+
+        async function getLogoUint8() {
+            try { const resp = await fetch('docs/img/logo_new.png'); if (!resp.ok) throw new Error('no logo'); const buf = await resp.arrayBuffer(); return new Uint8Array(buf); } catch (e) { return null; }
+        }
+
+        async function generarBlobDocx(tipo, datos) {
+            const { Document, Packer, Paragraph, TextRun, Header, Footer, AlignmentType, BorderStyle } = docx;
+            const tipoInfo = TIPOS_DOC[tipo];
+            const siglaDe = (SIGLAS[datos.deSecretario] && SIGLAS[datos.deSecretario].sigla) || '';
+            const siglaPara = (SIGLAS[datos.paraSecretario] && SIGLAS[datos.paraSecretario].sigla) || '';
+            const AZUL = '#1e3a8a', DORADO = '#c9a84c', GRIS = '#374151', GRIS_CLARO = '#6b7280';
+
+            const header = new Header({
+                children: [
+                    new Paragraph({
+                        children: [new TextRun({ text: 'SIUTCASJNJ', bold: true, size: 26, font: 'Arial', color: 'FFFFFF' })],
+                        shading: { type: 'solid', color: '0a1628' },
+                        border: { bottom: { color: DORADO, style: BorderStyle.SINGLE, size: 8, space: 1 } },
+                        spacing: { before: 0, after: 80 },
+                    }),
+                    new Paragraph({
+                        children: [new TextRun({ text: 'SINDICATO UNICO DE TRABAJADORES CAS - JNJ', size: 14, font: 'Arial', color: '93A3C4' })],
+                        spacing: { after: 60 },
+                    }),
+                    new Paragraph({
+                        children: [new TextRun({ text: tipoInfo.label + ' OFICIAL', bold: true, size: 20, font: 'Arial', color: DORADO })],
+                        alignment: AlignmentType.RIGHT, spacing: { after: 120 },
+                    }),
+                    new Paragraph({
+                        children: [new TextRun({ text: datos.numero, bold: true, size: 22, font: 'Arial', color: AZUL })],
+                        alignment: AlignmentType.CENTER, spacing: { after: 160 },
+                        border: { bottom: { color: DORADO, style: BorderStyle.SINGLE, size: 4, space: 8 } },
+                    }),
+                ],
+            });
+
+            const footer = new Footer({
+                children: [
+                    new Paragraph({
+                        children: [
+                            new TextRun({ text: 'GESTION 2026 - 2028', size: 16, font: 'Arial', color: '94A3B8' }),
+                            new TextRun({ text: '    |    ', size: 16, font: 'Arial', color: '94A3B8' }),
+                            new TextRun({ text: 'sindicatocasjnj.com', size: 16, font: 'Arial', color: '94A3B8' }),
+                        ],
+                        alignment: AlignmentType.CENTER,
+                        border: { top: { color: 'E2E8F0', style: BorderStyle.SINGLE, size: 2, space: 4 } },
+                    }),
+                ],
+            });
+
+            const children = [];
+            const addParrafo = (texto, opts = {}) => {
+                children.push(new Paragraph({
+                    children: [new TextRun({ text: texto, size: 22, font: 'Arial', color: opts.color || GRIS, bold: !!opts.bold })],
+                    spacing: { before: opts.before || 0, after: opts.after || 60, line: opts.line || 320 },
+                    alignment: opts.align || AlignmentType.LEFT,
+                    border: opts.border || undefined,
+                }));
+            };
+
+            if (tipo === 'carta') {
+                addParrafo(datos.lugar + ', ' + new Date(datos.fecha+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'}), {after:200});
+                addParrafo('Senor(a):', {bold:true,after:40});
+                addParrafo(datos.paraPersona || datos.paraSecretario || '', {bold:true,after:40});
+                if (datos.paraSecretario) addParrafo(datos.paraSecretario, {color:GRIS_CLARO,after:200});
+                addParrafo('Presente. -', {after:200});
+                addParrafo('Asunto: ' + datos.asunto, {bold:true,color:AZUL,after:200,border:{bottom:{color:'E5E7EB',style:BorderStyle.SINGLE,size:2,space:6}}});
+                datos.cuerpo.split('\n').forEach(linea => addParrafo(linea));
+                addParrafo('Atentamente,', {before:300,after:600});
+                addParrafo('____________________________', {after:40,align:AlignmentType.CENTER});
+                addParrafo(datos.dePersona || datos.deSecretario || '', {bold:true,after:20,align:AlignmentType.CENTER});
+                addParrafo(datos.deSecretario, {color:GRIS_CLARO,after:20,align:AlignmentType.CENTER});
+                addParrafo('SIUTCASJNJ', {color:GRIS_CLARO,align:AlignmentType.CENTER});
+            } else if (tipo === 'oficio') {
+                const createLabelLine = (label, valor) => {
+                    children.push(new Paragraph({
+                        children: [
+                            new TextRun({ text: label + ' : ', bold: true, size: 22, font: 'Arial', color: AZUL }),
+                            new TextRun({ text: valor, size: 22, font: 'Arial', color: GRIS }),
+                        ],
+                        spacing: { after: 60 },
+                    }));
+                };
+                createLabelLine('DE', datos.deSecretario + ' (' + siglaDe + ')');
+                createLabelLine('A', (datos.paraSecretario||'') + (siglaPara?' ('+siglaPara+')':''));
+                createLabelLine('ASUNTO', datos.asunto);
+                createLabelLine('FECHA', datos.lugar + ', ' + new Date(datos.fecha+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'}));
+                addParrafo('', {after:60,border:{bottom:{color:'E5E7EB',style:BorderStyle.SINGLE,size:2,space:8}}});
+                datos.cuerpo.split('\n').forEach(linea => addParrafo(linea));
+                addParrafo('Atentamente,', {before:300,after:600});
+                addParrafo('____________________________', {after:40,align:AlignmentType.CENTER});
+                addParrafo(datos.dePersona || datos.deSecretario || '', {bold:true,after:20,align:AlignmentType.CENTER});
+                addParrafo(datos.deSecretario, {color:GRIS_CLARO,align:AlignmentType.CENTER});
+            } else if (tipo === 'comunicado') {
+                addParrafo(datos.asunto || 'COMUNICADO', {bold:true,align:AlignmentType.CENTER,after:60,border:{bottom:{color:'E5E7EB',style:BorderStyle.SINGLE,size:2,space:8}}});
+                datos.cuerpo.split('\n').forEach(linea => addParrafo(linea));
+                addParrafo(datos.lugar + ', ' + new Date(datos.fecha+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'}), {before:200,after:200,align:AlignmentType.RIGHT,color:GRIS_CLARO});
+                addParrafo(datos.deSecretario, {bold:true,after:20,align:AlignmentType.CENTER});
+                addParrafo('SIUTCASJNJ', {color:GRIS_CLARO,align:AlignmentType.CENTER});
+            }
+
+            const doc = new Document({
+                sections: [{
+                    properties: { page: { margin: { top: 900, bottom: 900, left: 1300, right: 1300 } } },
+                    headers: { default: header }, footers: { default: footer }, children: children,
+                }],
+            });
+            return await Packer.toBlob(doc);
+        }
+
+        window.cargarDocumentosOficiales = async function () {
+            const tbody = document.getElementById('lista-documentos-oficiales');
+            if (!tbody) return;
+            try {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-400"><ion-icon name="sync" class="animate-spin text-2xl"></ion-icon><br>Cargando documentos...</td></tr>';
+                const q = query(collection(db, 'documentos_oficiales'), orderBy('timestamp', 'desc'));
+                const snap = await getDocs(q);
+                const docs = []; snap.forEach(d => docs.push({ id: d.id, ...d.data() }));
+                if (docs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">No hay documentos generados aun.</td></tr>'; return; }
+                tbody.innerHTML = '';
+                docs.forEach(d => {
+                    let fechaTxt = '—';
+                    if (d.fecha) fechaTxt = d.fecha;
+                    else if (d.timestamp) fechaTxt = new Date(d.timestamp).toLocaleDateString('es-PE');
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = '<td class="px-4 py-3 font-mono text-xs text-blue-700 font-bold">' + (d.numero||'—') + '</td>' +
+                        '<td class="px-4 py-3"><span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded">' + ((TIPOS_DOC[d.tipo]||{}).label || d.tipo) + '</span></td>' +
+                        '<td class="px-4 py-3 text-gray-700 text-xs">' + (d.deSecretario||'') + '</td>' +
+                        '<td class="px-4 py-3 text-gray-700 text-xs">' + (d.paraSecretario||d.paraExterno||'') + '</td>' +
+                        '<td class="px-4 py-3 text-gray-700 text-xs max-w-[200px] truncate">' + (d.asunto||'') + '</td>' +
+                        '<td class="px-4 py-3 text-gray-500 text-xs">' + fechaTxt + '</td>' +
+                        '<td class="px-4 py-3 text-right">' + (d.url ? '<a href="'+d.url+'" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold text-xs mr-2">Descargar</a>' : '') +
+                        '<button class="text-red-500 hover:text-red-700 text-xs font-bold btn-eliminar-doc" data-id="'+d.id+'" data-path="'+(d.storagePath||'')+'">Eliminar</button></td>';
+                    tbody.appendChild(tr);
+                });
+                document.querySelectorAll('.btn-eliminar-doc').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.target.getAttribute('data-id'); const path = e.target.getAttribute('data-path');
+                        if (confirm('Eliminar este documento oficial?')) {
+                            await deleteDoc(doc(db, 'documentos_oficiales', id));
+                            if (path) await deleteObject(ref(storage, path)).catch(() => {});
+                            window.cargarDocumentosOficiales();
+                        }
+                    });
+                });
+            } catch (e) { console.error('Error:', e); tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-red-400">Error al cargar documentos.</td></tr>'; }
+        };
+
+        async function procesarDocumento(subirAFirebase) {
+            const tipo = document.getElementById('doc-oficial-tipo').value;
+            const deSecretario = document.getElementById('doc-oficial-de').value;
+            const paraSecretario = document.getElementById('doc-oficial-para').value;
+            const asunto = document.getElementById('doc-oficial-asunto').value.trim();
+            const cuerpo = document.getElementById('doc-oficial-cuerpo').value.trim();
+            const fecha = document.getElementById('doc-oficial-fecha').value;
+            const lugar = document.getElementById('doc-oficial-lugar').value.trim() || 'Lima';
+            if (!tipo || !deSecretario || !paraSecretario || !asunto || !cuerpo || !fecha) { alert('Complete todos los campos obligatorios.'); return; }
+            const siglaDe = (SIGLAS[deSecretario] && SIGLAS[deSecretario].sigla) || '';
+            const anio = new Date(fecha+'T12:00:00').getFullYear();
+            const manualNum = parseInt(document.getElementById('doc-oficial-numero').value);
+            const numSec = (!isNaN(manualNum) && manualNum > 0) ? manualNum : await siguienteNumero(tipo, anio);
+            const numero = formatearNumeroDoc(tipo, siglaDe, anio, numSec);
+            const datos = { tipo, deSecretario, paraSecretario, asunto, cuerpo, fecha, lugar, numero,
+                dePersona: (SIGLAS[deSecretario]||{}).persona || '',
+                paraPersona: (SIGLAS[paraSecretario]||{}).persona || '' };
+            const btnGen = document.getElementById('btn-generar-doc');
+            const btnSub = document.getElementById('btn-generar-subir');
+            try {
+                btnGen.disabled = true; btnSub.disabled = true;
+                btnGen.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Generando...';
+                btnSub.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Generando...';
+                const blob = await generarBlobDocx(tipo, datos);
+                const nombreArchivo = numero.replace(/[^a-zA-Z0-9.\- ]/g, '_').replace(/\s+/g, '_') + '.docx';
+                if (subirAFirebase) {
+                    const storagePath = 'documentos_oficiales/' + nombreArchivo;
+                    const storageRef = ref(storage, storagePath);
+                    await uploadBytes(storageRef, blob);
+                    const url = await getDownloadURL(storageRef);
+                    await addDoc(collection(db, 'documentos_oficiales'), { ...datos, anio, numeroSecuencial: numSec, url, storagePath, createdAt: serverTimestamp(), timestamp: Date.now() });
+                    alert('Documento generado, subido y archivado.');
+                    document.getElementById('form-documento').reset();
+                    document.getElementById('doc-oficial-fecha').value = new Date().toISOString().split('T')[0];
+                    window.cargarDocumentosOficiales();
+                } else { saveAs(blob, nombreArchivo); }
+            } catch (e) { console.error('Error:', e); alert('Error: ' + e.message); }
+            finally { btnGen.disabled = false; btnSub.disabled = false; btnGen.innerHTML = '<ion-icon name="document-outline" class="mr-2 text-xl"></ion-icon> Generar y Descargar Word'; btnSub.innerHTML = '<ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon> Generar, Subir y Guardar'; }
+        }
+
+        async function registrarDocumentoFirmado() {
+            const archivoFile = document.getElementById('doc-oficial-archivo').files[0];
+            if (!archivoFile) { alert('Primero selecciona el PDF firmado digitalmente que quieres registrar.'); return; }
+
+            const tipo = document.getElementById('doc-oficial-tipo').value;
+            const deSecretario = document.getElementById('doc-oficial-de').value;
+            const paraSecretario = document.getElementById('doc-oficial-para').value;
+            const asunto = document.getElementById('doc-oficial-asunto').value.trim();
+            const cuerpo = document.getElementById('doc-oficial-cuerpo').value.trim();
+            const fecha = document.getElementById('doc-oficial-fecha').value;
+            const lugar = document.getElementById('doc-oficial-lugar').value.trim() || 'Lima';
+
+            if (!tipo || !deSecretario || !paraSecretario || !asunto || !fecha) {
+                alert('Completa al menos: tipo, remitente, destinatario, asunto y fecha.');
+                return;
+            }
+
+            const siglaDe = (SIGLAS[deSecretario] && SIGLAS[deSecretario].sigla) || '';
+            const anio = new Date(fecha+'T12:00:00').getFullYear();
+            const manualNum = parseInt(document.getElementById('doc-oficial-numero').value);
+            const numSec = (!isNaN(manualNum) && manualNum > 0) ? manualNum : await siguienteNumero(tipo, anio);
+            const numero = formatearNumeroDoc(tipo, siglaDe, anio, numSec);
+
+            const btnReg = document.getElementById('btn-registrar-firmado');
+            try {
+                btnReg.disabled = true;
+                btnReg.innerHTML = '<ion-icon name="sync-outline" class="mr-2 text-xl animate-spin"></ion-icon> Registrando...';
+
+                const nombreArchivo = numero.replace(/[^a-zA-Z0-9.\- ]/g, '_').replace(/\s+/g, '_') + '.docx';
+                const storagePath = 'documentos_oficiales/' + nombreArchivo;
+                const storageRef = ref(storage, storagePath);
+                await uploadBytes(storageRef, archivoFile);
+                const url = await getDownloadURL(storageRef);
+
+                const datos = {
+                    tipo, deSecretario,
+                    dePersona: (SIGLAS[deSecretario]||{}).persona || '',
+                    paraSecretario,
+                    paraPersona: (SIGLAS[paraSecretario]||{}).persona || '',
+                    asunto, cuerpo: cuerpo || '', fecha, lugar, numero,
+                };
+
+                await addDoc(collection(db, 'documentos_oficiales'), {
+                    ...datos, anio, numeroSecuencial: numSec, url, storagePath,
+                    createdAt: serverTimestamp(), timestamp: Date.now(),
+                });
+
+                alert('Documento firmado registrado como ' + numero);
+                document.getElementById('form-documento').reset();
+                document.getElementById('doc-oficial-archivo').value = '';
+                document.getElementById('doc-oficial-fecha').value = new Date().toISOString().split('T')[0];
+                window.cargarDocumentosOficiales();
+            } catch (e) {
+                console.error('Error:', e);
+                alert('Error al registrar: ' + e.message);
+            } finally {
+                btnReg.disabled = false;
+                btnReg.innerHTML = '<ion-icon name="checkmark-circle-outline" class="mr-2 text-xl"></ion-icon> Registrar Documento Firmado';
+            }
+        }
+
+        document.getElementById('form-documento').addEventListener('submit', (e) => { e.preventDefault(); procesarDocumento(false); });
+        document.getElementById('btn-generar-subir').addEventListener('click', () => { procesarDocumento(true); });
+        document.getElementById('btn-registrar-firmado').addEventListener('click', () => { registrarDocumentoFirmado(); });
+        document.getElementById('doc-oficial-fecha').value = new Date().toISOString().split('T')[0];
+        cargarSelectSecretarias();
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', bindForms);
         } else {
@@ -1336,6 +1651,11 @@
                         class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
                         <ion-icon name="cash" class="mr-3 text-xl"></ion-icon>
                         Economia y Finanzas
+                    </a>
+                    <a href="#" id="nav-documentos"
+                        class="flex items-center p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all nav-menu-item font-medium">
+                        <ion-icon name="document-text" class="mr-3 text-xl"></ion-icon>
+                        Documentos Oficiales
                     </a>
 
                     <div class="mt-8 mb-2 px-3 text-xs font-bold text-gray-600 uppercase tracking-wider">Próximas
@@ -2530,6 +2850,134 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- =================================== -->
+                    <!-- VISTA: DOCUMENTOS OFICIALES -->
+                    <!-- =================================== -->
+                    <div id="view-documentos" class="hidden space-y-8">
+
+                        <!-- Formulario: Generar Documento -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="create-outline" class="text-amber-600 mr-2 text-xl"></ion-icon>
+                                    Generar Nuevo Documento
+                                </h3>
+                            </div>
+                            <form id="form-documento" class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Tipo de Documento</label>
+                                        <select id="doc-oficial-tipo" required
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none cursor-pointer">
+                                            <option value="carta">Carta</option>
+                                            <option value="oficio">Oficio</option>
+                                            <option value="comunicado">Comunicado</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Remitente (De)</label>
+                                        <select id="doc-oficial-de" required
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none cursor-pointer">
+                                            <option value="">Cargando secretarias...</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Destinatario (A)</label>
+                                        <select id="doc-oficial-para" required
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none cursor-pointer">
+                                            <option value="">Cargando secretarias...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Asunto</label>
+                                    <input type="text" id="doc-oficial-asunto" required
+                                        placeholder="Ej: Implementacion de la pagina web del sindicato"
+                                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Cuerpo del Documento</label>
+                                    <textarea id="doc-oficial-cuerpo" required rows="8"
+                                        placeholder="Escriba el contenido del documento aqui..."
+                                        class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none resize-y"></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">Soporta multiples parrafos con saltos de linea.</p>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Fecha</label>
+                                        <input type="date" id="doc-oficial-fecha" required
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Lugar</label>
+                                        <input type="text" id="doc-oficial-lugar" value="Lima"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1.5">N.° secuencial (opcional)</label>
+                                        <input type="number" id="doc-oficial-numero" min="1" placeholder="Auto"
+                                            class="w-full border-gray-300 rounded-lg p-3 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none">
+                                        <p class="text-xs text-gray-400 mt-1">Dejar vacio para auto-numerar.</p>
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100">
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">PDF firmado digitalmente (opcional)</label>
+                                    <input type="file" id="doc-oficial-archivo" accept=".pdf,.docx,.doc"
+                                        class="w-full border-gray-300 rounded-lg p-2 border-2 focus:ring-0 focus:border-amber-600 bg-white shadow-sm transition outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer text-sm text-gray-600 mb-4">
+                                    <p class="text-xs text-gray-400 -mt-2 mb-4">Genera el .docx, editalo en Word, firmalo digitalmente como PDF y arrastralo aqui para registrarlo.</p>
+                                </div>
+                                <div class="flex flex-wrap gap-3">
+                                    <button type="submit" id="btn-generar-doc"
+                                        class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
+                                        <ion-icon name="document-outline" class="mr-2 text-xl"></ion-icon>
+                                        Generar y Descargar Word
+                                    </button>
+                                    <button type="button" id="btn-generar-subir"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
+                                        <ion-icon name="cloud-upload-outline" class="mr-2 text-xl"></ion-icon>
+                                        Generar, Subir y Guardar
+                                    </button>
+                                    <button type="button" id="btn-registrar-firmado"
+                                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center">
+                                        <ion-icon name="checkmark-circle-outline" class="mr-2 text-xl"></ion-icon>
+                                        Registrar Documento Firmado
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tabla: Documentos Generados -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                    <ion-icon name="archive-outline" class="text-gray-500 mr-2 text-xl"></ion-icon>
+                                    Documentos Generados y Archivados
+                                </h3>
+                                <button onclick="window.cargarDocumentosOficiales()"
+                                    class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded flex items-center transition">
+                                    <ion-icon name="refresh" class="mr-1"></ion-icon> Actualizar
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left text-sm text-gray-600">
+                                    <thead class="bg-white text-gray-400 text-xs uppercase font-extrabold border-b border-gray-100">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-4">N.°</th>
+                                            <th scope="col" class="px-4 py-4">Tipo</th>
+                                            <th scope="col" class="px-4 py-4">De</th>
+                                            <th scope="col" class="px-4 py-4">Para</th>
+                                            <th scope="col" class="px-4 py-4">Asunto</th>
+                                            <th scope="col" class="px-4 py-4">Fecha</th>
+                                            <th scope="col" class="px-4 py-4 text-right">Accion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lista-documentos-oficiales" class="divide-y divide-gray-100">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- =================================== -->
