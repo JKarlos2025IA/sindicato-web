@@ -34,6 +34,22 @@ def get_firestore():
     firebase_admin.initialize_app(cred)
     return firestore.client()
 
+DEDUPE_COLLECTION = "cumpleanios_enviados"
+
+def ya_enviado_hoy(db, hoy):
+    """True si el documento de dedupe de hoy ya existe en Firestore."""
+    doc_id = hoy.strftime("%Y-%m-%d")
+    snap = db.collection(DEDUPE_COLLECTION).document(doc_id).get()
+    return snap.exists, snap.to_dict().get("enviados", []) if snap.exists else []
+
+def snap_por(db, hoy):
+    """Quién envió hoy, para el log."""
+    doc_id = hoy.strftime("%Y-%m-%d")
+    snap = db.collection(DEDUPE_COLLECTION).document(doc_id).get()
+    if snap.exists:
+        return snap.to_dict().get("por", "desconocido")
+    return "nadie"
+
 def normalizar(s):
     return s.replace(' ', '_').replace('Ñ','N').replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
 
@@ -70,6 +86,13 @@ def main():
     fecha_hoy = hoy.strftime("%d/%m")
     log(f"Fecha: {hoy.strftime('%d/%m/%Y')} - Buscando {fecha_hoy}")
 
+    # Dedupe: si ya se envió hoy (por este workflow o el respaldo local), salir
+    ya, quienes = ya_enviado_hoy(db, hoy)
+    if ya:
+        log(f"Ya enviado hoy por {snap_por(db, hoy)}: {quienes} — no se duplica.")
+        log("=== FIN ===")
+        return
+
     socios = db.collection("socios").stream()
     cumpleañeros = []
     for doc in socios:
@@ -97,7 +120,7 @@ def main():
     for c in cumpleañeros:
         log(f"  {c['nombre']}")
 
-    enviados = 0
+    enviados = []
     for c in cumpleañeros:
         nombre = c['nombre']
         safe = normalizar(nombre)
@@ -112,11 +135,22 @@ def main():
 
         if enviar_telegram_video(video_url, caption):
             log(f"  ENVIADO: {nombre}")
-            enviados += 1
+            enviados.append(nombre)
         else:
             log(f"  FALLÓ: {nombre}")
 
-    log(f"=== FIN: {enviados}/{len(cumpleañeros)} enviados ===")
+    # Registrar en Firestore para que el respaldo local no duplique
+    if enviados:
+        doc_id = hoy.strftime("%Y-%m-%d")
+        db.collection(DEDUPE_COLLECTION).document(doc_id).set({
+            "fecha": hoy.strftime("%d/%m/%Y"),
+            "enviados": enviados,
+            "por": "github-actions",
+            "ts": datetime.now().isoformat()
+        })
+        log(f"Registrado en {DEDUPE_COLLECTION}/{doc_id}")
+
+    log(f"=== FIN: {len(enviados)}/{len(cumpleañeros)} enviados ===")
 
 if __name__ == "__main__":
     main()
